@@ -1,6 +1,16 @@
 export type GameStatus = "playable" | "coming-soon";
 
-export type GameGenre = "Classic" | "Logic" | "Arcade" | "Puzzle" | "Focus";
+export type GameGenre =
+  | "Action"
+  | "Adventure"
+  | "Casual"
+  | "Family"
+  | "Puzzle"
+  | "Racing"
+  | "Simulation"
+  | "Sports"
+  | "Strategy"
+  | "Word";
 
 export type GameAccent = "green" | "blue" | "amber" | "violet" | "slate" | "teal";
 

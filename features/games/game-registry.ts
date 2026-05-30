@@ -4,7 +4,7 @@ export const games = [
   {
     slug: "snake",
     title: "Snake",
-    genre: "Classic",
+    genre: "Action",
     status: "playable",
     summary: "Classic movement, tight controls, clean canvas.",
     description:
@@ -16,7 +16,7 @@ export const games = [
   {
     slug: "minesweeper",
     title: "Minesweeper",
-    genre: "Logic",
+    genre: "Puzzle",
     status: "coming-soon",
     summary: "A quiet grid puzzle shell reserved for the next playable build.",
     description:
@@ -28,7 +28,7 @@ export const games = [
   {
     slug: "pong",
     title: "Pong",
-    genre: "Arcade",
+    genre: "Sports",
     status: "coming-soon",
     summary: "Minimal rallies and quick rounds for a future arcade slot.",
     description: "A planned lightweight arcade game with keyboard and touch-friendly controls.",
@@ -50,7 +50,7 @@ export const games = [
   {
     slug: "orbit",
     title: "Orbit",
-    genre: "Focus",
+    genre: "Adventure",
     status: "coming-soon",
     summary: "A small timing game planned around simple orbital motion.",
     description: "A calm precision game concept for a later release.",
