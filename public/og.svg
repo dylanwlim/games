@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Dylan Games preview">
+  <rect width="1200" height="630" fill="#f7f8fb" />
+  <rect x="72" y="72" width="1056" height="486" rx="24" fill="#ffffff" stroke="#d9dee8" />
+  <rect x="112" y="112" width="296" height="296" rx="16" fill="#101926" />
+  <path d="M178 250h34v34h-34zM212 250h34v34h-34zM246 250h34v34h-34zM280 250h34v34h-34zM280 284h34v34h-34zM280 318h34v34h-34zM314 318h34v34h-34z" fill="#76d66f"/>
+  <rect x="112" y="432" width="296" height="54" rx="10" fill="#f7f8fb" stroke="#d9dee8" />
+  <text x="464" y="260" fill="#101114" font-family="Inter, Arial, sans-serif" font-size="76" font-weight="700">Dylan Games</text>
+  <text x="468" y="326" fill="#4d5665" font-family="Inter, Arial, sans-serif" font-size="28">A quiet browser-games hub by Dylan W. Lim.</text>
+  <rect x="468" y="372" width="220" height="58" rx="12" fill="#2f64ff" />
+  <text x="504" y="410" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="650">Play Snake</text>
+</svg>

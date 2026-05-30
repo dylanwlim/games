@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Dylan Games">
+  <rect width="128" height="128" rx="24" fill="#f7f8fb" />
+  <path
+    d="M34 32h28c20.435 0 34 12.888 34 32s-13.565 32-34 32H34V32Zm16 14v36h11.3C72.85 82 80 74.95 80 64S72.85 46 61.3 46H50Z"
+    fill="#101114"
+  />
+  <path d="M85 83h10v13H82c-10.493 0-19-8.507-19-19V64h15v13c0 3.314 2.686 6 6 6h1Z" fill="#2f64ff" />
+</svg>
