@@ -6,6 +6,10 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-05-30: Added the standardized `docs-public/` guide set and
+  `.github/workflows/publish-public-docs.yml` so public manuals/changelog files
+  can be mirrored to `dylanwlim/dylan-games-docs` on docs changes, manual
+  dispatch, and the daily sync.
 - 2026-05-30: Scaffolded and deployed Dylan Games as a production Next.js App
   Router app for `games.dylanwlim.com`. The app includes a hub-first UI,
   flexible game registry, playable Snake starter, polished unavailable-game

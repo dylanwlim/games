@@ -1,0 +1,120 @@
+name: Publish public docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs-public/**"
+      - ".github/workflows/publish-public-docs.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "31 9 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-public-docs-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PUBLIC_DOCS_REPO: dylanwlim/dylan-games-docs
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out private repository
+        uses: actions/checkout@v4
+
+      - name: Fail closed when publish credential is missing
+        env:
+          DOCS_CREDENTIAL: ${{ secrets.PUBLIC_DOCS_REPO_TOKEN }}
+        run: |
+          if [ -z "${DOCS_CREDENTIAL}" ]; then
+            echo "::error::PUBLIC_DOCS_REPO_TOKEN is required to publish public docs."
+            exit 1
+          fi
+
+      - name: Validate docs allowlist and leak check
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for required in "README.md" "overview.md" "product-guide.md" "how-it-works.md" "build-and-run.md" "roadmap.md" "changelog.md" "security-and-privacy.md" "setup.md"; do
+            if [ ! -f "docs-public/${required}" ]; then
+              echo "::error::Missing docs-public/${required}"
+              exit 1
+            fi
+          done
+
+          while IFS= read -r file; do
+            rel="${file#docs-public/}"
+            case "${rel}" in
+              README\.md|overview\.md|product-guide\.md|how-it-works\.md|build-and-run\.md|roadmap\.md|changelog\.md|security-and-privacy\.md|setup\.md)
+                ;;
+              *)
+                echo "::error::Unexpected public docs file: ${rel}"
+                exit 1
+                ;;
+            esac
+          done < <(find docs-public -type f | sort)
+
+          if find docs-public -type f ! -name "*.md" -print -quit | grep -q .; then
+            echo "::error::docs-public may contain Markdown files only."
+            exit 1
+          fi
+
+          if grep -RInE '(gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|sk-[A-Za-z0-9]{20,}|BEGIN (RSA|OPENSSH|PRIVATE)|DATABASE_URL=|PAYLOAD_SECRET=|SUPABASE_[A-Z0-9_]+=|RESEND_[A-Z0-9_]+=|CONTACT_[A-Z0-9_]+=|GOOGLE_[A-Z0-9_]+=|E2E_ADMIN_[A-Z0-9_]+=|CLOUDFLARE_[A-Z0-9_]+=|VERCEL_[A-Z0-9_]+=|OPENAI_[A-Z0-9_]+=|AUTH_SECRET=|JWT_SECRET=|nothing sensitive|nothing private|no sensitive data|no private data)' docs-public; then
+            echo "::error::Potential secret or unsafe public-docs disclosure phrase found in docs-public."
+            exit 1
+          fi
+
+      - name: Publish docs to public repository
+        shell: bash
+        env:
+          DOCS_CREDENTIAL: ${{ secrets.PUBLIC_DOCS_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          workdir="${RUNNER_TEMP}/public-docs"
+          git_url="https://x-access-token:${DOCS_CREDENTIAL}@github.com/${PUBLIC_DOCS_REPO}.git"
+
+          if printf '%s\n' "${DOCS_CREDENTIAL}" | grep -q "BEGIN .*PRIVATE KEY"; then
+            credential_file="${RUNNER_TEMP}/public-docs-deploy-key"
+            mkdir -p "${HOME}/.ssh"
+            chmod 700 "${HOME}/.ssh"
+            printf '%s\n' "${DOCS_CREDENTIAL}" > "${credential_file}"
+            chmod 600 "${credential_file}"
+            ssh-keyscan github.com >> "${HOME}/.ssh/known_hosts"
+            chmod 644 "${HOME}/.ssh/known_hosts"
+            export GIT_SSH_COMMAND="ssh -i ${credential_file} -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+            git_url="git@github.com:${PUBLIC_DOCS_REPO}.git"
+          fi
+
+          git clone --depth 1 "${git_url}" "${workdir}"
+
+          cd "${workdir}"
+          git checkout -B main
+          find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
+
+          cd "${GITHUB_WORKSPACE}"
+          while IFS= read -r file; do
+            rel="${file#docs-public/}"
+            install -D -m 0644 "${file}" "${workdir}/${rel}"
+          done < <(find docs-public -type f | sort)
+
+          cd "${workdir}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+
+          if git diff --cached --quiet; then
+            echo "Public docs already up to date."
+            exit 0
+          fi
+
+          git commit -m "Publish public docs"
+          git push origin HEAD:main
