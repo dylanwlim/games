@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Check out private repository
+      - name: Check out source repository
         uses: actions/checkout@v4
 
       - name: Fail closed when publish credential is missing
