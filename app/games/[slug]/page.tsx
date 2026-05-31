@@ -43,5 +43,5 @@ export default async function GamePage({ params }: GameRouteProps) {
     notFound();
   }
 
-  return <GameHub key={slug} initialSlug={slug} view="games" />;
+  return <GameHub key={slug} initialSlug={slug} focusGame view="games" />;
 }

@@ -14,6 +14,13 @@ test("renders the hub and launches Snake", async ({ page }) => {
     await page.getByRole("button", { name: "Close navigation" }).click();
     await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeHidden();
   }
+  await expect(page.getByRole("heading", { name: "Top Arcade Games" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Recently Updated" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Continue Playing" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Coming Soon" })).toBeVisible();
+
+  await page.getByRole("link", { name: "Get Snake from Top Arcade Games" }).click();
+  await expect(page).toHaveURL(/\/games\/snake/);
   await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
   await expect(page.getByRole("img", { name: /Snake board/i })).toBeVisible();
 
@@ -24,7 +31,7 @@ test("renders the hub and launches Snake", async ({ page }) => {
 
 test("switches to a placeholder game with a finished unavailable state", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Minesweeper Puzzle Soon" }).click();
+  await page.getByRole("link", { name: "Get Minesweeper from Top Arcade Games" }).click();
 
   await expect(page.getByRole("heading", { name: "Minesweeper", level: 2 })).toBeVisible();
   await expect(
