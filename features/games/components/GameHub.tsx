@@ -18,8 +18,10 @@ import {
   Flag,
   Gamepad2,
   Grid2X2,
+  Heart,
   Lock,
   Map,
+  Menu,
   Puzzle,
   Rocket,
   Search,
@@ -28,13 +30,14 @@ import {
   Trophy,
   Type,
   Users,
+  X,
   Zap,
   type LucideIcon,
 } from "lucide-react";
 import { AnimatePresence, LazyMotion, domAnimation, m, useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
 
-type GameHubView = "games" | "discover" | "genre";
+type GameHubView = "games" | "discover" | "favorites" | "genre";
 
 type GameHubProps = {
   initialSlug?: string;
@@ -56,7 +59,48 @@ const gameComponents = {
   snake: SnakeGame,
 } as const;
 
+const allGames: GameDefinition[] = games;
+const fallbackGame = allGames[0] as GameDefinition;
 const sidebarGenres = ["action", "adventure", "puzzle", "racing", "simulation", "strategy"];
+const favoriteGameSlugs = ["snake", "minesweeper", "orbit"] as const;
+
+const genrePageCopy: Partial<
+  Record<GenreSlug, { description: string; focus: string; rhythm: string }>
+> = {
+  action: {
+    description: "Fast rounds, clean restarts, and games that make sense the moment they open.",
+    focus: "Immediate loops",
+    rhythm: "Short sessions with room for tighter arcade builds.",
+  },
+  adventure: {
+    description:
+      "Small exploration ideas reserved for readable maps, simple movement, and playful goals.",
+    focus: "Readable worlds",
+    rhythm: "Calm routes, compact scenes, and clear next steps.",
+  },
+  puzzle: {
+    description:
+      "Quiet boards and logic-first layouts for games that reward focus over visual noise.",
+    focus: "Finished puzzle shells",
+    rhythm: "Stable routes for Minesweeper, Tiles, and 2048.",
+  },
+  racing: {
+    description:
+      "A prepared shelf for quick races, time trials, and motion-led browser experiments.",
+    focus: "Fast starts",
+    rhythm: "Lean game slots that can become playable without reshaping the hub.",
+  },
+  simulation: {
+    description: "A slower shelf for small systems, toy economies, and readable state changes.",
+    focus: "Tiny systems",
+    rhythm: "Simple loops that make cause and effect visible.",
+  },
+  strategy: {
+    description: "A planning shelf for turn-based ideas, clean boards, and tactical constraints.",
+    focus: "Clear decisions",
+    rhythm: "Compact rulesets with visible outcomes.",
+  },
+};
 
 const iconMap = {
   boxes: Boxes,
@@ -114,9 +158,10 @@ export function GameHub({ initialSlug = "snake", initialGenre, view = "games" }:
   );
   const [featureIndex, setFeatureIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const selectedGame = useMemo(() => getGameBySlug(selectedSlug) ?? games[0], [selectedSlug]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const selectedGame = useMemo(() => getGameBySlug(selectedSlug) ?? fallbackGame, [selectedSlug]);
   const selectedGenre = initialGenre ? getGenreBySlug(initialGenre) : undefined;
-  const isDiscover = view === "discover";
+  const isGames = view === "games";
 
   const selectGame = (game: GameDefinition) => {
     setSelectedSlug(game.slug);
@@ -135,16 +180,42 @@ export function GameHub({ initialSlug = "snake", initialGenre, view = "games" }:
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>
-        <Sidebar
-          activeView={view}
-          activeGenre={initialGenre}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
+        <button
+          className="sidebar-toggle"
+          type="button"
+          aria-controls="arcade-sidebar"
+          aria-expanded={sidebarOpen}
+          disabled={sidebarOpen}
+          onClick={() => setSidebarOpen(true)}
+        >
+          <Menu aria-hidden="true" />
+          <span className="sr-only">Open navigation</span>
+        </button>
+        <AnimatePresence>
+          {sidebarOpen ? (
+            <>
+              <m.button
+                className="sidebar-scrim"
+                type="button"
+                aria-label="Dismiss navigation"
+                onClick={() => setSidebarOpen(false)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.16, ease: "easeOut" }}
+              />
+              <Sidebar
+                activeView={view}
+                activeGenre={initialGenre}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onClose={() => setSidebarOpen(false)}
+              />
+            </>
+          ) : null}
+        </AnimatePresence>
         <main id="main-content" className="arcade-main">
-          {isDiscover ? (
-            <DiscoverView />
-          ) : (
+          {isGames ? (
             <GamesView
               activeGenre={selectedGenre}
               featureIndex={featureIndex}
@@ -155,6 +226,8 @@ export function GameHub({ initialSlug = "snake", initialGenre, view = "games" }:
               onFeatureSelect={setFeatureIndex}
               onGameSelect={selectGame}
             />
+          ) : (
+            <CollectionView activeGenre={selectedGenre} searchQuery={searchQuery} view={view} />
           )}
         </main>
       </div>
@@ -167,18 +240,34 @@ function Sidebar({
   activeGenre,
   searchQuery,
   onSearchChange,
+  onClose,
 }: {
   activeView: GameHubView;
   activeGenre?: GenreSlug;
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  onClose: () => void;
 }) {
   return (
-    <aside className="arcade-sidebar" aria-label="Dylan Games navigation">
-      <div className="window-dots" aria-hidden="true">
-        <span className="dot red" />
-        <span className="dot yellow" />
-        <span className="dot green" />
+    <m.aside
+      id="arcade-sidebar"
+      className="arcade-sidebar"
+      aria-label="Dylan Games navigation"
+      initial={{ x: "-102%" }}
+      animate={{ x: 0 }}
+      exit={{ x: "-102%" }}
+      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div className="sidebar-topbar">
+        <span>Dylan Games</span>
+        <button
+          className="sidebar-close"
+          type="button"
+          onClick={onClose}
+          aria-label="Close navigation"
+        >
+          <X aria-hidden="true" />
+        </button>
       </div>
 
       <label className="sidebar-search">
@@ -197,7 +286,13 @@ function Sidebar({
           href="/"
           icon={Grid2X2}
           label="Games"
-          active={activeView !== "discover" && !activeGenre}
+          active={activeView === "games" && !activeGenre}
+        />
+        <SidebarLink
+          href={"/games/favorites" as Route}
+          icon={Heart}
+          label="Favorites"
+          active={activeView === "favorites"}
         />
         <SidebarLink
           href={"/discover" as Route}
@@ -224,7 +319,7 @@ function Sidebar({
         </span>
         <span>dylanwlim.com</span>
       </a>
-    </aside>
+    </m.aside>
   );
 }
 
@@ -388,17 +483,74 @@ function GamesView({
   );
 }
 
-function DiscoverView() {
+function CollectionView({
+  activeGenre,
+  searchQuery,
+  view,
+}: {
+  activeGenre?: ReturnType<typeof getGenreBySlug>;
+  searchQuery: string;
+  view: Exclude<GameHubView, "games">;
+}) {
+  const meta = getCollectionMeta(view, activeGenre);
+  const shelfGames = getCollectionGames(view, activeGenre);
+  const search = searchQuery.trim().toLowerCase();
+  const visibleGames = shelfGames.filter((game) =>
+    search ? `${game.title} ${game.genre} ${game.summary}`.toLowerCase().includes(search) : true,
+  );
+  const previewGame = visibleGames[0] ?? shelfGames[0] ?? fallbackGame;
+
   return (
-    <div className="discover-page">
-      <header className="arcade-title discover-title">
-        <h1>Discover</h1>
-        <p>
-          A focused look at the games, genres, and release-ready structure behind{" "}
-          <Link href="/">Dylan Games</Link>.
-        </p>
+    <div className="collection-page">
+      <header className="collection-hero">
+        <div className="collection-copy">
+          <h1>{meta.title}</h1>
+          <p>{meta.description}</p>
+          <div className="collection-actions">
+            <Link className="collection-primary-action" href={meta.href as Route}>
+              {meta.action}
+              <ArrowUpRight aria-hidden="true" />
+            </Link>
+            <span>{visibleGames.length} games shown</span>
+          </div>
+        </div>
+        <div className={`collection-art accent-${previewGame.accent}`} aria-hidden="true">
+          <PreviewArt kind={previewGame.preview} />
+          <span>{meta.artLabel}</span>
+        </div>
       </header>
-      <DiscoverParallaxContent />
+
+      <section className="template-panel-grid" aria-label={`${meta.title} highlights`}>
+        {meta.panels.map((panel) => (
+          <article key={panel.title} className="template-panel">
+            <p>{panel.label}</p>
+            <h2>{panel.title}</h2>
+            <span>{panel.body}</span>
+          </article>
+        ))}
+      </section>
+
+      <section className="game-shelf template-shelf" aria-labelledby="template-shelf-title">
+        <div className="shelf-heading">
+          <div>
+            <p>{meta.shelfLabel}</p>
+            <h2 id="template-shelf-title">{searchQuery ? "Search results" : meta.shelfTitle}</h2>
+          </div>
+          <span>{visibleGames.length} shown</span>
+        </div>
+
+        {visibleGames.length ? (
+          <div className="template-game-grid" role="list">
+            {visibleGames.map((game) => (
+              <CollectionGameCard key={game.slug} game={game} />
+            ))}
+          </div>
+        ) : (
+          <EmptyGenreState genre={meta.title} />
+        )}
+      </section>
+
+      {view === "discover" ? <DiscoverParallaxContent /> : null}
     </div>
   );
 }
@@ -458,6 +610,28 @@ function GameTile({
         </span>
       </button>
     </div>
+  );
+}
+
+function CollectionGameCard({ game }: { game: GameDefinition }) {
+  return (
+    <Link className="template-game-card" href={`/games/${game.slug}` as Route} role="listitem">
+      <span className={`game-preview ${game.preview} accent-${game.accent}`} aria-hidden="true">
+        <PreviewArt kind={game.preview} />
+      </span>
+      <span className="template-game-copy">
+        <strong>{game.title}</strong>
+        <small>{game.summary}</small>
+        <span className={`mini-status ${game.status}`}>
+          {game.status === "playable" ? (
+            <Gamepad2 aria-hidden="true" />
+          ) : (
+            <Lock aria-hidden="true" />
+          )}
+          {game.status === "playable" ? "Playable" : "Soon"}
+        </span>
+      </span>
+    </Link>
   );
 }
 
@@ -595,4 +769,125 @@ function PreviewArt({ kind }: { kind: GameDefinition["preview"] }) {
       <i className="path-number">2048</i>
     </>
   );
+}
+
+function getCollectionMeta(
+  view: Exclude<GameHubView, "games">,
+  activeGenre?: ReturnType<typeof getGenreBySlug>,
+) {
+  if (view === "favorites") {
+    return {
+      title: "Favorites",
+      description:
+        "A saved-games shelf for quick returns, starter picks, and the games most ready to revisit.",
+      href: "/games/snake",
+      action: "Play Snake",
+      artLabel: "Favorite picks",
+      shelfLabel: "Saved shelf",
+      shelfTitle: "Favorite-ready games",
+      panels: [
+        {
+          label: "Start",
+          title: "Snake is first in line.",
+          body: "The playable starter stays one click away while the rest of the shelf fills in.",
+        },
+        {
+          label: "Next",
+          title: "Polished placeholders stay visible.",
+          body: "Upcoming games keep their finished preview states so the page feels intentional now.",
+        },
+        {
+          label: "Return",
+          title: "Built for fast revisits.",
+          body: "The route lives under Games and matches the same hub rhythm as the launcher.",
+        },
+      ],
+    };
+  }
+
+  if (view === "genre" && activeGenre) {
+    const copy = genrePageCopy[activeGenre.slug];
+
+    return {
+      title: activeGenre.label,
+      description:
+        copy?.description ??
+        `${activeGenre.label} games on Dylan Games, with routes ready for future playable builds.`,
+      href: `/genres/${activeGenre.slug}`,
+      action: `Browse ${activeGenre.label}`,
+      artLabel: `${activeGenre.label} shelf`,
+      shelfLabel: "Genre shelf",
+      shelfTitle: `${activeGenre.label} games`,
+      panels: [
+        {
+          label: "Focus",
+          title: copy?.focus ?? `${activeGenre.label} route`,
+          body:
+            copy?.rhythm ??
+            "This page uses the shared discovery template so the genre route is complete.",
+        },
+        {
+          label: "Library",
+          title: "Registry-backed layout.",
+          body: "Game cards come from the central registry, keeping metadata and routes aligned.",
+        },
+        {
+          label: "Ready",
+          title: "Playable states can drop in later.",
+          body: "Empty shelves still communicate structure without inventing unavailable games.",
+        },
+      ],
+    };
+  }
+
+  return {
+    title: "Discover",
+    description:
+      "A focused look at the games, genres, and release-ready structure behind Dylan Games.",
+    href: "/games/favorites",
+    action: "View Favorites",
+    artLabel: "Discover shelf",
+    shelfLabel: "Library",
+    shelfTitle: "Games to explore",
+    panels: [
+      {
+        label: "Hub",
+        title: "Small games, clean routes.",
+        body: "The site keeps game metadata, genre pages, and launch states connected.",
+      },
+      {
+        label: "Genres",
+        title: "Every sidebar page has a surface.",
+        body: "Discovery pages share one template so empty shelves still feel built.",
+      },
+      {
+        label: "Soft launch",
+        title: "No noisy public push.",
+        body: "The hub stays quiet while playable games and finished previews grow over time.",
+      },
+    ],
+  };
+}
+
+function getCollectionGames(
+  view: Exclude<GameHubView, "games">,
+  activeGenre?: ReturnType<typeof getGenreBySlug>,
+): GameDefinition[] {
+  if (view === "favorites") {
+    return favoriteGameSlugs.reduce<GameDefinition[]>((collection, slug) => {
+      const game = getGameBySlug(slug);
+
+      if (game) {
+        collection.push(game);
+      }
+
+      return collection;
+    }, []);
+  }
+
+  if (view === "genre" && activeGenre) {
+    return allGames.filter((game) => game.genre === activeGenre.label);
+  }
+
+  return allGames;
 }

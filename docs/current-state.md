@@ -6,6 +6,10 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-05-30: Updated the hub shell with a closed-by-default full-height
+  sidebar drawer, removed the decorative traffic-light dots, added
+  `/games/favorites`, and gave Discover plus genre routes a shared
+  registry-backed collection template.
 - 2026-05-30: Added the standardized `docs-public/` guide set and
   `.github/workflows/publish-public-docs.yml` so public manuals/changelog files
   can be mirrored to `dylanwlim/dylan-games-docs` on docs changes, manual

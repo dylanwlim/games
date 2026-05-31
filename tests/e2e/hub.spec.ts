@@ -5,8 +5,14 @@ test("renders the hub and launches Snake", async ({ page }) => {
 
   await expect(page).toHaveTitle(/Dylan Games/);
   await expect(page.getByRole("heading", { name: "Games", level: 1 })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Open navigation" })).toBeVisible();
   if ((page.viewportSize()?.width ?? 0) >= 900) {
+    await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeHidden();
+    await page.getByRole("button", { name: "Open navigation" }).click();
     await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Favorites" })).toBeVisible();
+    await page.getByRole("button", { name: "Close navigation" }).click();
+    await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeHidden();
   }
   await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
   await expect(page.getByRole("img", { name: /Snake board/i })).toBeVisible();
@@ -32,11 +38,15 @@ test("renders discover and genre pages", async ({ page }) => {
   await page.goto("/discover");
   await expect(page.getByRole("heading", { name: "Discover", level: 1 })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Fast rounds with clean restarts." }),
+    page.getByRole("heading", { name: "Every sidebar page has a surface." }),
   ).toBeVisible();
 
+  await page.goto("/games/favorites");
+  await expect(page.getByRole("heading", { name: "Favorites", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Favorite-ready games" })).toBeVisible();
+
   await page.goto("/genres/puzzle");
-  await expect(page.getByRole("heading", { name: "Games", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Puzzle", level: 1 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Puzzle games" })).toBeVisible();
 });
 
