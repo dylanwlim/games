@@ -14,7 +14,19 @@ export type GameGenre =
 
 export type GameAccent = "green" | "blue" | "amber" | "violet" | "slate" | "teal";
 
-export type GamePreviewKind = "snake" | "minesweeper" | "pong" | "tiles" | "orbit" | "path";
+export type GamePreviewKind =
+  | "snake"
+  | "minesweeper"
+  | "pong"
+  | "tiles"
+  | "orbit"
+  | "number"
+  | "dashline"
+  | "sky-courier"
+  | "word"
+  | "stack"
+  | "garden"
+  | "route";
 
 export type GameDefinition = {
   slug: string;

@@ -6,6 +6,17 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-05-31: Deployed production `dpl_6Ke3a3o3RfLEMqLktg5mfaDhctGc`
+  with the new icon set, verified `games.dylanwlim.com`, and confirmed live
+  favicon/manifest assets match the local generated files.
+- 2026-05-31: Replaced the temporary favicon/app icon with the supplied Dylan
+  Games logo across Next app icon files, root favicon variants, Apple touch
+  icon, and manifest Android icon sizes.
+- 2026-05-31: Reworked the games home UI into a faster hub: permanent
+  collapsed/hover-expand sidebar rail, lighter top scroll blur, Snake-specific
+  featured hero art and copy, compact Continue Playing, active genre filters with
+  counts, a single playable All Games section, grouped coming-soon previews, no
+  Game Center label, and no visible Get CTAs.
 - 2026-05-31: Refined the sidebar drawer with a smaller rounded glass panel,
   top-row search, no visible drawer title, an unbadged `dylanwlim.com` footer
   link, slower Motion timing, matched search/close control colors, background
@@ -13,7 +24,7 @@ that changes or verifies the project.
   route/sidebar/game cascade motion, and a scroll-reactive top blur.
 - 2026-05-31: Added the Apple Arcade-style storefront below the genre chips,
   expanded the registry with additional coming-soon games, switched the site
-  icon/favicon mark to the sports trophy, added Motion-backed page/list
+  icon/favicon mark to a temporary launcher mark, added Motion-backed page/list
   animation, and verified the Vercel project framework blocker is resolved:
   project inspect now reports `Next.js` instead of `Other`/`null`.
 - 2026-05-30: Updated the hub shell with a closed-by-default full-height

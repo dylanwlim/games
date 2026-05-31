@@ -4,7 +4,7 @@ export const gameGenres = [
   {
     slug: "action",
     label: "Action",
-    icon: "spark",
+    icon: "zap",
   },
   {
     slug: "adventure",
@@ -14,7 +14,7 @@ export const gameGenres = [
   {
     slug: "casual",
     label: "Casual",
-    icon: "rocket",
+    icon: "gamepad",
   },
   {
     slug: "family",
@@ -44,7 +44,7 @@ export const gameGenres = [
   {
     slug: "strategy",
     label: "Strategy",
-    icon: "crosshair",
+    icon: "map",
   },
   {
     slug: "word",

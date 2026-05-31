@@ -8,18 +8,26 @@ test("renders the hub and launches Snake", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Open navigation" })).toBeVisible();
   if ((page.viewportSize()?.width ?? 0) >= 900) {
     await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeHidden();
+    await page.locator("#arcade-sidebar").hover();
+    await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeVisible();
+    await page.mouse.move(720, 420);
+    await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeHidden();
     await page.getByRole("button", { name: "Open navigation" }).click();
     await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Favorites" })).toBeVisible();
+    await page.mouse.move(720, 420);
+    await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeVisible();
     await page.getByRole("button", { name: "Close navigation" }).click();
+    await page.mouse.move(720, 420);
     await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeHidden();
   }
-  await expect(page.getByRole("heading", { name: "Top Arcade Games" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Recently Updated" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Continue Playing" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "All Games" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Coming Soon" })).toBeVisible();
+  await expect(page.getByText("Game Center")).toHaveCount(0);
+  await expect(page.getByText("Get", { exact: true })).toHaveCount(0);
 
-  await page.getByRole("link", { name: "Get Snake from Top Arcade Games" }).click();
+  await page.getByRole("link", { name: "Play Snake from Featured" }).click();
   await expect(page).toHaveURL(/\/games\/snake/);
   await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
   await expect(page.getByRole("img", { name: /Snake board/i })).toBeVisible();
@@ -30,8 +38,7 @@ test("renders the hub and launches Snake", async ({ page }) => {
 });
 
 test("switches to a placeholder game with a finished unavailable state", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("link", { name: "Get Minesweeper from Top Arcade Games" }).click();
+  await page.goto("/games/minesweeper");
 
   await expect(page.getByRole("heading", { name: "Minesweeper", level: 2 })).toBeVisible();
   await expect(
