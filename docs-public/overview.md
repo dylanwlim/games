@@ -8,11 +8,11 @@ The public hub is live with Snake, New Game, keyboard/on-screen controls, and an
 
 ## Current Public Actions
 
-| Area | Current public flow |
-| --- | --- |
-| Play Snake | Use Play Snake, New Game, keyboard controls, or on-screen directional controls. |
-| Browse the launcher | Use All games to view Snake and the planned game slots. |
-| Track the current public set | Use the public docs changelog and roadmap to see what changed. |
+| Area                         | Current public flow                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------- |
+| Play Snake                   | Use Play Snake, New Game, keyboard controls, or on-screen directional controls. |
+| Browse the launcher          | Use All games to view Snake and the planned game slots.                         |
+| Track the current public set | Use the public docs changelog and roadmap to see what changed.                  |
 
 ## Best First Step
 

@@ -10,11 +10,11 @@ Use this page as the practical user manual for the public surface that is availa
 
 ## Current Actions
 
-| Area | Current public flow |
-| --- | --- |
-| Play Snake | Use Play Snake, New Game, keyboard controls, or on-screen directional controls. |
-| Browse the launcher | Use All games to view Snake and the planned game slots. |
-| Track the current public set | Use the public docs changelog and roadmap to see what changed. |
+| Area                         | Current public flow                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------- |
+| Play Snake                   | Use Play Snake, New Game, keyboard controls, or on-screen directional controls. |
+| Browse the launcher          | Use All games to view Snake and the planned game slots.                         |
+| Track the current public set | Use the public docs changelog and roadmap to see what changed.                  |
 
 ## Notes For Use
 

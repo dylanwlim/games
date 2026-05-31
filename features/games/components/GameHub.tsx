@@ -125,7 +125,9 @@ export function GameHub({ initialSlug = "snake", initialGenre, view = "games" }:
   };
 
   const selectFeature = (direction: -1 | 1) => {
-    setFeatureIndex((current) => (current + direction + featuredSlides.length) % featuredSlides.length);
+    setFeatureIndex(
+      (current) => (current + direction + featuredSlides.length) % featuredSlides.length,
+    );
   };
 
   return (
@@ -192,8 +194,18 @@ function Sidebar({
       </label>
 
       <nav className="sidebar-nav" aria-label="Sections">
-        <SidebarLink href="/" icon={Grid2X2} label="Games" active={activeView !== "discover" && !activeGenre} />
-        <SidebarLink href="/discover" icon={Star} label="Discover" active={activeView === "discover"} />
+        <SidebarLink
+          href="/"
+          icon={Grid2X2}
+          label="Games"
+          active={activeView !== "discover" && !activeGenre}
+        />
+        <SidebarLink
+          href="/discover"
+          icon={Star}
+          label="Discover"
+          active={activeView === "discover"}
+        />
         {gameGenres
           .filter((genre) => sidebarGenres.includes(genre.slug))
           .map((genre) => (
@@ -229,7 +241,11 @@ function SidebarLink({
   active: boolean;
 }) {
   return (
-    <Link className={`sidebar-link ${active ? "active" : ""}`} href={href} aria-current={active ? "page" : undefined}>
+    <Link
+      className={`sidebar-link ${active ? "active" : ""}`}
+      href={href}
+      aria-current={active ? "page" : undefined}
+    >
       <Icon aria-hidden="true" />
       <span>{label}</span>
     </Link>
@@ -342,7 +358,11 @@ function GamesView({
           <div>
             <p>{activeGenre ? activeGenre.label : "All Games"}</p>
             <h2 id="game-shelf-title">
-              {searchQuery ? "Search results" : activeGenre ? `${activeGenre.label} games` : "Available and upcoming"}
+              {searchQuery
+                ? "Search results"
+                : activeGenre
+                  ? `${activeGenre.label} games`
+                  : "Available and upcoming"}
             </h2>
           </div>
           <span>{visibleGames.length} shown</span>
@@ -429,7 +449,11 @@ function GameTile({
             <small>{game.genre}</small>
           </span>
           <span className={`mini-status ${game.status}`}>
-            {game.status === "playable" ? <Gamepad2 aria-hidden="true" /> : <Lock aria-hidden="true" />}
+            {game.status === "playable" ? (
+              <Gamepad2 aria-hidden="true" />
+            ) : (
+              <Lock aria-hidden="true" />
+            )}
             {game.status === "playable" ? "Playable" : "Soon"}
           </span>
         </span>
@@ -456,7 +480,11 @@ function GameLauncher({
           <span>{selectedGame.summary}</span>
         </div>
         <span className={`status-badge ${selectedGame.status}`}>
-          {selectedGame.status === "playable" ? <Sparkles aria-hidden="true" /> : <Lock aria-hidden="true" />}
+          {selectedGame.status === "playable" ? (
+            <Sparkles aria-hidden="true" />
+          ) : (
+            <Lock aria-hidden="true" />
+          )}
           {selectedGame.status === "playable" ? "Playable" : "Coming soon"}
         </span>
       </div>
@@ -469,7 +497,11 @@ function GameLauncher({
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
         >
-          {GameComponent ? <GameComponent /> : <UnavailableGame game={selectedGame} onPlaySnake={onPlaySnake} />}
+          {GameComponent ? (
+            <GameComponent />
+          ) : (
+            <UnavailableGame game={selectedGame} onPlaySnake={onPlaySnake} />
+          )}
         </m.div>
       </AnimatePresence>
     </section>

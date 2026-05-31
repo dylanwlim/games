@@ -17,11 +17,11 @@ Dylan Games is a browser-games hub at games.dylanwlim.com. The current public pl
 
 ## What You Can Do Today
 
-| Area | Current public flow |
-| --- | --- |
-| Play Snake | Use Play Snake, New Game, keyboard controls, or on-screen directional controls. |
-| Browse the launcher | Use All games to view Snake and the planned game slots. |
-| Track the current public set | Use the public docs changelog and roadmap to see what changed. |
+| Area                         | Current public flow                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------- |
+| Play Snake                   | Use Play Snake, New Game, keyboard controls, or on-screen directional controls. |
+| Browse the launcher          | Use All games to view Snake and the planned game slots.                         |
+| Track the current public set | Use the public docs changelog and roadmap to see what changed.                  |
 
 ## Start Here
 
