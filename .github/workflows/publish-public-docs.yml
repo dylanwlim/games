@@ -1,12 +1,8 @@
 name: Publish public docs
 
+# Automatic publishing is paused. Run this workflow manually when public docs should be refreshed.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
-  schedule:
-    - cron: "31 9 * * *"
 
 permissions:
   contents: read
