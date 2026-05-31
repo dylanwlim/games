@@ -210,7 +210,7 @@ function Sidebar({
           .map((genre) => (
             <SidebarLink
               key={genre.slug}
-              href={`/genres/${genre.slug}` as Route}
+              href={`/genres/${genre.slug}`}
               icon={iconMap[genre.icon]}
               label={genre.label}
               active={activeGenre === genre.slug}
@@ -234,7 +234,7 @@ function SidebarLink({
   label,
   active,
 }: {
-  href: Route;
+  href: string;
   icon: LucideIcon;
   label: string;
   active: boolean;
@@ -242,7 +242,7 @@ function SidebarLink({
   return (
     <Link
       className={`sidebar-link ${active ? "active" : ""}`}
-      href={href}
+      href={href as Route}
       aria-current={active ? "page" : undefined}
     >
       <Icon aria-hidden="true" />
