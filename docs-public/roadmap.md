@@ -5,7 +5,7 @@ This roadmap covers public-facing guide and user-surface work only.
 ## Current Priorities
 
 - Keep Snake stable and responsive across desktop and touch devices.
-- Promote planned game slots only when they become playable public entries.
+- Keep Discover and genre browsing aligned with the current public catalog.
 - Refresh public docs and screenshots through the publish workflow.
 
 ## Documentation Rule

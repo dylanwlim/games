@@ -4,6 +4,7 @@
 
 - Refreshed the public docs around the current public Dylan Games surface.
 - Added a current homepage screenshot to the README.
+- Documented the current Discover and genre browsing pages.
 - Updated the publish workflow so homepage screenshots refresh on main-branch updates and the daily sync.
 - Tightened the public guide language to focus on actions users can access now.
 

@@ -9,11 +9,11 @@
 
 1. Open the public hub and choose Play Snake.
 2. Use arrow keys or the on-screen controls to move.
-3. Use New Game to restart and All games to browse the current launcher entries.
+3. Use New Game to restart, then browse All Games, Discover, or a genre page.
 
 ## Current Availability
 
-The public hub is live with Snake, New Game, keyboard/on-screen controls, and an All games launcher.
+The public hub is live with Snake, New Game, keyboard/on-screen controls, Discover, All Games, and genre pages.
 
 ## Source Development
 

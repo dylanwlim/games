@@ -2,8 +2,8 @@
 
 import { ArrowUpRight } from "lucide-react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
-import type { Route } from "next";
 import Link from "next/link";
+import type { Route } from "next";
 import { useRef, type ReactNode } from "react";
 
 const imagePadding = 12;
@@ -134,7 +134,7 @@ function DiscoverSectionCopy({
 }: {
   title: string;
   body: string;
-  href: Route;
+  href: string;
   action: string;
 }) {
   return (
@@ -142,7 +142,7 @@ function DiscoverSectionCopy({
       <h3>{title}</h3>
       <div>
         <p>{body}</p>
-        <Link className="discover-action" href={href}>
+        <Link className="discover-action" href={href as Route}>
           {action}
           <ArrowUpRight aria-hidden="true" />
         </Link>

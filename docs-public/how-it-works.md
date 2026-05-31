@@ -6,13 +6,13 @@ Dylan Games is documented here from the public user's point of view.
 
 The homepage opens directly into the game launcher with Snake selected.
 
-## Playable starter
+## Play Flow
 
 Snake is the current playable browser game.
 
-## Planned slots
+## Catalog Browsing
 
-The launcher shows future games as planned entries instead of playable games.
+All Games, Discover, and genre pages provide public browsing paths around the current catalog.
 
 ## Publishing Model
 
