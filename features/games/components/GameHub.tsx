@@ -64,6 +64,17 @@ const fallbackGame = allGames[0] as GameDefinition;
 const sidebarGenres = ["action", "adventure", "puzzle", "racing", "simulation", "strategy"];
 const favoriteGameSlugs = ["snake", "minesweeper", "orbit"] as const;
 
+const genrePreviewArt: Partial<
+  Record<GenreSlug, { accent: GameDefinition["accent"]; preview: GameDefinition["preview"] }>
+> = {
+  action: { accent: "green", preview: "snake" },
+  adventure: { accent: "teal", preview: "orbit" },
+  puzzle: { accent: "blue", preview: "minesweeper" },
+  racing: { accent: "slate", preview: "pong" },
+  simulation: { accent: "teal", preview: "orbit" },
+  strategy: { accent: "amber", preview: "path" },
+};
+
 const genrePageCopy: Partial<
   Record<GenreSlug, { description: string; focus: string; rhythm: string }>
 > = {
@@ -498,7 +509,7 @@ function CollectionView({
   const visibleGames = shelfGames.filter((game) =>
     search ? `${game.title} ${game.genre} ${game.summary}`.toLowerCase().includes(search) : true,
   );
-  const previewGame = visibleGames[0] ?? shelfGames[0] ?? fallbackGame;
+  const previewArt = getCollectionArt(view, activeGenre, visibleGames[0] ?? shelfGames[0]);
 
   return (
     <div className="collection-page">
@@ -514,8 +525,8 @@ function CollectionView({
             <span>{visibleGames.length} games shown</span>
           </div>
         </div>
-        <div className={`collection-art accent-${previewGame.accent}`} aria-hidden="true">
-          <PreviewArt kind={previewGame.preview} />
+        <div className={`collection-art accent-${previewArt.accent}`} aria-hidden="true">
+          <PreviewArt kind={previewArt.preview} />
           <span>{meta.artLabel}</span>
         </div>
       </header>
@@ -890,4 +901,26 @@ function getCollectionGames(
   }
 
   return allGames;
+}
+
+function getCollectionArt(
+  view: Exclude<GameHubView, "games">,
+  activeGenre: ReturnType<typeof getGenreBySlug> | undefined,
+  preferredGame: GameDefinition | undefined,
+) {
+  if (preferredGame) {
+    return {
+      accent: preferredGame.accent,
+      preview: preferredGame.preview,
+    };
+  }
+
+  if (view === "genre" && activeGenre) {
+    return genrePreviewArt[activeGenre.slug] ?? { accent: "violet", preview: "tiles" };
+  }
+
+  return {
+    accent: fallbackGame.accent,
+    preview: fallbackGame.preview,
+  };
 }
