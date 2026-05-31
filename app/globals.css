@@ -4,6 +4,7 @@
   --sidebar: #f7f7f7;
   --sidebar-line: rgba(0, 0, 0, 0.08);
   --sidebar-highlight: #efefef;
+  --sidebar-hover: #f4f4f4;
   --surface: #ffffff;
   --surface-muted: #f2f2f5;
   --surface-raised: rgba(255, 255, 255, 0.86);
@@ -255,7 +256,11 @@ img {
 }
 
 .sidebar-link:hover {
-  background: rgba(0, 0, 0, 0.045);
+  background: var(--sidebar-highlight);
+}
+
+.sidebar-link:not(.active):hover {
+  background: var(--sidebar-hover);
 }
 
 .sidebar-link.active {

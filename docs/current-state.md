@@ -8,7 +8,8 @@ that changes or verifies the project.
 
 - 2026-05-31: Refined the sidebar drawer with a smaller rounded glass panel,
   top-row search, no visible drawer title, an unbadged `dylanwlim.com` footer
-  link, slower Motion timing, and the requested white/sidebar/highlight colors.
+  link, slower Motion timing, the requested white/sidebar/highlight colors, and
+  lighter non-selected row hover states.
 - 2026-05-31: Added the Apple Arcade-style storefront below the genre chips,
   expanded the registry with additional coming-soon games, switched the site
   icon/favicon mark to the sports trophy, added Motion-backed page/list
