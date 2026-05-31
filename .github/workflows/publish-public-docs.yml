@@ -46,8 +46,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p docs-public/assets
-          npx --yes playwright@1.57.0 install --with-deps chromium
-          npx --yes playwright@1.57.0 screenshot --wait-for-timeout=2500 --viewport-size=1440,900 "${PUBLIC_DOCS_HOMEPAGE_URL}" docs-public/assets/homepage.png
+          if ! npx --yes playwright@1.57.0 screenshot --channel=chrome --wait-for-timeout=2500 --viewport-size=1440,900 "${PUBLIC_DOCS_HOMEPAGE_URL}" docs-public/assets/homepage.png; then
+            echo "Chrome channel capture failed; installing bundled Chromium fallback."
+            npx --yes playwright@1.57.0 install chromium
+            npx --yes playwright@1.57.0 screenshot --wait-for-timeout=2500 --viewport-size=1440,900 "${PUBLIC_DOCS_HOMEPAGE_URL}" docs-public/assets/homepage.png
+          fi
 
       - name: Validate docs allowlist and leak check
         shell: bash
