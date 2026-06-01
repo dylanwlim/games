@@ -40,6 +40,51 @@ test("renders the hub and launches Snake", async ({ page }) => {
   await expect(page.getByText(/Snake status: Playing/i)).toBeAttached();
 });
 
+test("filters sidebar search by fuzzy game and category names", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByRole("button", { name: "Open navigation" }).click();
+  const search = page.getByLabel("Search games");
+  const sidebar = page.locator("#arcade-sidebar");
+  await expect(search).toBeVisible();
+
+  const activeLinkBackground = await page
+    .locator("#arcade-sidebar")
+    .getByRole("link", { name: "Games", exact: true })
+    .evaluate((element) => window.getComputedStyle(element).backgroundColor);
+  const searchBackground = await search.evaluate(
+    (element) =>
+      window.getComputedStyle(element.closest(".sidebar-search") as HTMLElement).backgroundColor,
+  );
+
+  expect(activeLinkBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(searchBackground).toBe("rgba(0, 0, 0, 0)");
+
+  if ((page.viewportSize()?.width ?? 0) >= 900) {
+    await sidebar.getByRole("link", { name: "Favorites", exact: true }).hover();
+    const hoveredLinkBackground = await sidebar
+      .getByRole("link", { name: "Favorites", exact: true })
+      .evaluate((element) => window.getComputedStyle(element).backgroundColor);
+    expect(hoveredLinkBackground).toBe("rgba(0, 0, 0, 0)");
+  }
+
+  await search.fill("puzl");
+  await expect(page.getByRole("heading", { name: "Playable results" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "In-progress results" })).toBeVisible();
+  await expect(
+    page.locator(".coming-soon-card.is-disabled", { hasText: "Minesweeper" }),
+  ).toBeVisible();
+  await expect(page.locator(".store-game-card.is-disabled", { hasText: "Tiles" })).toBeVisible();
+  await expect(page.locator(".store-game-card.is-disabled", { hasText: "2048" })).toBeVisible();
+  await expect(page.locator('a.coming-soon-card[href="/games/minesweeper"]')).toHaveCount(0);
+  await expect(page.locator('a.store-game-card[href="/games/tiles"]')).toHaveCount(0);
+  await expect(page.getByText("Snake", { exact: true })).toHaveCount(0);
+
+  await search.fill("snkae");
+  await expect(page.locator('a.store-game-card[href="/games/snake"]')).toBeVisible();
+  await expect(page.locator(".store-game-card", { hasText: "Minesweeper" })).toHaveCount(0);
+});
+
 test("opens Snake from every Snake entry point", async ({ page }) => {
   await page.goto("/");
 

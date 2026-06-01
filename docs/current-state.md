@@ -6,6 +6,17 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-01: Finished a production pass on `/games/snake`: the engine now
+  awards score with base, speed, and streak bonuses; the route has a dedicated
+  local top-score component with per-mode bests; the HUD was rebuilt around a
+  compact run summary; the canvas visuals were polished with smoother board,
+  food, head, and wrap interpolation handling; and the animation loop now keeps
+  frame-timing remainders for steadier 60 fps rendering. Verified with
+  Browser desktop/mobile play checks and `npm run validate`.
+- 2026-06-01: Updated sidebar search to use immediate fuzzy/category matching,
+  hide unrelated storefront hero/continue content while searching, surface
+  unreleased matches as disabled gray cards, and remove gray tint from opened
+  sidebar nav/search hover and active states.
 - 2026-06-01: Rebuilt `/games/snake` as a dedicated no-scroll play route instead
   of a hub shelf plus embedded game. The route now uses a compact play shell,
   viewport-bound Snake board, quiet HUD rail, single score/restart surface,

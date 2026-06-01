@@ -554,13 +554,13 @@ function getOverlayCopy(state: SnakeState) {
   if (state.status === "paused") {
     return {
       title: "Paused",
-      body: "Space resumes. Escape pauses whenever the board is active.",
+      body: "Resume when the route is clear and keep the streak alive.",
     };
   }
 
   return {
     title: "Snake",
-    body: "Use arrows, WASD, or swipe.",
+    body: "Chain bites, build streaks, and push the top score.",
   };
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { DiscoverParallaxContent } from "@/components/ui/text-parallax-content-scroll";
+import { filterGamesBySearch, getSearchGenre } from "@/features/games/game-search";
 import { gameGenres, getGenreBySlug, type GenreSlug } from "@/features/games/genre-registry";
 import { games, getGameBySlug } from "@/features/games/game-registry";
 import { SnakeGame } from "@/features/games/snake/SnakeGame";
@@ -758,14 +759,7 @@ function GamesView({
   onGameSelect: (game: GameDefinition) => void;
 }) {
   const [activeFilter, setActiveFilter] = useState<GenreSlug | undefined>(activeGenre?.slug);
-  const visibleGames = games.filter((game) => {
-    const matchesGenre = activeGenre ? game.genre === activeGenre.label : true;
-    const search = searchQuery.trim().toLowerCase();
-    const matchesSearch = search
-      ? `${game.title} ${game.genre} ${game.summary}`.toLowerCase().includes(search)
-      : true;
-    return matchesGenre && matchesSearch;
-  });
+  const visibleGames = filterGamesBySearch(games, searchQuery, activeGenre?.slug);
 
   return (
     <m.div className="games-page" variants={pageCascadeVariants}>
@@ -818,7 +812,7 @@ function GamesView({
         </>
       ) : (
         <m.div variants={pageItemVariants}>
-          <FeatureHero shouldReduceMotion={shouldReduceMotion} />
+          {searchQuery.trim() ? null : <FeatureHero shouldReduceMotion={shouldReduceMotion} />}
           <ArcadeStorefront
             activeGenre={activeFilter}
             searchQuery={searchQuery}
@@ -928,6 +922,9 @@ function ArcadeStorefront({
   shouldReduceMotion: boolean;
   onGenreChange: (genre: GenreSlug | undefined) => void;
 }) {
+  const hasSearch = Boolean(searchQuery.trim());
+  const searchGenre = getSearchGenre(searchQuery);
+  const effectiveGenre = searchGenre ?? activeGenre;
   const liveGames = filterStorefrontGames(
     games.filter((game) => game.status === "playable"),
     searchQuery,
@@ -950,7 +947,7 @@ function ArcadeStorefront({
   if (searchQuery.trim() && visibleCount === 0) {
     return (
       <m.div className="arcade-storefront" {...motionProps}>
-        <GenrePills activeGenre={activeGenre} resultCount={0} onGenreChange={onGenreChange} />
+        <GenrePills activeGenre={effectiveGenre} resultCount={0} onGenreChange={onGenreChange} />
         <EmptyGenreState genre="Search" />
       </m.div>
     );
@@ -958,14 +955,14 @@ function ArcadeStorefront({
 
   return (
     <m.div className="arcade-storefront" {...motionProps}>
-      <ContinuePlayingSection />
+      {!hasSearch ? <ContinuePlayingSection /> : null}
       <GenrePills
-        activeGenre={activeGenre}
+        activeGenre={effectiveGenre}
         resultCount={visibleCount}
         onGenreChange={onGenreChange}
       />
-      <AllGamesSection activeGenre={activeGenre} games={liveGames} searchQuery={searchQuery} />
-      <ComingSoonSection games={plannedGames} />
+      <AllGamesSection activeGenre={effectiveGenre} games={liveGames} searchQuery={searchQuery} />
+      <ComingSoonSection games={plannedGames} searching={hasSearch} />
     </m.div>
   );
 }
@@ -990,7 +987,7 @@ function AllGamesSection({
     >
       <div className="store-section-header">
         <div>
-          <h2 id={titleId}>All Games</h2>
+          <h2 id={titleId}>{searchQuery.trim() ? "Playable results" : "All Games"}</h2>
           <p>
             {activeLabel
               ? `${activeLabel} games that are playable in the browser right now.`
@@ -1087,14 +1084,9 @@ function ContinueCard({
 
 function StoreGameCard({ game, source }: { game: GameDefinition; source: string }) {
   const isPlayable = game.status === "playable";
-  const action = isPlayable ? "Play" : "Preview";
-
-  return (
-    <Link
-      className={`store-game-card ${game.status}`}
-      href={`/games/${game.slug}` as Route}
-      aria-label={`${action} ${game.title} from ${source}`}
-    >
+  const action = isPlayable ? "Play" : "In progress";
+  const cardContent = (
+    <>
       <ArcadeAppIcon game={game} />
       <span className="store-game-copy">
         <span className="store-game-title-row">
@@ -1107,15 +1099,39 @@ function StoreGameCard({ game, source }: { game: GameDefinition; source: string 
         <span>{game.summary}</span>
         <span className="store-game-meta">
           <small>{game.genre}</small>
-          <small>{isPlayable ? "1 min rounds" : "Preview route"}</small>
+          <small>{isPlayable ? "1 min rounds" : "Not playable yet"}</small>
         </span>
       </span>
       <span className={`store-get-button ${isPlayable ? "" : "secondary"}`}>{action}</span>
+    </>
+  );
+
+  if (!isPlayable) {
+    return (
+      <article className={`store-game-card ${game.status} is-disabled`} data-disabled="true">
+        {cardContent}
+      </article>
+    );
+  }
+
+  return (
+    <Link
+      className={`store-game-card ${game.status}`}
+      href={`/games/${game.slug}` as Route}
+      aria-label={`${action} ${game.title} from ${source}`}
+    >
+      {cardContent}
     </Link>
   );
 }
 
-function ComingSoonSection({ games: plannedGames }: { games: GameDefinition[] }) {
+function ComingSoonSection({
+  games: plannedGames,
+  searching,
+}: {
+  games: GameDefinition[];
+  searching: boolean;
+}) {
   if (!plannedGames.length) {
     return null;
   }
@@ -1134,16 +1150,16 @@ function ComingSoonSection({ games: plannedGames }: { games: GameDefinition[] })
     >
       <div className="store-section-header">
         <div>
-          <h2 id="coming-soon-title">Coming Soon</h2>
-          <p>Unreleased concepts are grouped here so playable games stay clear.</p>
+          <h2 id="coming-soon-title">{searching ? "In-progress results" : "Coming Soon"}</h2>
+          <p>
+            {searching
+              ? "Unreleased matches stay visible but are disabled until they are playable."
+              : "Unreleased concepts are grouped here so playable games stay clear."}
+          </p>
         </div>
       </div>
       <div className="coming-soon-layout">
-        <Link
-          className="coming-soon-card"
-          href={`/games/${featuredGame.slug}` as Route}
-          aria-label={`Preview ${featuredGame.title} from Coming Soon`}
-        >
+        <article className="coming-soon-card is-disabled" data-disabled="true">
           <span className="coming-soon-media">
             <Image
               src="/art/discover-racing.png"
@@ -1159,11 +1175,11 @@ function ComingSoonSection({ games: plannedGames }: { games: GameDefinition[] })
             <span>{featuredGame.description}</span>
             <span className="coming-soon-meta">
               <span>{featuredGame.genre}</span>
-              <span>Preview route ready</span>
+              <span>Not playable yet</span>
             </span>
-            <span className="store-get-button secondary">Preview</span>
+            <span className="store-get-button secondary">In progress</span>
           </span>
-        </Link>
+        </article>
         {supportingGames.length ? (
           <div className="store-card-grid planned" role="list">
             {supportingGames.map((game) => (
@@ -1200,9 +1216,11 @@ function CollectionView({
 }) {
   const meta = getCollectionMeta(view, activeGenre);
   const shelfGames = getCollectionGames(view, activeGenre);
-  const search = searchQuery.trim().toLowerCase();
-  const visibleGames = shelfGames.filter((game) =>
-    search ? `${game.title} ${game.genre} ${game.summary}`.toLowerCase().includes(search) : true,
+  const hasSearch = Boolean(searchQuery.trim());
+  const visibleGames = filterGamesBySearch(
+    hasSearch ? allGames : shelfGames,
+    searchQuery,
+    activeGenre?.slug,
   );
   const previewArt = getCollectionArt(view, activeGenre, visibleGames[0] ?? shelfGames[0]);
 
@@ -1360,8 +1378,9 @@ function GameTile({
 }
 
 function CollectionGameCard({ game }: { game: GameDefinition }) {
-  return (
-    <Link className="template-game-card" href={`/games/${game.slug}` as Route} role="listitem">
+  const isPlayable = game.status === "playable";
+  const cardContent = (
+    <>
       <span className={`game-preview ${game.preview} accent-${game.accent}`} aria-hidden="true">
         <PreviewArt kind={game.preview} />
       </span>
@@ -1369,14 +1388,28 @@ function CollectionGameCard({ game }: { game: GameDefinition }) {
         <strong>{game.title}</strong>
         <small>{game.summary}</small>
         <span className={`mini-status ${game.status}`}>
-          {game.status === "playable" ? (
-            <Gamepad2 aria-hidden="true" />
-          ) : (
-            <Lock aria-hidden="true" />
-          )}
-          {game.status === "playable" ? "Playable" : "Soon"}
+          {isPlayable ? <Gamepad2 aria-hidden="true" /> : <Lock aria-hidden="true" />}
+          {isPlayable ? "Playable" : "Soon"}
         </span>
       </span>
+    </>
+  );
+
+  if (!isPlayable) {
+    return (
+      <article
+        className="template-game-card coming-soon is-disabled"
+        role="listitem"
+        data-disabled="true"
+      >
+        {cardContent}
+      </article>
+    );
+  }
+
+  return (
+    <Link className="template-game-card" href={`/games/${game.slug}` as Route} role="listitem">
+      {cardContent}
     </Link>
   );
 }
@@ -1788,14 +1821,5 @@ function filterStorefrontGames(
   searchQuery: string,
   activeGenre?: GenreSlug,
 ) {
-  const search = searchQuery.trim().toLowerCase();
-  const activeGenreLabel = activeGenre ? getGenreBySlug(activeGenre)?.label : undefined;
-
-  return storefrontGames.filter(
-    (game) =>
-      (activeGenreLabel ? game.genre === activeGenreLabel : true) &&
-      (search
-        ? `${game.title} ${game.genre} ${game.summary}`.toLowerCase().includes(search)
-        : true),
-  );
+  return filterGamesBySearch(storefrontGames, searchQuery, activeGenre);
 }

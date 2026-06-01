@@ -228,7 +228,7 @@ img {
   height: 36px;
   gap: 8px;
   border-radius: 17px;
-  background: var(--sidebar-control);
+  background: transparent;
   color: var(--sidebar-control-text);
   padding: 0 12px;
 }
@@ -315,18 +315,18 @@ img {
 
 .sidebar-link:hover,
 .sidebar-link:focus-visible {
-  background: var(--sidebar-hover);
+  background: transparent;
 }
 
 .sidebar-link.active,
 .sidebar-link[aria-current="page"] {
-  background: var(--sidebar-highlight);
+  background: transparent;
   color: #2d2e31;
 }
 
 .sidebar-link.active:hover,
 .sidebar-link[aria-current="page"]:hover {
-  background: var(--sidebar-highlight);
+  background: transparent;
 }
 
 .sidebar-link.active svg,
@@ -349,7 +349,7 @@ img {
 }
 
 .sidebar-profile:hover {
-  background: var(--sidebar-hover);
+  background: transparent;
 }
 
 .arcade-sidebar.collapsed .sidebar-profile {
@@ -805,12 +805,26 @@ img {
     transform 160ms ease;
 }
 
-.store-game-card:hover,
-.store-game-card:focus-visible {
+.store-game-card:not(.is-disabled):hover,
+.store-game-card:not(.is-disabled):focus-visible {
   border-color: #bfd0ea;
   box-shadow: 0 14px 32px rgba(15, 23, 42, 0.07);
   color: #1769e0;
   transform: translateY(-1px);
+}
+
+.store-game-card.is-disabled {
+  border-color: #e1e4ea;
+  background: #f4f5f7;
+  color: #6f737c;
+  cursor: default;
+}
+
+.store-game-card.is-disabled:hover {
+  border-color: #e1e4ea;
+  box-shadow: none;
+  color: #6f737c;
+  transform: none;
 }
 
 .store-game-copy {
@@ -889,16 +903,23 @@ img {
   color: #1769e0;
 }
 
-.store-game-card:hover .store-get-button,
+.store-game-card:not(.is-disabled):hover .store-get-button,
 .continue-card:hover .store-get-button,
-.coming-soon-card:hover .store-get-button {
+.coming-soon-card:not(.is-disabled):hover .store-get-button {
   background: #0f5fcf;
   transform: translateY(-1px);
 }
 
-.store-game-card:hover .store-get-button.secondary,
-.coming-soon-card:hover .store-get-button.secondary {
+.store-game-card:not(.is-disabled):hover .store-get-button.secondary,
+.coming-soon-card:not(.is-disabled):hover .store-get-button.secondary {
   background: #dfeafe;
+}
+
+.store-game-card.is-disabled .store-get-button.secondary,
+.coming-soon-card.is-disabled .store-get-button.secondary {
+  background: #e2e5eb;
+  color: #717783;
+  transform: none;
 }
 
 .store-app-icon {
@@ -924,6 +945,12 @@ img {
   width: 58px;
   height: 58px;
   border-radius: 14px;
+}
+
+.store-game-card.is-disabled .store-app-icon,
+.template-game-card.is-disabled .game-preview {
+  filter: grayscale(1);
+  opacity: 0.64;
 }
 
 .store-app-icon::before {
@@ -1263,7 +1290,7 @@ img {
 }
 
 .continue-card:hover .continue-image,
-.coming-soon-card:hover .coming-soon-image {
+.coming-soon-card:not(.is-disabled):hover .coming-soon-image {
   transform: scale(1.018);
 }
 
@@ -1359,11 +1386,31 @@ img {
     transform 160ms ease;
 }
 
-.coming-soon-card:hover,
-.coming-soon-card:focus-visible {
+.coming-soon-card:not(.is-disabled):hover,
+.coming-soon-card:not(.is-disabled):focus-visible {
   border-color: #bfd0ea;
   box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
   transform: translateY(-1px);
+}
+
+.coming-soon-card.is-disabled {
+  border-color: #e1e4ea;
+  background: #f4f5f7;
+  color: #6f737c;
+  cursor: default;
+}
+
+.coming-soon-card.is-disabled .coming-soon-image {
+  filter: grayscale(1);
+  opacity: 0.78;
+}
+
+.coming-soon-card.is-disabled .coming-soon-copy small,
+.coming-soon-card.is-disabled .coming-soon-copy strong,
+.coming-soon-card.is-disabled
+  .coming-soon-copy
+  > span:not(.coming-soon-meta):not(.store-get-button) {
+  color: #6f737c;
 }
 
 .coming-soon-media {
@@ -2397,11 +2444,29 @@ img {
     transform 160ms ease;
 }
 
-.template-game-card:hover,
-.template-game-card:focus-visible {
+.template-game-card:not(.is-disabled):hover,
+.template-game-card:not(.is-disabled):focus-visible {
   border-color: rgba(0, 122, 255, 0.5);
   box-shadow: 0 16px 34px rgba(22, 31, 47, 0.09);
   transform: translateY(-2px);
+}
+
+.template-game-card.is-disabled {
+  border-color: #e1e4ea;
+  background: #f4f5f7;
+  color: #6f737c;
+  cursor: default;
+}
+
+.template-game-card.is-disabled:hover {
+  border-color: #e1e4ea;
+  box-shadow: none;
+  transform: none;
+}
+
+.template-game-card.is-disabled .template-game-copy strong,
+.template-game-card.is-disabled .template-game-copy small {
+  color: #6f737c;
 }
 
 .template-game-copy {
