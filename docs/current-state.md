@@ -6,6 +6,9 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-05-31: Removed the app-level ICO route that triggered the Next dev
+  favicon decoder overlay, regenerated root favicon PNG/ICO assets with alpha,
+  and rechecked the hub in desktop and mobile browser viewports.
 - 2026-05-31: Deployed production `dpl_6Ke3a3o3RfLEMqLktg5mfaDhctGc`
   with the new icon set, verified `games.dylanwlim.com`, and confirmed live
   favicon/manifest assets match the local generated files.
