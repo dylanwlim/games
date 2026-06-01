@@ -13,6 +13,26 @@ export const games = [
     priority: 1,
   },
   {
+    id: "cipherword",
+    slug: "cipherword",
+    title: "Cipherword",
+    genre: "Word",
+    status: "playable",
+    summary: "Guess the hidden concept through letters, meaning, and clues.",
+    description:
+      "A daily semantic word puzzle where every guess reveals letters, meaning distance, and elegant clues.",
+    accent: "violet",
+    preview: "cipherword",
+    priority: 2,
+    path: "/games/cipherword",
+    featured: true,
+    favoriteReady: true,
+    daily: true,
+    modes: ["Daily", "Archive", "Unlimited", "Hard", "Zen"],
+    duration: "2-4 min",
+    tags: ["Daily", "Archive", "Semantic", "Word", "Logic", "Wordle", "Calendar", "Clue"],
+  },
+  {
     slug: "minesweeper",
     title: "Minesweeper",
     genre: "Puzzle",
@@ -22,7 +42,7 @@ export const games = [
       "The placeholder is intentionally finished so the hub can ship before this game is playable.",
     accent: "blue",
     preview: "minesweeper",
-    priority: 2,
+    priority: 3,
   },
   {
     slug: "pong",
@@ -33,7 +53,7 @@ export const games = [
     description: "A planned lightweight arcade game with keyboard and touch-friendly controls.",
     accent: "slate",
     preview: "pong",
-    priority: 3,
+    priority: 4,
   },
   {
     slug: "tiles",
@@ -44,7 +64,7 @@ export const games = [
     description: "Reserved for a polished puzzle loop once the core hub is stable.",
     accent: "violet",
     preview: "tiles",
-    priority: 4,
+    priority: 5,
   },
   {
     slug: "orbit",
@@ -55,7 +75,7 @@ export const games = [
     description: "A calm precision game concept for a later release.",
     accent: "teal",
     preview: "orbit",
-    priority: 5,
+    priority: 6,
   },
   {
     slug: "2048",
@@ -66,7 +86,7 @@ export const games = [
     description: "A future implementation target once the hub has more playable games.",
     accent: "amber",
     preview: "number",
-    priority: 6,
+    priority: 7,
   },
   {
     slug: "dashline",
@@ -77,7 +97,7 @@ export const games = [
     description: "A future racing slot for short runs, readable routes, and quick restarts.",
     accent: "slate",
     preview: "dashline",
-    priority: 7,
+    priority: 8,
   },
   {
     slug: "sky-courier",
@@ -88,17 +108,6 @@ export const games = [
     description: "Reserved for a calm flying loop with tiny deliveries and simple timing.",
     accent: "blue",
     preview: "sky-courier",
-    priority: 8,
-  },
-  {
-    slug: "word-forge",
-    title: "Word Forge",
-    genre: "Word",
-    status: "coming-soon",
-    summary: "Build short words from a focused letter rack.",
-    description: "A planned word game slot for fast vocabulary puzzles and quiet scoring.",
-    accent: "violet",
-    preview: "word",
     priority: 9,
   },
   {

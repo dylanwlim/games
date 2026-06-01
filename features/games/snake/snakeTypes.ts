@@ -11,7 +11,7 @@ export type SnakeMode = (typeof snakeModes)[number];
 
 export type SnakeStatus = "ready" | "playing" | "paused" | "game-over";
 
-export type SnakeLastEvent = "none" | "ate" | "crashed" | "time-up" | "cleared";
+export type SnakeLastEvent = "none" | "ate" | "hit-wall" | "hit-self" | "time-up" | "cleared";
 
 export type SnakeModeDefinition = {
   label: string;

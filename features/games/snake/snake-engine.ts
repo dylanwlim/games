@@ -180,14 +180,14 @@ export function stepSnake(state: SnakeState): SnakeState {
   const nextQueuedDirections = state.queuedDirections.slice(1);
 
   if (!modeDefinition.wrapsWalls && isOutsideBoard(rawNextHead, state.boardSize)) {
-    return endSnakeRound(state, nextDirection, nextQueuedDirections, "crashed");
+    return endSnakeRound(state, nextDirection, nextQueuedDirections, "hit-wall");
   }
 
   const willEat = state.food ? pointsEqual(nextHead, state.food) : false;
   const bodyToCheck = willEat ? state.snake : state.snake.slice(0, -1);
 
   if (bodyToCheck.some((point) => pointsEqual(point, nextHead))) {
-    return endSnakeRound(state, nextDirection, nextQueuedDirections, "crashed");
+    return endSnakeRound(state, nextDirection, nextQueuedDirections, "hit-self");
   }
 
   const nextSnake = [nextHead, ...state.snake];

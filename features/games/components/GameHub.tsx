@@ -1,6 +1,8 @@
 "use client";
 
 import { DiscoverParallaxContent } from "@/components/ui/text-parallax-content-scroll";
+import { CipherwordGame } from "@/features/games/cipherword/CipherwordGame";
+import { DailyCipherwordCTA } from "@/features/games/cipherword/DailyCipherwordCTA";
 import { filterGamesBySearch, getSearchGenre } from "@/features/games/game-search";
 import { gameGenres, getGenreBySlug, type GenreSlug } from "@/features/games/genre-registry";
 import { games, getGameBySlug } from "@/features/games/game-registry";
@@ -54,12 +56,13 @@ type GameHubProps = {
 };
 
 const gameComponents = {
+  cipherword: CipherwordGame,
   snake: SnakeGame,
 } as const;
 
 const allGames: GameDefinition[] = games;
 const fallbackGame = allGames[0] as GameDefinition;
-const favoriteGameSlugs = ["snake", "minesweeper", "orbit"] as const;
+const favoriteGameSlugs = ["cipherword", "snake", "minesweeper", "orbit"] as const;
 
 const genrePreviewArt: Partial<
   Record<GenreSlug, { accent: GameDefinition["accent"]; preview: GameDefinition["preview"] }>
@@ -73,7 +76,7 @@ const genrePreviewArt: Partial<
   simulation: { accent: "teal", preview: "garden" },
   sports: { accent: "slate", preview: "pong" },
   strategy: { accent: "amber", preview: "route" },
-  word: { accent: "violet", preview: "word" },
+  word: { accent: "violet", preview: "cipherword" },
 };
 
 const genrePageCopy: Partial<
@@ -112,6 +115,12 @@ const genrePageCopy: Partial<
     focus: "Clear decisions",
     rhythm: "Compact rulesets with visible outcomes.",
   },
+  word: {
+    description:
+      "Daily word games built around clean typing, fair clues, and fast return rituals.",
+    focus: "Daily meaning",
+    rhythm: "Cipherword leads the shelf with letters, semantic warmth, and archive play.",
+  },
 };
 
 const iconMap = {
@@ -133,12 +142,12 @@ const iconMap = {
 } satisfies Record<string, LucideIcon>;
 
 const featuredSpotlight = {
-  label: "Featured",
-  title: "Snake",
-  summary: "Eat the next dot, grow the chain, and restart instantly when the route gets tight.",
-  image: "/art/feature-snake.svg",
-  gameSlug: "snake",
-  meta: ["Classic", "Blitz", "Zen"],
+  label: "Daily",
+  title: "Cipherword",
+  summary: "Guess the hidden concept through letters, meaning distance, and clue unlocks.",
+  image: "/art/feature-cipherword.svg",
+  gameSlug: "cipherword",
+  meta: ["Daily", "Archive", "Unlimited"],
 } as const;
 
 const motionEase = [0.22, 1, 0.36, 1] as const;
@@ -838,7 +847,7 @@ function FeatureHero({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
       >
         <Image
           src={featuredSpotlight.image}
-          alt="Snake gameplay artwork"
+          alt={`${featuredSpotlight.title} gameplay artwork`}
           fill
           preload
           loading="eager"
@@ -854,12 +863,12 @@ function FeatureHero({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
             <Link
               className="primary-play-button"
               href={`/games/${featuredSpotlight.gameSlug}` as Route}
-              aria-label="Play Snake from Featured"
+              aria-label={`Play ${featuredSpotlight.title} from Featured`}
             >
               <Play aria-hidden="true" />
               Play
             </Link>
-            <div className="feature-meta" aria-label="Snake details">
+            <div className="feature-meta" aria-label={`${featuredSpotlight.title} details`}>
               {featuredSpotlight.meta.map((item) => (
                 <span key={item}>{item}</span>
               ))}
@@ -869,7 +878,7 @@ function FeatureHero({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
         <Link
           className="feature-app-card"
           href={`/games/${game.slug}` as Route}
-          aria-label="Open Snake details"
+          aria-label={`Open ${game.title} details`}
         >
           <ArcadeAppIcon game={game} small />
           <span className="feature-app-copy">
@@ -1030,10 +1039,11 @@ function ContinuePlayingSection() {
       <div className="store-section-header compact">
         <div>
           <h2 id="continue-playing-title">Continue Playing</h2>
-          <p>Jump back into the one game that is live today.</p>
+          <p>Start today&apos;s word puzzle or jump back into a quick arcade run.</p>
         </div>
       </div>
       <div className="continue-rail">
+        <DailyCipherwordCTA variant="banner" />
         <ContinueCard
           game={snake}
           image="/art/feature-snake.svg"
@@ -1099,7 +1109,7 @@ function StoreGameCard({ game, source }: { game: GameDefinition; source: string 
         <span>{game.summary}</span>
         <span className="store-game-meta">
           <small>{game.genre}</small>
-          <small>{isPlayable ? "1 min rounds" : "Not playable yet"}</small>
+          <small>{isPlayable ? (game.duration ?? "1 min rounds") : "Not playable yet"}</small>
         </span>
       </span>
       <span className={`store-get-button ${isPlayable ? "" : "secondary"}`}>{action}</span>
@@ -1223,6 +1233,7 @@ function CollectionView({
     activeGenre?.slug,
   );
   const previewArt = getCollectionArt(view, activeGenre, visibleGames[0] ?? shelfGames[0]);
+  const showDailyCta = view !== "genre" || activeGenre?.slug === "word";
 
   return (
     <m.div className="collection-page" variants={pageCascadeVariants}>
@@ -1243,6 +1254,12 @@ function CollectionView({
           <span>{meta.artLabel}</span>
         </div>
       </m.header>
+
+      {showDailyCta ? (
+        <m.div variants={pageItemVariants}>
+          <DailyCipherwordCTA variant={view === "discover" ? "banner" : "card"} />
+        </m.div>
+      ) : null}
 
       <m.section
         className="template-panel-grid"
@@ -1549,6 +1566,18 @@ function UnavailableGame({ game, onPlaySnake }: { game: GameDefinition; onPlaySn
 }
 
 function PreviewArt({ kind }: { kind: GameDefinition["preview"] }) {
+  if (kind === "cipherword") {
+    return (
+      <span className="cipherword-preview-art">
+        <i className="cipherword-preview-tile correct">C</i>
+        <i className="cipherword-preview-tile present">I</i>
+        <i className="cipherword-preview-tile absent">P</i>
+        <i className="cipherword-preview-tile correct">H</i>
+        <i className="cipherword-preview-meter" />
+      </span>
+    );
+  }
+
   if (kind === "snake") {
     return (
       <>
@@ -1681,17 +1710,17 @@ function getCollectionMeta(
     return {
       title: "Favorites",
       description:
-        "A saved-games shelf for quick returns, starter picks, and the games most ready to revisit.",
-      href: "/games/snake",
-      action: "Play Snake",
+        "A saved-games shelf for daily returns, starter picks, and the games most ready to revisit.",
+      href: "/games/cipherword",
+      action: "Play Cipherword",
       artLabel: "Favorite picks",
       shelfLabel: "Saved shelf",
       shelfTitle: "Favorite-ready games",
       panels: [
         {
           label: "Start",
-          title: "Snake is first in line.",
-          body: "The playable starter stays one click away while the rest of the shelf fills in.",
+          title: "Cipherword is ready daily.",
+          body: "The daily word puzzle stays one click away while the playable shelf grows.",
         },
         {
           label: "Next",
@@ -1746,8 +1775,8 @@ function getCollectionMeta(
     title: "Discover",
     description:
       "A focused look at the games, genres, and release-ready structure behind Dylan Games.",
-    href: "/games/favorites",
-    action: "View Favorites",
+    href: "/games/cipherword",
+    action: "Play Cipherword",
     artLabel: "Discover shelf",
     shelfLabel: "Library",
     shelfTitle: "Games to explore",

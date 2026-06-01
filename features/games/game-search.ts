@@ -33,7 +33,9 @@ function getGameSearchTokens(game: GameDefinition) {
       : "coming soon upcoming unreleased in progress planned disabled";
 
   return getSearchTokens(
-    `${game.title} ${game.slug} ${game.genre} ${game.summary} ${game.description} ${statusText}`,
+    `${game.title} ${game.slug} ${game.genre} ${game.summary} ${game.description} ${
+      game.tags?.join(" ") ?? ""
+    } ${game.modes?.join(" ") ?? ""} ${statusText}`,
   );
 }
 

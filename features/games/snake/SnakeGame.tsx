@@ -1,15 +1,21 @@
 "use client";
 
 import {
+  Apple,
   ArrowDown,
   ArrowLeft,
   ArrowRight,
   ArrowUp,
+  Gauge,
   Maximize2,
   Pause,
   Play,
   RotateCcw,
+  Sparkles,
+  Trophy,
+  type LucideIcon,
 } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import {
@@ -45,6 +51,12 @@ const directionControls = [
   { direction: "down", label: "Move down", Icon: ArrowDown },
 ] satisfies Array<{ direction: Direction; label: string; Icon: typeof ArrowUp }>;
 
+const modeShortDescriptions = {
+  classic: "Walls",
+  blitz: "60 sec",
+  zen: "Wraps",
+} satisfies Record<SnakeMode, string>;
+
 type PointerStart = {
   pointerId: number;
   x: number;
@@ -67,8 +79,11 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
   const pointerStartRef = useRef<PointerStart | null>(null);
   const statusLabel = getSnakeStatusLabel(state.status);
   const remainingMs = getRemainingMs(state);
-  const speedLabel = (1000 / state.speedMs).toFixed(1);
+  const speedLabel = `${(1000 / state.speedMs).toFixed(1)}/s`;
   const lastScoreLabel = state.lastScoreDelta > 0 ? `+${state.lastScoreDelta}` : "0";
+  const modeLabel = snakeModeDefinitions[state.mode].label;
+  const hasStarted =
+    state.status !== "ready" || state.score > 0 || state.foodsEaten > 0 || state.tick > 0;
   const primaryActionLabel =
     state.status === "game-over"
       ? "Restart"
@@ -79,8 +94,19 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
           : "Start";
   const overlayCopy = useMemo(() => getOverlayCopy(state), [state]);
 
-  const focusBoard = useCallback(() => {
-    boardRef.current?.focus({ preventScroll: true });
+  const handleFullscreen = useCallback(() => {
+    const board = boardRef.current;
+
+    if (!board) {
+      return;
+    }
+
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+      return;
+    }
+
+    void board.requestFullscreen();
   }, []);
 
   const handlePrimaryAction = useCallback(() => {
@@ -89,17 +115,18 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
     } else {
       actions.togglePlay();
     }
-
-    window.requestAnimationFrame(focusBoard);
-  }, [actions, focusBoard, stateRef]);
+  }, [actions, stateRef]);
 
   const handleRestart = useCallback(() => {
     actions.restart();
-    window.requestAnimationFrame(focusBoard);
-  }, [actions, focusBoard]);
+  }, [actions]);
 
   const handleKeyboardInput = useCallback(
     (event: KeyboardEvent) => {
+      if (event.defaultPrevented) {
+        return;
+      }
+
       if (shouldIgnoreShortcut(event.target)) {
         return;
       }
@@ -124,6 +151,12 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
         return;
       }
 
+      if (event.code === "KeyF") {
+        event.preventDefault();
+        handleFullscreen();
+        return;
+      }
+
       if (
         event.code === "KeyR" ||
         (event.code === "Enter" && stateRef.current.status === "game-over")
@@ -138,7 +171,7 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
         actions.pause();
       }
     },
-    [actions, stateRef],
+    [actions, handleFullscreen, stateRef],
   );
 
   useEffect(() => {
@@ -240,7 +273,6 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
       return;
     }
 
-    boardRef.current?.focus({ preventScroll: true });
     event.currentTarget.setPointerCapture(event.pointerId);
     pointerStartRef.current = {
       pointerId: event.pointerId,
@@ -279,22 +311,11 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
     }
   };
 
-  const handleFullscreen = useCallback(() => {
-    const board = boardRef.current;
-
-    if (!board) {
-      return;
-    }
-
-    if (document.fullscreenElement) {
-      void document.exitFullscreen();
-      return;
-    }
-
-    void board.requestFullscreen();
-  }, []);
-
   const handleModeTabKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (state.status === "playing") {
+      return;
+    }
+
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.code)) {
       return;
     }

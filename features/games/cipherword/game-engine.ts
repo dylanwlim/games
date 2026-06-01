@@ -178,6 +178,18 @@ export function submitCipherwordGuess(
   };
 }
 
+export function replayCipherwordGuesses(
+  state: CipherwordRoundState,
+  guesses: string[],
+  now = new Date(),
+) {
+  return guesses.reduce(
+    (currentState, guess) =>
+      currentState.status === "playing" ? submitCipherwordGuess(currentState, guess, now) : currentState,
+    state,
+  );
+}
+
 export function getUnlockedClues(state: CipherwordRoundState): CipherwordClue[] {
   const ladder = getClueLadder(state.puzzle);
   const guessCount = state.guesses.length;

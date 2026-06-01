@@ -43,5 +43,12 @@ export default async function GenrePage({ params }: GenreRouteProps) {
     notFound();
   }
 
-  return <GameHub key={genre} initialSlug="snake" initialGenre={genre} view="genre" />;
+  return (
+    <GameHub
+      key={genre}
+      initialSlug={genre === "word" ? "cipherword" : "snake"}
+      initialGenre={genre}
+      view="genre"
+    />
+  );
 }

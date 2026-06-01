@@ -16,6 +16,7 @@ export type GameAccent = "green" | "blue" | "amber" | "violet" | "slate" | "teal
 
 export type GamePreviewKind =
   | "snake"
+  | "cipherword"
   | "minesweeper"
   | "pong"
   | "tiles"
@@ -29,6 +30,7 @@ export type GamePreviewKind =
   | "route";
 
 export type GameDefinition = {
+  id?: string;
   slug: string;
   title: string;
   genre: GameGenre;
@@ -38,4 +40,11 @@ export type GameDefinition = {
   accent: GameAccent;
   preview: GamePreviewKind;
   priority: number;
+  path?: string;
+  featured?: boolean;
+  favoriteReady?: boolean;
+  daily?: boolean;
+  modes?: string[];
+  duration?: string;
+  tags?: string[];
 };
