@@ -134,10 +134,6 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
   );
 
   useEffect(() => {
-    focusBoard();
-  }, [focusBoard]);
-
-  useEffect(() => {
     if (menuOpen) {
       actions.pause();
     }
@@ -324,9 +320,11 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
           <h2>Snake</h2>
           <span>Eat the dot. Grow the snake. Avoid walls and yourself.</span>
         </div>
-        <span className={`snake-status-chip status-${state.status}`} aria-live="polite">
-          {statusLabel}
-        </span>
+        {state.status === "playing" ? (
+          <span className="snake-status-chip status-playing" aria-live="polite">
+            {statusLabel}
+          </span>
+        ) : null}
       </div>
 
       <span id="snake-board-instructions" className="sr-only">

@@ -89,12 +89,12 @@ test("plays Snake with keyboard, modes, restart, and touch swipe", async ({ page
 
   const scrollState = await page.evaluate(() => ({
     bodyCanScroll: (document.scrollingElement?.scrollHeight ?? 0) > window.innerHeight + 1,
-    mainCanScroll:
-      (document.querySelector("main")?.scrollHeight ?? 0) >
-      (document.querySelector("main")?.clientHeight ?? 0) + 1,
+    mainOverflowY: document.querySelector("main")
+      ? window.getComputedStyle(document.querySelector("main") as HTMLElement).overflowY
+      : null,
   }));
   expect(scrollState.bodyCanScroll).toBe(false);
-  expect(scrollState.mainCanScroll).toBe(false);
+  expect(scrollState.mainOverflowY).toBe("hidden");
 
   const initialBox = await board.boundingBox();
   expect(initialBox).not.toBeNull();

@@ -1776,7 +1776,7 @@ img {
   min-height: 0;
   min-width: 0;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 12px;
+  gap: 16px;
 }
 
 .snake-toolbar {
@@ -1871,13 +1871,13 @@ img {
   min-height: 0;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
   gap: 16px;
-  align-items: center;
+  align-items: start;
 }
 
 .snake-canvas-shell {
   position: relative;
   overflow: hidden;
-  width: min(100%, calc(100dvh - 98px));
+  width: min(100%, calc(100dvh - 140px));
   min-width: 0;
   aspect-ratio: 1 / 1;
   justify-self: center;
