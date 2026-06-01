@@ -11,6 +11,10 @@ import {
 const DEFAULT_BOARD_SIZE = 21;
 const INITIAL_LENGTH = 5;
 const MAX_BUFFERED_DIRECTIONS = 2;
+const SCORE_STREAK_STEP = 3;
+const SCORE_STREAK_BONUS = 2;
+const SCORE_STREAK_BONUS_CAP = 30;
+const SCORE_SPEED_BONUS_STEP_MS = 10;
 
 export const snakeModeDefinitions = {
   classic: {
@@ -85,6 +89,9 @@ export function createSnakeState(
     queuedDirections: [],
     status: "ready",
     score: 0,
+    foodsEaten: 0,
+    scoreStreak: 0,
+    lastScoreDelta: 0,
     tick: 0,
     speedMs: computeSnakeSpeed(mode, snake.length, 0),
     elapsedMs: 0,
@@ -189,7 +196,11 @@ export function stepSnake(state: SnakeState): SnakeState {
     nextSnake.pop();
   }
 
-  const nextScore = willEat ? state.score + modeDefinition.scorePerFood : state.score;
+  const nextScoreStreak = willEat ? state.scoreStreak + 1 : state.scoreStreak;
+  const scoreDelta = willEat
+    ? computeSnakeScoreAward(state.mode, state.snake.length, state.score, nextScoreStreak)
+    : 0;
+  const nextScore = willEat ? state.score + scoreDelta : state.score;
   const nextFood = willEat
     ? chooseFood(nextSnake, state.boardSize, state.tick + nextScore + nextSnake.length * 19)
     : state.food;
@@ -202,6 +213,9 @@ export function stepSnake(state: SnakeState): SnakeState {
     direction: nextDirection,
     queuedDirections: nextQueuedDirections,
     score: nextScore,
+    foodsEaten: willEat ? state.foodsEaten + 1 : state.foodsEaten,
+    scoreStreak: nextScoreStreak,
+    lastScoreDelta: willEat ? scoreDelta : state.lastScoreDelta,
     tick: state.tick + 1,
     speedMs: computeSnakeSpeed(state.mode, nextSnake.length, nextScore),
     status: willEat && nextFood === null ? "game-over" : state.status,
@@ -215,6 +229,26 @@ export function computeSnakeSpeed(mode: SnakeMode, length: number, score: number
   const scoreBoost = Math.floor(score / 50) * 2;
 
   return Math.max(modeDefinition.minSpeedMs, modeDefinition.baseSpeedMs - growthBoost - scoreBoost);
+}
+
+export function computeSnakeScoreAward(
+  mode: SnakeMode,
+  length: number,
+  score: number,
+  scoreStreak: number,
+) {
+  const modeDefinition = snakeModeDefinitions[mode];
+  const currentSpeed = computeSnakeSpeed(mode, length, score);
+  const speedBonus = Math.max(
+    0,
+    Math.floor((modeDefinition.baseSpeedMs - currentSpeed) / SCORE_SPEED_BONUS_STEP_MS),
+  );
+  const streakBonus = Math.min(
+    SCORE_STREAK_BONUS_CAP,
+    Math.floor(Math.max(0, scoreStreak - 1) / SCORE_STREAK_STEP) * SCORE_STREAK_BONUS,
+  );
+
+  return modeDefinition.scorePerFood + speedBonus + streakBonus;
 }
 
 export function getRemainingMs(state: SnakeState) {

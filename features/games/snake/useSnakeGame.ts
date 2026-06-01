@@ -36,6 +36,7 @@ export function useSnakeGame() {
   const storageLoadedRef = useRef(false);
   const state = viewState.game;
   const bestScore = viewState.bestScores[state.mode] ?? 0;
+  const topScore = Math.max(...Object.values(viewState.bestScores));
 
   const updateGame = useCallback((updater: (previousState: SnakeState) => SnakeState) => {
     setViewState((previousViewState) => {
@@ -138,12 +139,12 @@ export function useSnakeGame() {
   );
 
   const advanceFrame = useCallback(
-    ({ clockDeltaMs, shouldStep }: { clockDeltaMs: number; shouldStep: boolean }) => {
+    ({ clockDeltaMs, steps }: { clockDeltaMs: number; steps: number }) => {
       updateGame((previousState) => {
         let nextState =
           clockDeltaMs > 0 ? advanceSnakeClock(previousState, clockDeltaMs) : previousState;
 
-        if (shouldStep && nextState.status === "playing") {
+        for (let step = 0; step < steps && nextState.status === "playing"; step += 1) {
           nextState = stepSnake(nextState);
         }
 
@@ -169,6 +170,8 @@ export function useSnakeGame() {
     state,
     stateRef,
     bestScore,
+    bestScores: viewState.bestScores,
+    topScore,
     modeDefinition: snakeModeDefinitions[state.mode],
     actions,
   };
@@ -179,16 +182,27 @@ function parseStoredBestScores(rawBestScores: string | null): Record<SnakeMode, 
     return { ...initialBestScores };
   }
 
-  return snakeModes.reduce<Record<SnakeMode, number>>(
-    (scores, mode) => {
-      const match = rawBestScores.match(new RegExp(`"${mode}"\\s*:\\s*(\\d+)`));
-      const parsedScore = match ? Number(match[1]) : 0;
+  try {
+    const parsed = JSON.parse(rawBestScores) as unknown;
+    const storedScores =
+      parsed && typeof parsed === "object" ? (parsed as Partial<Record<SnakeMode, unknown>>) : {};
 
-      return {
+    return snakeModes.reduce<Record<SnakeMode, number>>(
+      (scores, mode) => ({
         ...scores,
-        [mode]: Number.isFinite(parsedScore) ? parsedScore : 0,
-      };
-    },
-    { ...initialBestScores },
-  );
+        [mode]: normalizeStoredScore(storedScores[mode]),
+      }),
+      { ...initialBestScores },
+    );
+  } catch {
+    return { ...initialBestScores };
+  }
+}
+
+function normalizeStoredScore(score: unknown) {
+  if (typeof score !== "number" || !Number.isFinite(score) || score < 0) {
+    return 0;
+  }
+
+  return Math.floor(score);
 }

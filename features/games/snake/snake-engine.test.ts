@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   advanceSnakeClock,
+  computeSnakeScoreAward,
   createSnakeState,
   queueDirection,
   setSnakeStatus,
@@ -57,6 +58,17 @@ describe("snake engine", () => {
     expect(next.score).toBe(10);
     expect(next.snake).toHaveLength(state.snake.length + 1);
     expect(next.speedMs).toBeLessThan(state.speedMs);
+    expect(next.foodsEaten).toBe(1);
+    expect(next.scoreStreak).toBe(1);
+    expect(next.lastScoreDelta).toBe(10);
+  });
+
+  it("adds speed and streak bonuses as a run builds", () => {
+    const firstAward = computeSnakeScoreAward("classic", 5, 0, 1);
+    const laterAward = computeSnakeScoreAward("classic", 13, 150, 7);
+
+    expect(firstAward).toBe(10);
+    expect(laterAward).toBeGreaterThan(firstAward);
   });
 
   it("ends classic rounds on wall collision", () => {

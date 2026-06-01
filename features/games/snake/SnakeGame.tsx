@@ -18,7 +18,13 @@ import {
   getSnakeStatusLabel,
   snakeModeDefinitions,
 } from "./snake-engine";
-import { snakeModes, type Direction, type Point, type SnakeState } from "./snakeTypes";
+import {
+  snakeModes,
+  type Direction,
+  type Point,
+  type SnakeMode,
+  type SnakeState,
+} from "./snakeTypes";
 import { useSnakeGame } from "./useSnakeGame";
 
 const directionKeys: Record<string, Direction> = {
@@ -50,7 +56,8 @@ type SnakeGameProps = {
 };
 
 export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
-  const { state, stateRef, bestScore, modeDefinition, actions } = useSnakeGame();
+  const { state, stateRef, bestScore, bestScores, topScore, modeDefinition, actions } =
+    useSnakeGame();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -61,6 +68,7 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
   const statusLabel = getSnakeStatusLabel(state.status);
   const remainingMs = getRemainingMs(state);
   const speedLabel = (1000 / state.speedMs).toFixed(1);
+  const lastScoreLabel = state.lastScoreDelta > 0 ? `+${state.lastScoreDelta}` : "0";
   const primaryActionLabel =
     state.status === "game-over"
       ? "Restart"
@@ -175,24 +183,26 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
         moveAccumulatorRef.current += delta;
         clockAccumulatorRef.current += delta;
 
-        const shouldStep = moveAccumulatorRef.current >= currentState.speedMs;
+        let steps = 0;
+
+        while (moveAccumulatorRef.current >= currentState.speedMs && steps < 3) {
+          moveAccumulatorRef.current -= currentState.speedMs;
+          steps += 1;
+        }
+
         const shouldSyncClock =
           clockAccumulatorRef.current >= 100 ||
           (currentState.durationMs !== null &&
             currentState.durationMs - currentState.elapsedMs <= clockAccumulatorRef.current);
 
-        if (shouldStep || shouldSyncClock) {
+        if (steps > 0 || shouldSyncClock) {
           const clockDeltaMs = shouldSyncClock ? clockAccumulatorRef.current : 0;
-
-          if (shouldStep) {
-            moveAccumulatorRef.current = 0;
-          }
 
           if (shouldSyncClock) {
             clockAccumulatorRef.current = 0;
           }
 
-          actions.advanceFrame({ clockDeltaMs, shouldStep });
+          actions.advanceFrame({ clockDeltaMs, steps });
         }
       } else {
         moveAccumulatorRef.current = 0;
@@ -338,7 +348,7 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
           role="application"
           tabIndex={0}
           aria-describedby="snake-board-instructions"
-          aria-label={`Snake board. ${statusLabel}. Score ${state.score}. Best ${bestScore}.`}
+          aria-label={`Snake board. ${statusLabel}. Score ${state.score}. Best ${bestScore}. Top ${topScore}. Streak ${state.scoreStreak}.`}
           onPointerCancel={() => {
             pointerStartRef.current = null;
           }}
@@ -357,15 +367,23 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
         </div>
 
         <aside className="snake-side-panel" aria-label="Snake stats and actions">
+          <RunSummary
+            score={state.score}
+            lastScoreLabel={lastScoreLabel}
+            statusLabel={statusLabel}
+            topScore={topScore}
+          />
           <div className="snake-score-strip" aria-label="Snake score">
-            <Metric label="Score" value={String(state.score)} />
-            <Metric label="Best" value={String(bestScore)} />
             <Metric label="Length" value={String(state.snake.length)} />
+            <Metric label="Streak" value={String(state.scoreStreak)} />
+            <Metric label="Last bite" value={lastScoreLabel} />
             <Metric
               label={state.mode === "blitz" ? "Time" : "Speed"}
               value={remainingMs === null ? speedLabel : formatTime(remainingMs)}
             />
           </div>
+
+          <TopScorePanel bestScores={bestScores} currentMode={state.mode} />
 
           <div
             className="snake-mode-tabs"
@@ -425,11 +443,6 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
           <p id="snake-mode-description" className="snake-hint">
             {modeDefinition.description}
           </p>
-          <div className="snake-shortcuts" aria-label="Snake shortcuts">
-            <span>Move: Arrows / WASD / swipe</span>
-            <span>Pause: Space / P</span>
-            <span>Restart: R</span>
-          </div>
         </aside>
       </div>
 
@@ -447,9 +460,62 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
       </div>
 
       <p className="sr-only" aria-live="polite">
-        Snake status: {statusLabel}. Score {state.score}. Best {bestScore}. Length{" "}
-        {state.snake.length}. Speed {speedLabel}.
+        Snake status: {statusLabel}. Score {state.score}. Best {bestScore}. Top {topScore}. Length{" "}
+        {state.snake.length}. Streak {state.scoreStreak}. Speed {speedLabel}.
       </p>
+    </section>
+  );
+}
+
+function RunSummary({
+  score,
+  lastScoreLabel,
+  statusLabel,
+  topScore,
+}: {
+  score: number;
+  lastScoreLabel: string;
+  statusLabel: string;
+  topScore: number;
+}) {
+  return (
+    <div className="snake-run-summary" aria-label="Current Snake run">
+      <div>
+        <span>Score</span>
+        <strong>{score}</strong>
+      </div>
+      <div className="snake-run-summary-meta">
+        <span>{statusLabel}</span>
+        <span>Last bite {lastScoreLabel}</span>
+        <span>Top {topScore}</span>
+      </div>
+    </div>
+  );
+}
+
+function TopScorePanel({
+  bestScores,
+  currentMode,
+}: {
+  bestScores: Record<SnakeMode, number>;
+  currentMode: SnakeMode;
+}) {
+  const topScore = Math.max(...Object.values(bestScores));
+
+  return (
+    <section className="snake-top-score" aria-label="Top scores">
+      <div className="snake-top-score-header">
+        <span>Top score</span>
+        <strong>{topScore}</strong>
+      </div>
+      <div className="snake-top-score-list">
+        {snakeModes.map((mode) => (
+          <div key={mode} className={`snake-top-score-row ${mode === currentMode ? "active" : ""}`}>
+            <span>{snakeModeDefinitions[mode].label}</span>
+            <strong>{bestScores[mode] ?? 0}</strong>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
@@ -540,11 +606,26 @@ function drawSnakeBoard(
     canvas.height = height;
   }
 
+  context.imageSmoothingEnabled = true;
   context.clearRect(0, 0, width, height);
   const boardGradient = context.createLinearGradient(0, 0, width, height);
-  boardGradient.addColorStop(0, "#101926");
-  boardGradient.addColorStop(1, "#0a111c");
+  boardGradient.addColorStop(0, "#111d2b");
+  boardGradient.addColorStop(0.58, "#0b1420");
+  boardGradient.addColorStop(1, "#07101a");
   context.fillStyle = boardGradient;
+  context.fillRect(0, 0, width, height);
+
+  const boardGlow = context.createRadialGradient(
+    width * 0.28,
+    height * 0.2,
+    0,
+    width * 0.28,
+    height * 0.2,
+    width * 0.72,
+  );
+  boardGlow.addColorStop(0, "rgba(131, 228, 111, 0.12)");
+  boardGlow.addColorStop(1, "rgba(131, 228, 111, 0)");
+  context.fillStyle = boardGlow;
   context.fillRect(0, 0, width, height);
 
   const padding = Math.max(12 * dpr, Math.min(width, height) * 0.052);
@@ -573,7 +654,7 @@ function drawGrid(
   dpr: number,
 ) {
   context.save();
-  context.strokeStyle = "rgba(255, 255, 255, 0.052)";
+  context.strokeStyle = "rgba(255, 255, 255, 0.045)";
   context.lineWidth = 1 * dpr;
 
   for (let index = 0; index <= boardSize; index += 1) {
@@ -591,7 +672,7 @@ function drawGrid(
     context.stroke();
   }
 
-  context.strokeStyle = "rgba(255, 255, 255, 0.16)";
+  context.strokeStyle = "rgba(255, 255, 255, 0.18)";
   context.lineWidth = 1.5 * dpr;
   roundedRect(context, originX, originY, boardPixels, boardPixels, 16 * dpr);
   context.stroke();
@@ -615,12 +696,29 @@ function drawFood(
   const foodSize = cellSize * 0.58 * pulse;
   const foodX = originX + state.food.x * cellSize + (cellSize - foodSize) / 2;
   const foodY = originY + state.food.y * cellSize + (cellSize - foodSize) / 2;
+  const centerX = foodX + foodSize / 2;
+  const centerY = foodY + foodSize / 2;
 
   context.save();
-  context.shadowColor = "rgba(255, 119, 109, 0.42)";
-  context.shadowBlur = 16 * dpr;
-  context.fillStyle = "#ff776d";
+  context.shadowColor = "rgba(255, 111, 99, 0.48)";
+  context.shadowBlur = 18 * dpr;
+  context.fillStyle = "rgba(255, 111, 99, 0.18)";
+  context.beginPath();
+  context.arc(centerX, centerY, foodSize * 0.92, 0, Math.PI * 2);
+  context.fill();
+  context.shadowBlur = 10 * dpr;
+  context.fillStyle = "#ff6f63";
   roundedRect(context, foodX, foodY, foodSize, foodSize, Math.max(4 * dpr, foodSize * 0.28));
+  context.fill();
+  context.fillStyle = "rgba(255, 255, 255, 0.74)";
+  context.beginPath();
+  context.arc(
+    foodX + foodSize * 0.68,
+    foodY + foodSize * 0.32,
+    Math.max(1.5 * dpr, foodSize * 0.09),
+    0,
+    Math.PI * 2,
+  );
   context.fill();
   context.restore();
 }
@@ -638,22 +736,32 @@ function drawSnake(
     const previousPoint =
       state.previousSnake[index] ?? state.previousSnake[state.previousSnake.length - 1] ?? point;
     const drawPoint =
-      state.status === "playing" ? interpolatePoint(previousPoint, point, progress) : point;
-    const inset = cellSize * (index === 0 ? 0.1 : 0.15);
+      state.status === "playing"
+        ? interpolatePoint(previousPoint, point, progress, state.boardSize)
+        : point;
+    const isHead = index === 0;
+    const atePulse = isHead && state.lastEvent === "ate" ? 0.04 : 0;
+    const inset = cellSize * (isHead ? 0.09 - atePulse : 0.15);
     const size = cellSize - inset * 2;
     const radius = Math.max(4 * dpr, size * 0.24);
     const x = originX + drawPoint.x * cellSize + inset;
     const y = originY + drawPoint.y * cellSize + inset;
 
     context.save();
-    context.shadowColor = index === 0 ? "rgba(155, 234, 130, 0.25)" : "rgba(103, 201, 95, 0.16)";
-    context.shadowBlur = index === 0 ? 12 * dpr : 6 * dpr;
-    context.fillStyle = index === 0 ? "#9bea82" : blendSnakeColor(index, state.snake.length);
+    context.shadowColor = isHead ? "rgba(131, 228, 111, 0.34)" : "rgba(103, 201, 95, 0.16)";
+    context.shadowBlur = isHead ? 14 * dpr : 6 * dpr;
+    context.fillStyle = isHead ? "#9bea82" : blendSnakeColor(index, state.snake.length);
     roundedRect(context, x, y, size, size, radius);
     context.fill();
 
-    if (index === 0) {
-      drawSnakeEyes(context, x, y, size, dpr);
+    if (isHead) {
+      const highlight = context.createLinearGradient(x, y, x + size, y + size);
+      highlight.addColorStop(0, "rgba(255, 255, 255, 0.22)");
+      highlight.addColorStop(1, "rgba(255, 255, 255, 0)");
+      context.fillStyle = highlight;
+      roundedRect(context, x, y, size, size, radius);
+      context.fill();
+      drawSnakeEyes(context, x, y, size, dpr, state.direction);
     }
 
     context.restore();
@@ -673,17 +781,41 @@ function drawSnakeEyes(
   y: number,
   size: number,
   dpr: number,
+  direction: Direction,
 ) {
   const eyeRadius = Math.max(1.7 * dpr, size * 0.07);
+  const eyePositions: Record<Direction, Array<[number, number]>> = {
+    up: [
+      [0.34, 0.34],
+      [0.66, 0.34],
+    ],
+    right: [
+      [0.66, 0.34],
+      [0.66, 0.66],
+    ],
+    down: [
+      [0.34, 0.66],
+      [0.66, 0.66],
+    ],
+    left: [
+      [0.34, 0.34],
+      [0.34, 0.66],
+    ],
+  };
 
   context.fillStyle = "#101926";
-  context.beginPath();
-  context.arc(x + size * 0.34, y + size * 0.42, eyeRadius, 0, Math.PI * 2);
-  context.arc(x + size * 0.66, y + size * 0.42, eyeRadius, 0, Math.PI * 2);
-  context.fill();
+  eyePositions[direction].forEach(([eyeX, eyeY]) => {
+    context.beginPath();
+    context.arc(x + size * eyeX, y + size * eyeY, eyeRadius, 0, Math.PI * 2);
+    context.fill();
+  });
 }
 
-function interpolatePoint(from: Point, to: Point, progress: number): Point {
+function interpolatePoint(from: Point, to: Point, progress: number, boardSize: number): Point {
+  if (Math.abs(from.x - to.x) > boardSize / 2 || Math.abs(from.y - to.y) > boardSize / 2) {
+    return to;
+  }
+
   return {
     x: from.x + (to.x - from.x) * progress,
     y: from.y + (to.y - from.y) * progress,

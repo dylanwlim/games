@@ -31,6 +31,7 @@ test("renders the hub and launches Snake", async ({ page }) => {
   await expect(page).toHaveURL(/\/games\/snake/);
   await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
   await expect(page.getByLabel(/Snake board/i)).toBeVisible();
+  await expect(page.getByLabel("Top scores")).toBeVisible();
   await expect(page.getByRole("heading", { name: "All Games" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Continue Playing" })).toHaveCount(0);
 

@@ -34,6 +34,9 @@ export type SnakeState = {
   queuedDirections: Direction[];
   status: SnakeStatus;
   score: number;
+  foodsEaten: number;
+  scoreStreak: number;
+  lastScoreDelta: number;
   tick: number;
   speedMs: number;
   elapsedMs: number;
