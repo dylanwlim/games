@@ -47,7 +47,10 @@ export function CipherwordArchive() {
     const next = new Date(Date.UTC(year, month - 1 + delta, 1));
     const nextMonth = next.toISOString().slice(0, 7);
 
-    if (nextMonth >= CIPHERWORD_DAILY_START_DATE.slice(0, 7) && nextMonth <= CIPHERWORD_DAILY_END_DATE.slice(0, 7)) {
+    if (
+      nextMonth >= CIPHERWORD_DAILY_START_DATE.slice(0, 7) &&
+      nextMonth <= CIPHERWORD_DAILY_END_DATE.slice(0, 7)
+    ) {
       setCursorMonth(nextMonth);
     }
   };
@@ -109,7 +112,7 @@ export function CipherwordArchive() {
           <span className="locked">Locked</span>
         </div>
 
-        <div className="cipherword-archive-grid" role="list" aria-label={`${formatMonth(cursorMonth)} puzzles`}>
+        <div className="cipherword-archive-grid" aria-label={`${formatMonth(cursorMonth)} puzzles`}>
           {entries.map((entry) => {
             const solved = solvedDates.includes(entry.date);
             const status = solved
@@ -123,7 +126,11 @@ export function CipherwordArchive() {
 
             if (entry.status === "locked") {
               return (
-                <span key={entry.date} className={`cipherword-archive-cell ${status}`} role="listitem" aria-label={label}>
+                <span
+                  key={entry.date}
+                  className={`cipherword-archive-cell ${status}`}
+                  aria-label={label}
+                >
                   <strong>{entry.date.slice(-2)}</strong>
                   <small>Locked</small>
                 </span>
@@ -135,7 +142,6 @@ export function CipherwordArchive() {
                 key={entry.date}
                 className={`cipherword-archive-cell ${status}`}
                 href={`/games/cipherword?mode=archive&date=${entry.date}` as Route}
-                role="listitem"
                 aria-label={`Play Cipherword archive ${label}`}
               >
                 <strong>{entry.date.slice(-2)}</strong>
@@ -171,6 +177,7 @@ function formatMonth(month: string) {
 
   return new Intl.DateTimeFormat("en-US", {
     month: "long",
+    timeZone: "UTC",
     year: "numeric",
   }).format(new Date(Date.UTC(year, monthIndex - 1, 1)));
 }

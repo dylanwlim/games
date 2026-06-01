@@ -9075,7 +9075,9 @@ export function getCanonicalCipherwordDate(now: Date = new Date()): string {
   return `${get("year")}-${get("month")}-${get("day")}`;
 }
 
-export function getTodayCipherwordDailyAnswer(now: Date = new Date()): CipherwordDailyAnswer | null {
+export function getTodayCipherwordDailyAnswer(
+  now: Date = new Date(),
+): CipherwordDailyAnswer | null {
   return getCipherwordDailyAnswerForDate(getCanonicalCipherwordDate(now));
 }
 
@@ -9083,14 +9085,20 @@ export function getCipherwordPuzzleIdForDate(dateIso: string): string {
   return `cipherword-daily-${dateIso}`;
 }
 
-export function getCipherwordArchiveEntry(dateIso: string, now: Date = new Date(), includeAnswer = false): CipherwordArchiveEntry {
+export function getCipherwordArchiveEntry(
+  dateIso: string,
+  now: Date = new Date(),
+  includeAnswer = false,
+): CipherwordArchiveEntry {
   const todayIso = getCanonicalCipherwordDate(now);
   const start = utcOrdinalFromIsoDate(CIPHERWORD_DAILY_START_DATE);
   const end = utcOrdinalFromIsoDate(CIPHERWORD_DAILY_END_DATE);
   const ordinal = utcOrdinalFromIsoDate(dateIso);
-  if (ordinal < start || ordinal > end) throw new RangeError(`Cipherword archive date out of range: ${dateIso}`);
+  if (ordinal < start || ordinal > end)
+    throw new RangeError(`Cipherword archive date out of range: ${dateIso}`);
   const todayOrdinal = utcOrdinalFromIsoDate(todayIso);
-  const status: CipherwordArchiveStatus = ordinal > todayOrdinal ? "locked" : ordinal === todayOrdinal ? "today" : "available";
+  const status: CipherwordArchiveStatus =
+    ordinal > todayOrdinal ? "locked" : ordinal === todayOrdinal ? "today" : "available";
   const index = ordinal - start;
   return {
     date: dateIso,
@@ -9101,7 +9109,12 @@ export function getCipherwordArchiveEntry(dateIso: string, now: Date = new Date(
   };
 }
 
-export function getCipherwordArchiveRange(startDate: string, endDate: string, now: Date = new Date(), includeAnswers = false): CipherwordArchiveEntry[] {
+export function getCipherwordArchiveRange(
+  startDate: string,
+  endDate: string,
+  now: Date = new Date(),
+  includeAnswers = false,
+): CipherwordArchiveEntry[] {
   const start = utcOrdinalFromIsoDate(startDate);
   const end = utcOrdinalFromIsoDate(endDate);
   if (end < start) return [];
@@ -9110,17 +9123,29 @@ export function getCipherwordArchiveRange(startDate: string, endDate: string, no
   );
 }
 
-export function validateCipherwordDailyBank(): { ok: true; count: number; startDate: string; endDate: string } {
+export function validateCipherwordDailyBank(): {
+  ok: true;
+  count: number;
+  startDate: string;
+  endDate: string;
+} {
   const expected = daysInclusive(CIPHERWORD_DAILY_START_DATE, CIPHERWORD_DAILY_END_DATE);
-  if (expected !== CIPHERWORD_DAILY_REQUIRED_COUNT) throw new Error(`Date coverage mismatch: expected ${expected}`);
-  if (CIPHERWORD_DAILY_ANSWERS.length !== expected) throw new Error(`Answer count mismatch: ${CIPHERWORD_DAILY_ANSWERS.length} !== ${expected}`);
+  if (expected !== CIPHERWORD_DAILY_REQUIRED_COUNT)
+    throw new Error(`Date coverage mismatch: expected ${expected}`);
+  if (CIPHERWORD_DAILY_ANSWERS.length !== expected)
+    throw new Error(`Answer count mismatch: ${CIPHERWORD_DAILY_ANSWERS.length} !== ${expected}`);
   const seen = new Set<string>();
   for (const answer of CIPHERWORD_DAILY_ANSWERS) {
     if (!/^[a-z]{4,10}$/.test(answer)) throw new Error(`Invalid answer: ${answer}`);
     if (seen.has(answer)) throw new Error(`Duplicate answer: ${answer}`);
     seen.add(answer);
   }
-  return { ok: true, count: CIPHERWORD_DAILY_ANSWERS.length, startDate: CIPHERWORD_DAILY_START_DATE, endDate: CIPHERWORD_DAILY_END_DATE };
+  return {
+    ok: true,
+    count: CIPHERWORD_DAILY_ANSWERS.length,
+    startDate: CIPHERWORD_DAILY_START_DATE,
+    endDate: CIPHERWORD_DAILY_END_DATE,
+  };
 }
 
 export const CIPHERWORD_DAILY_BANK_VALIDATION = validateCipherwordDailyBank();

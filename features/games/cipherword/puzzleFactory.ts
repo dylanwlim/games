@@ -83,7 +83,8 @@ export function getRandomCipherwordPuzzle(recentIds: string[] = [], seed = Date.
 function createGeneratedPuzzle(answer: string): CipherwordPuzzle {
   const display = normalizeDisplay(answer);
   const normalized = normalizeAnswer(answer);
-  const category = CIPHERWORD_CATEGORIES[Math.abs(hashString(normalized)) % CIPHERWORD_CATEGORIES.length];
+  const category =
+    CIPHERWORD_CATEGORIES[Math.abs(hashString(normalized)) % CIPHERWORD_CATEGORIES.length];
   const difficulty = getGeneratedDifficulty(normalized);
   const near = getGeneratedNearTerms(category, normalized);
   const readable = display || answer.toLowerCase();

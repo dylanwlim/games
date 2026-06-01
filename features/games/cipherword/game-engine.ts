@@ -134,7 +134,9 @@ export function submitCipherwordGuess(
   const score = scoreGuess(displayGuess, state.puzzle, cipherwordLexicon);
   const answerLength = getNormalizedLetterCount(state.puzzle.answer);
   const tileStates =
-    normalizedGuess.length === answerLength ? getLetterFeedback(displayGuess, state.puzzle.answer) : [];
+    normalizedGuess.length === answerLength
+      ? getLetterFeedback(displayGuess, state.puzzle.answer)
+      : [];
   const guess: CipherwordGuessResult = {
     ...score,
     id: `${state.puzzleId}-${state.guesses.length + 1}`,
@@ -149,8 +151,11 @@ export function submitCipherwordGuess(
   };
   const guesses = [...state.guesses, guess];
   const closestGuess = getClosestGuess([...state.guesses, guess]);
-  const terminalStatus =
-    isExact ? "won" : state.maxGuesses !== null && guesses.length >= state.maxGuesses ? "lost" : "playing";
+  const terminalStatus = isExact
+    ? "won"
+    : state.maxGuesses !== null && guesses.length >= state.maxGuesses
+      ? "lost"
+      : "playing";
   const nextState: CipherwordRoundState = {
     ...state,
     guesses,
@@ -185,7 +190,9 @@ export function replayCipherwordGuesses(
 ) {
   return guesses.reduce(
     (currentState, guess) =>
-      currentState.status === "playing" ? submitCipherwordGuess(currentState, guess, now) : currentState,
+      currentState.status === "playing"
+        ? submitCipherwordGuess(currentState, guess, now)
+        : currentState,
     state,
   );
 }

@@ -29,14 +29,18 @@ test("renders the hub and launches the featured Cipherword game", async ({ page 
 
   await page.getByRole("link", { name: "Play Cipherword from Featured" }).click();
   await expect(page).toHaveURL(/\/games\/cipherword/);
-  await expect(page.getByRole("heading", { name: "Daily semantic word puzzle", level: 2 })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Daily semantic word puzzle", level: 2 }),
+  ).toBeVisible();
   await expect(page.getByLabel("Cipherword board and input")).toBeVisible();
   await expect(page.getByRole("heading", { name: "All Games" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Continue Playing" })).toHaveCount(0);
 
   await page.getByLabel("Enter a Cipherword guess").fill("code");
   await page.getByRole("button", { name: "Guess" }).click();
-  await expect(page.getByText(/Different neighborhood|Right broad domain|Close conceptually|Almost there/)).toBeVisible();
+  await expect(page.locator(".cipherword-feedback")).toContainText(
+    /Different neighborhood|Right broad domain|Close conceptually|Almost there/,
+  );
 });
 
 test("filters sidebar search by fuzzy game and category names", async ({ page }) => {
@@ -191,7 +195,7 @@ test("plays Snake with keyboard, modes, restart, and touch swipe", async ({ page
     await page.mouse.up();
   }
 
-  await page.getByRole("button", { name: "Restart" }).click();
+  await page.getByRole("button", { name: /Restart Snake/i }).click();
   await expect(page.getByText(/Score 0/i)).toBeAttached();
 });
 
@@ -217,7 +221,9 @@ test("plays Cipherword daily and opens archive", async ({ page }) => {
 
   await page.goto("/games/cipherword/archive");
   await expect(page.getByRole("heading", { name: "Cipherword Archive" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Play Cipherword archive 2026-06-01/ })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Play Cipherword archive 2026-06-01/ }),
+  ).toBeVisible();
 
   await page.goto("/games/word-forge");
   await expect(page).toHaveURL(/\/games\/cipherword/);

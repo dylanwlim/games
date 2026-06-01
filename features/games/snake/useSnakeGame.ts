@@ -39,8 +39,11 @@ export function useSnakeGame() {
   const topScore = Math.max(...Object.values(viewState.bestScores));
 
   const updateGame = useCallback((updater: (previousState: SnakeState) => SnakeState) => {
+    const game = updater(stateRef.current);
+
+    stateRef.current = game;
+
     setViewState((previousViewState) => {
-      const game = updater(previousViewState.game);
       const currentBest = previousViewState.bestScores[game.mode] ?? 0;
       const bestScores =
         game.score > currentBest
@@ -50,18 +53,12 @@ export function useSnakeGame() {
             }
           : previousViewState.bestScores;
 
-      stateRef.current = game;
-
       return {
         game,
         bestScores,
       };
     });
   }, []);
-
-  useEffect(() => {
-    stateRef.current = state;
-  }, [state]);
 
   useEffect(() => {
     let storedMode: SnakeMode | undefined;

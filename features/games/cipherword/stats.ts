@@ -186,7 +186,9 @@ export function getUnlockedAchievements(
 function unlockAchievements(stats: CipherwordStats, result: CipherwordRoundResult, now: Date) {
   const unlockedAt = now.toISOString();
   const solved = result.solved;
-  const categorySolveCount = Object.values(stats.categorySolves).filter((count) => count > 0).length;
+  const categorySolveCount = Object.values(stats.categorySolves).filter(
+    (count) => count > 0,
+  ).length;
   const firstGuessTier = result.guesses[0]?.tier;
   const burningCount = result.guesses.filter((guess) => guess.tier === "Burning").length;
 
@@ -214,7 +216,12 @@ function unlockAchievements(stats: CipherwordStats, result: CipherwordRoundResul
   unlock(stats, "daily-return", hasConsecutiveDailyPlay(stats), unlockedAt);
   unlock(stats, "time-traveler", solved && result.mode === "archive", unlockedAt);
   unlock(stats, "backfill", stats.archive.solvedDates.length >= 7, unlockedAt);
-  unlock(stats, "calendar-sweep", hasSolvedFullAvailableMonth(stats.archive.solvedDates), unlockedAt);
+  unlock(
+    stats,
+    "calendar-sweep",
+    hasSolvedFullAvailableMonth(stats.archive.solvedDates),
+    unlockedAt,
+  );
   unlock(stats, "launch-week", hasLaunchWeek(stats.archive.solvedDates), unlockedAt);
   unlock(stats, "historian", stats.archive.solvedDates.length >= 100, unlockedAt);
 }
@@ -251,7 +258,10 @@ function hasConsecutiveDailyPlay(stats: CipherwordStats) {
     ...(stats.daily.lastPlayedDate ? [stats.daily.lastPlayedDate] : []),
   ]);
 
-  return dates.some((date, index) => index > 0 && utcOrdinalFromIsoDate(date) - utcOrdinalFromIsoDate(dates[index - 1]) === 1);
+  return dates.some(
+    (date, index) =>
+      index > 0 && utcOrdinalFromIsoDate(date) - utcOrdinalFromIsoDate(dates[index - 1]) === 1,
+  );
 }
 
 function hasLaunchWeek(solvedDates: string[]) {

@@ -6,7 +6,6 @@ import {
   ArrowUpRight,
   BarChart3,
   CalendarDays,
-  Clock3,
   Flame,
   History,
   Keyboard,
@@ -21,7 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
-import { Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
   cipherwordModeLabels,
@@ -49,7 +48,7 @@ export function CipherwordGame({ menuOpen = false }: CipherwordGameProps) {
 
 function CipherwordGameInner({ menuOpen }: CipherwordGameProps) {
   const shouldReduceMotion = useReducedMotion();
-  const { round, stats, todayKey, lastResult, achievementUnlocks, storageAvailable, actions } =
+  const { round, stats, lastResult, achievementUnlocks, storageAvailable, actions } =
     useCipherwordGame();
   const [guess, setGuess] = useState("");
   const [shareFallback, setShareFallback] = useState("");
@@ -178,7 +177,11 @@ function CipherwordGameInner({ menuOpen }: CipherwordGameProps) {
               </div>
               <div>
                 <span>Category</span>
-                <strong>{round.mode === "hard" && round.guesses.length < 2 ? "Hidden" : round.puzzle.category}</strong>
+                <strong>
+                  {round.mode === "hard" && round.guesses.length < 2
+                    ? "Hidden"
+                    : round.puzzle.category}
+                </strong>
               </div>
               <div>
                 <span>Attempts</span>
@@ -206,7 +209,11 @@ function CipherwordGameInner({ menuOpen }: CipherwordGameProps) {
                 placeholder={isComplete ? "Round complete" : "Type any word or phrase"}
                 autoComplete="off"
               />
-              <button className="primary-action as-button" type="submit" disabled={round.status !== "playing"}>
+              <button
+                className="primary-action as-button"
+                type="submit"
+                disabled={round.status !== "playing"}
+              >
                 <Send aria-hidden="true" />
                 Guess
               </button>
@@ -227,11 +234,19 @@ function CipherwordGameInner({ menuOpen }: CipherwordGameProps) {
               </div>
             ) : null}
             <DailyStreakPanel streak={stats.daily.currentStreak} best={stats.daily.bestStreak} />
-            <SignalTrail clues={clues} closestGuess={round.closestGuess} reduceMotion={Boolean(shouldReduceMotion)} />
+            <SignalTrail
+              clues={clues}
+              closestGuess={round.closestGuess}
+              reduceMotion={Boolean(shouldReduceMotion)}
+            />
             <StatsPanel stats={stats} />
             <AchievementShelf stats={stats} />
             <div className="cipherword-settings-panel">
-              <button type="button" className="secondary-action" onClick={actions.toggleHighContrast}>
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={actions.toggleHighContrast}
+              >
                 <Settings aria-hidden="true" />
                 {highContrast ? "Standard contrast" : "High contrast"}
               </button>
@@ -316,7 +331,9 @@ function GuessBoard({
               ))}
             </div>
           ) : (
-            <div className="cipherword-shape-chip">Shape {groups.map((group) => group.length).join(" + ")}</div>
+            <div className="cipherword-shape-chip">
+              Shape {groups.map((group) => group.length).join(" + ")}
+            </div>
           )}
         </m.article>
       ))}
@@ -324,13 +341,7 @@ function GuessBoard({
   );
 }
 
-function SemanticMeter({
-  guess,
-  mode,
-}: {
-  guess?: CipherwordGuessResult;
-  mode: CipherwordMode;
-}) {
+function SemanticMeter({ guess, mode }: { guess?: CipherwordGuessResult; mode: CipherwordMode }) {
   const score = guess ? getVisibleScore(guess, mode) : 0;
   const displayScore = score === null ? 64 : score;
 
@@ -348,7 +359,10 @@ function SemanticMeter({
           transition={{ type: "spring", stiffness: 190, damping: 28 }}
         />
       </div>
-      <p>{guess?.hint ?? "Every accepted guess returns a tier, hint, and letter logic when lengths match."}</p>
+      <p>
+        {guess?.hint ??
+          "Every accepted guess returns a tier, hint, and letter logic when lengths match."}
+      </p>
     </section>
   );
 }
@@ -385,7 +399,11 @@ function SignalTrail({
       <div className="cipherword-closest-card">
         <span>Closest guess</span>
         <strong>{closestGuess?.guess ?? "None yet"}</strong>
-        <em>{closestGuess ? `${closestGuess.tier} · ${closestGuess.score}` : "The best signal will pin here."}</em>
+        <em>
+          {closestGuess
+            ? `${closestGuess.tier} · ${closestGuess.score}`
+            : "The best signal will pin here."}
+        </em>
       </div>
     </section>
   );
@@ -487,7 +505,12 @@ function ResultModal({
         exit={{ opacity: 0, y: 12, scale: 0.98 }}
         transition={{ duration: 0.22, ease: "easeOut" }}
       >
-        <button className="cipherword-modal-close" type="button" aria-label="Close result" onClick={onClose}>
+        <button
+          className="cipherword-modal-close"
+          type="button"
+          aria-label="Close result"
+          onClick={onClose}
+        >
           <X aria-hidden="true" />
         </button>
         <p>{result.solved ? "Signal found" : "Round complete"}</p>
@@ -495,7 +518,10 @@ function ResultModal({
         <span>{result.learn}</span>
         <div className="cipherword-result-stats">
           <Metric label="Guesses" value={`${result.guesses.length}/${result.maxGuesses ?? "∞"}`} />
-          <Metric label="Best" value={result.guesses.reduce((best, guess) => Math.max(best, guess.score), 0)} />
+          <Metric
+            label="Best"
+            value={result.guesses.reduce((best, guess) => Math.max(best, guess.score), 0)}
+          />
           <Metric label="Mode" value={result.mode} />
         </div>
         <SolveReplay result={result} />
@@ -522,7 +548,9 @@ function ResultModal({
             <ArrowUpRight aria-hidden="true" />
           </Link>
         </div>
-        {shareFallback ? <textarea className="cipherword-share-fallback" readOnly value={shareFallback} /> : null}
+        {shareFallback ? (
+          <textarea className="cipherword-share-fallback" readOnly value={shareFallback} />
+        ) : null}
       </m.div>
     </m.div>
   );
@@ -595,7 +623,8 @@ function getCountdownLabel(now = new Date()) {
     hourCycle: "h23",
   }).formatToParts(now);
   const get = (type: string) => Number(parts.find((part) => part.type === type)?.value ?? 0);
-  const remainingSeconds = 24 * 60 * 60 - (get("hour") * 60 * 60 + get("minute") * 60 + get("second"));
+  const remainingSeconds =
+    24 * 60 * 60 - (get("hour") * 60 * 60 + get("minute") * 60 + get("second"));
   const hours = Math.floor(remainingSeconds / 3600);
   const minutes = Math.floor((remainingSeconds % 3600) / 60);
 

@@ -11,24 +11,24 @@ import { cipherwordStatsStorageKey, parseCipherwordStats } from "./stats";
 
 type DailyCipherwordCTAVariant = "card" | "compact" | "banner";
 
-export function DailyCipherwordCTA({
-  variant = "card",
-}: {
-  variant?: DailyCipherwordCTAVariant;
-}) {
+export function DailyCipherwordCTA({ variant = "card" }: { variant?: DailyCipherwordCTAVariant }) {
   const shouldReduceMotion = useReducedMotion();
   const todayKey = useMemo(() => getCanonicalCipherwordDate(), []);
   const [solved, setSolved] = useState(false);
   const [streak, setStreak] = useState(0);
 
   useEffect(() => {
-    try {
-      const stats = parseCipherwordStats(window.localStorage.getItem(cipherwordStatsStorageKey));
-      setSolved(stats.daily.solvedDates.includes(todayKey));
-      setStreak(stats.daily.currentStreak);
-    } catch {
-      setSolved(false);
-    }
+    const timeout = window.setTimeout(() => {
+      try {
+        const stats = parseCipherwordStats(window.localStorage.getItem(cipherwordStatsStorageKey));
+        setSolved(stats.daily.solvedDates.includes(todayKey));
+        setStreak(stats.daily.currentStreak);
+      } catch {
+        setSolved(false);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [todayKey]);
 
   const status = solved ? "Solved today" : "Daily unsolved";

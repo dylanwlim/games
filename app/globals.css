@@ -1946,14 +1946,16 @@ img {
 
 .snake-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
+  grid-template-columns: minmax(0, min(68dvw, calc(100dvh - 116px))) 326px;
+  gap: 34px;
   align-items: end;
+  justify-content: center;
 }
 
 .snake-title-block {
   display: grid;
   gap: 7px;
+  padding-left: 16px;
 }
 
 .snake-back-link {
@@ -2090,7 +2092,7 @@ img {
 .snake-game-shell {
   display: grid;
   min-height: 0;
-  grid-template-columns: minmax(0, min(68dvw, calc(100dvh - 116px))) 326px;
+  grid-template-columns: minmax(0, min(68dvw, calc(100dvh - 148px))) 326px;
   gap: 34px;
   align-items: start;
   justify-content: center;
@@ -2208,6 +2210,10 @@ img {
   color: rgba(247, 248, 251, 0.62);
 }
 
+.snake-state-overlay.status-game-over .snake-overlay-kicker span {
+  color: var(--snake-red);
+}
+
 .snake-overlay-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2262,6 +2268,7 @@ img {
 .snake-side-panel {
   display: grid;
   min-width: 0;
+  align-self: stretch;
   align-content: start;
   gap: 11px;
   border: 1px solid var(--snake-panel-line);
@@ -2405,6 +2412,12 @@ img {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
+}
+
+.snake-game button:focus-visible,
+.snake-back-link:focus-visible {
+  outline: 2px solid rgba(103, 201, 95, 0.55);
+  outline-offset: 3px;
 }
 
 .snake-actions .primary-action,
@@ -2997,8 +3010,7 @@ img {
   border: 1px solid #e4e7ee;
   border-radius: 16px;
   background:
-    radial-gradient(circle at 12% 16%, rgba(124, 84, 255, 0.12), transparent 34%),
-    #ffffff;
+    radial-gradient(circle at 12% 16%, rgba(124, 84, 255, 0.12), transparent 34%), #ffffff;
   padding: 14px;
   color: #222326;
   box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
@@ -3524,8 +3536,7 @@ img {
   gap: 10px;
   align-items: center;
   background:
-    radial-gradient(circle at 14% 12%, rgba(246, 196, 83, 0.22), transparent 34%),
-    #111827;
+    radial-gradient(circle at 14% 12%, rgba(246, 196, 83, 0.22), transparent 34%), #111827;
   color: #ffffff;
   padding: 12px;
 }
@@ -4136,12 +4147,14 @@ img {
   }
 
   .cipherword-shell {
+    align-content: start;
     grid-template-columns: 1fr;
     overflow: auto;
   }
 
   .cipherword-play-panel {
-    min-height: 520px;
+    min-height: auto;
+    grid-template-rows: auto minmax(220px, auto) auto auto auto auto;
   }
 
   .cipherword-side-panel {
@@ -4155,6 +4168,37 @@ img {
 
   .cipherword-archive-actions {
     justify-content: flex-start;
+  }
+
+  .snake-game {
+    max-width: min(100%, 760px);
+  }
+
+  .snake-toolbar,
+  .snake-game-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .snake-toolbar {
+    align-items: start;
+  }
+
+  .snake-header-stats {
+    justify-content: flex-start;
+  }
+
+  .snake-title-block {
+    padding-left: 0;
+  }
+
+  .snake-game-shell {
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .snake-canvas-shell {
+    width: min(100%, max(260px, calc(100dvh - 330px)));
+    justify-self: center;
   }
 }
 
@@ -4330,7 +4374,7 @@ img {
   }
 
   .snake-actions {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
   }
 
@@ -4394,8 +4438,8 @@ img {
   }
 
   .cipherword-play-panel {
-    min-height: 0;
-    grid-template-rows: auto minmax(220px, 1fr) auto auto auto auto;
+    min-height: auto;
+    grid-template-rows: auto minmax(220px, auto) auto auto auto auto;
   }
 
   .cipherword-row {

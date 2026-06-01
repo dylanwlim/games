@@ -116,8 +116,7 @@ const genrePageCopy: Partial<
     rhythm: "Compact rulesets with visible outcomes.",
   },
   word: {
-    description:
-      "Daily word games built around clean typing, fair clues, and fast return rituals.",
+    description: "Daily word games built around clean typing, fair clues, and fast return rituals.",
     focus: "Daily meaning",
     rhythm: "Cipherword leads the shelf with letters, semantic warmth, and archive play.",
   },
@@ -1047,7 +1046,7 @@ function ContinuePlayingSection() {
         <ContinueCard
           game={snake}
           image="/art/feature-snake.svg"
-          summary="Best score saves locally. Restart in one click."
+          summary="Eat apples, chase streaks, and restart in one click."
         />
       </div>
     </m.section>

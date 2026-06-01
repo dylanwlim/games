@@ -6,6 +6,30 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-01: Reduced Snake input latency without UI changes by making the
+  hook's live game snapshot update synchronously before React render catches up,
+  so queued keyboard/swipe/touch moves are visible to the animation loop on the
+  next frame. Verified with targeted Snake engine tests, file-level lint and
+  Prettier checks, TypeScript, Browser rapid-input smoke testing on
+  `/games/snake`, the Snake Playwright test in desktop/mobile Chromium, and
+  `npm run validate`.
+- 2026-06-01: Implemented Cipherword as the second playable game across the hub.
+  `/games/cipherword` now supports daily, archive, unlimited, hard, and zen
+  modes with local-only stats, streaks, completed puzzle state, achievements,
+  share text, clue ladder, semantic warmth feedback, keyboard-friendly input,
+  and responsive desktop/mobile play. `/games/cipherword/archive` exposes
+  past/today puzzles while keeping future cells locked, and `/games/word-forge`
+  redirects to Cipherword. The daily bank is sourced from the uploaded pack,
+  starts on 2026-06-01 at index 0 in `America/New_York`, and validates as 8,980
+  unique answers through 2050-12-31. Verified with `npm run cipherword:validate`,
+  `npm run validate`, and Browser desktop/mobile spot checks.
+- 2026-06-01: Remade the Snake route and site artwork around a cleaner modern
+  arcade direction: compact board-aligned header, single visible status source,
+  stretched right rail, simplified score/best/stats controls, in-board
+  Start/Resume/Restart overlays, custom focus styling, connected canvas snake,
+  glowing apple art, crash-cause Game Over copy, refreshed Snake preview art,
+  and responsive mobile controls. Verified with Browser desktop/mobile checks
+  and `npm run validate`.
 - 2026-06-01: Finished a production pass on `/games/snake`: the engine now
   awards score with base, speed, and streak bonuses; the route has a dedicated
   local top-score component with per-mode bests; the HUD was rebuilt around a

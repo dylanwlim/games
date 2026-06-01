@@ -514,8 +514,8 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
       </div>
 
       <p className="sr-only" aria-live="polite">
-        Snake status: {statusLabel}. Score {state.score}. Best {bestScore}. Overall best{" "}
-        {topScore}. Length {state.snake.length}. Streak {state.scoreStreak}. Speed {speedLabel}.
+        Snake status: {statusLabel}. Score {state.score}. Best {bestScore}. Overall best {topScore}.
+        Length {state.snake.length}. Streak {state.scoreStreak}. Speed {speedLabel}.
       </p>
     </section>
   );
@@ -539,9 +539,9 @@ function StateOverlay({
   const overlayStats =
     state.status === "ready"
       ? [
-          ["Move", "Arrows / WASD"],
-          ["Start", "Space"],
-          ["Restart", "R"],
+          ["Move", "Arrows"],
+          ["Start/Pause", "Space"],
+          ["Fullscreen", "F"],
         ]
       : [
           ["Score", String(state.score)],
@@ -726,7 +726,9 @@ function shouldIgnoreShortcut(target: EventTarget | null) {
     return false;
   }
 
-  return Boolean(target.closest("a, input, select, textarea, [contenteditable='true']"));
+  return Boolean(
+    target.closest("[role='tab'], a, input, select, textarea, [contenteditable='true']"),
+  );
 }
 
 function formatTime(milliseconds: number) {
@@ -1061,7 +1063,11 @@ function drawBiteBurst(
   context.stroke();
   context.fillStyle = "rgba(255, 245, 237, 0.94)";
   context.font = `700 ${Math.max(10 * dpr, cellSize * 0.3)}px ui-sans-serif, system-ui, sans-serif`;
-  context.fillText(`+${state.lastScoreDelta}`, center.x + cellSize * 0.32, center.y - cellSize * 0.34);
+  context.fillText(
+    `+${state.lastScoreDelta}`,
+    center.x + cellSize * 0.32,
+    center.y - cellSize * 0.34,
+  );
   context.restore();
 }
 

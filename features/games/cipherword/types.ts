@@ -5,14 +5,7 @@ export const cipherwordModes = ["daily", "archive", "unlimited", "hard", "zen"] 
 
 export type CipherwordMode = (typeof cipherwordModes)[number];
 export type CipherwordRoundStatus = "playing" | "won" | "lost" | "unavailable";
-export type SemanticTier =
-  | "Ice cold"
-  | "Cold"
-  | "Warm"
-  | "Hot"
-  | "Very hot"
-  | "Burning"
-  | "Solved";
+export type SemanticTier = "Ice cold" | "Cold" | "Warm" | "Hot" | "Very hot" | "Burning" | "Solved";
 
 export type CipherwordClue = {
   id: string;

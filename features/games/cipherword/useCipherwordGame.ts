@@ -102,40 +102,41 @@ export function useCipherwordGame() {
     [router],
   );
 
-  const submitGuess = useCallback(
-    (rawGuess: string) => {
-      setRound((currentRound) => {
-        const nextRound = submitCipherwordGuess(currentRound, rawGuess);
+  const submitGuess = useCallback((rawGuess: string) => {
+    setRound((currentRound) => {
+      const nextRound = submitCipherwordGuess(currentRound, rawGuess);
 
-        if (nextRound !== currentRound && nextRound.error === undefined) {
-          persistProgress(nextRound, setStorageAvailable);
-        }
+      if (nextRound !== currentRound && nextRound.error === undefined) {
+        persistProgress(nextRound, setStorageAvailable);
+      }
 
-        if (
-          nextRound.status !== currentRound.status &&
-          (nextRound.status === "won" || nextRound.status === "lost")
-        ) {
-          const result = toCipherwordRoundResult(nextRound);
-          setLastResult(result);
-          setStats((currentStats) => {
-            const after = updateStatsAfterRound(currentStats, result);
-            const unlocks = getUnlockedAchievements(currentStats, after);
-            setAchievementUnlocks(unlocks);
-            writeStorage(cipherwordStatsStorageKey, serializeCipherwordStats(after), setStorageAvailable);
+      if (
+        nextRound.status !== currentRound.status &&
+        (nextRound.status === "won" || nextRound.status === "lost")
+      ) {
+        const result = toCipherwordRoundResult(nextRound);
+        setLastResult(result);
+        setStats((currentStats) => {
+          const after = updateStatsAfterRound(currentStats, result);
+          const unlocks = getUnlockedAchievements(currentStats, after);
+          setAchievementUnlocks(unlocks);
+          writeStorage(
+            cipherwordStatsStorageKey,
+            serializeCipherwordStats(after),
+            setStorageAvailable,
+          );
 
-            if (result.mode === "unlimited" || result.mode === "zen") {
-              writeRecentUnlimitedId(result.puzzleId, setStorageAvailable);
-            }
+          if (result.mode === "unlimited" || result.mode === "zen") {
+            writeRecentUnlimitedId(result.puzzleId, setStorageAvailable);
+          }
 
-            return after;
-          });
-        }
+          return after;
+        });
+      }
 
-        return nextRound;
-      });
-    },
-    [],
-  );
+      return nextRound;
+    });
+  }, []);
 
   const restart = useCallback(() => {
     const recentIds = readRecentUnlimitedIds(setStorageAvailable);
@@ -214,13 +215,18 @@ function parseProgress(raw: string | null) {
 
   try {
     const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string") : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((value): value is string => typeof value === "string")
+      : [];
   } catch {
     return [];
   }
 }
 
-function persistProgress(round: CipherwordRoundState, setStorageAvailable: (available: boolean) => void) {
+function persistProgress(
+  round: CipherwordRoundState,
+  setStorageAvailable: (available: boolean) => void,
+) {
   writeStorage(
     getProgressKey(round),
     JSON.stringify(round.guesses.map((guess) => guess.guess)),
