@@ -6,6 +6,12 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-02: Replaced the Dylan Games logo/favicon asset set with the supplied
+  trophy logo from `Logo.png`. Regenerated the Next app icon files, root
+  favicon PNG/ICO files, Apple touch icon, manifest PWA icons, and bumped icon
+  metadata query versions for cache refresh. Updated the date-sensitive Cipher
+  daily/archive E2E to derive the current daily answer, then verified with
+  `npm run validate` and a Browser metadata/asset-response check on localhost.
 - 2026-06-01: Renamed the playable word game from Cipherword to Cipher across
   visible hub, game, archive, share, and test surfaces. `/games/cipher` is now
   the primary route, with `/games/cipherword` and old archive URLs redirecting

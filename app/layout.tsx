@@ -6,7 +6,7 @@ import { siteConfig } from "@/lib/site";
 
 import "./globals.css";
 
-const iconVersion = "20260601";
+const iconVersion = "20260602";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  getCanonicalCipherwordDate,
+  getCipherwordDailyAnswerForDate,
+} from "../../features/games/cipherword/dailyAnswers";
+
 test("renders the hub and launches the featured Cipher game", async ({ page }) => {
   await page.goto("/");
 
@@ -210,17 +215,24 @@ test("switches to a placeholder game with a finished unavailable state", async (
 });
 
 test("plays Cipher daily and opens archive", async ({ page }) => {
+  const todayKey = getCanonicalCipherwordDate();
+  const dailyAnswer = getCipherwordDailyAnswerForDate(todayKey);
+
+  if (!dailyAnswer) {
+    throw new Error(`No Cipher daily answer for ${todayKey}`);
+  }
+
   await page.goto("/games/cipher");
 
   await expect(page.getByLabel("Cipher board and input")).toBeVisible();
-  await page.getByLabel("Enter a Cipher guess").fill("cipher");
+  await page.getByLabel("Enter a Cipher guess").fill(dailyAnswer);
   await page.getByRole("button", { name: "Guess" }).click();
-  await expect(page.getByRole("dialog", { name: "cipher" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: dailyAnswer })).toBeVisible();
   await expect(page.getByRole("button", { name: /Share|Copied/ })).toBeVisible();
 
   await page.goto("/games/cipher/archive");
   await expect(page.getByRole("heading", { name: "Cipher Archive" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Play Cipher archive 2026-06-01/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: `Play Cipher archive ${todayKey}` })).toBeVisible();
 
   await page.goto("/games/word-forge");
   await expect(page).toHaveURL(/\/games\/cipher/);
