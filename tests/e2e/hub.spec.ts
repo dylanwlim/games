@@ -12,19 +12,22 @@ test("renders the hub and launches the featured Cipher game", async ({ page }) =
   await expect(page.getByRole("heading", { name: "Games", level: 1 })).toBeVisible();
   await expect(page.getByRole("button", { name: "Open navigation" })).toBeVisible();
   if ((page.viewportSize()?.width ?? 0) >= 900) {
-    await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeHidden();
-    await page.locator("#arcade-sidebar").hover();
+    const sidebar = page.locator("#arcade-sidebar");
+    const collapsedBox = await sidebar.boundingBox();
+    expect(collapsedBox).not.toBeNull();
     await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeVisible();
-    await page.mouse.move(720, 420);
-    await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeHidden();
     await page.getByRole("button", { name: "Open navigation" }).click();
+    await expect(page.getByRole("button", { name: "Close navigation" })).toBeVisible();
     await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Favorites" })).toBeVisible();
-    await page.mouse.move(720, 420);
-    await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeVisible();
+    const expandedBox = await sidebar.boundingBox();
+    expect(expandedBox).not.toBeNull();
+    expect(expandedBox!.width).toBeGreaterThan((collapsedBox?.width ?? 0) + 120);
     await page.getByRole("button", { name: "Close navigation" }).click();
-    await page.mouse.move(720, 420);
-    await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeHidden();
+    await expect(page.getByRole("button", { name: "Open navigation" })).toBeVisible();
+    await expect
+      .poll(async () => (await sidebar.boundingBox())?.width ?? 0)
+      .toBeLessThanOrEqual((collapsedBox?.width ?? 0) + 4);
   }
   await expect(page.getByRole("heading", { name: "Continue Playing" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Playable Games" })).toBeVisible();
@@ -50,32 +53,59 @@ test("renders the hub and launches the featured Cipher game", async ({ page }) =
 test("filters sidebar search by fuzzy game and category names", async ({ page }) => {
   await page.goto("/");
 
+  const isMobile = (page.viewportSize()?.width ?? 0) < 900;
   await page.getByRole("button", { name: "Open navigation" }).click();
-  const search = page.getByLabel("Search games");
+  let search = page.getByLabel("Search games");
   const sidebar = page.locator("#arcade-sidebar");
   await expect(search).toBeVisible();
 
   const activeLinkBackground = await page
     .locator("#arcade-sidebar")
     .getByRole("link", { name: "Games", exact: true })
-    .evaluate((element) => window.getComputedStyle(element).backgroundColor);
+    .evaluate((element) => ({
+      active: element.getAttribute("data-active"),
+      background: window.getComputedStyle(element).backgroundColor,
+    }));
   const searchBackground = await search.evaluate(
     (element) =>
-      window.getComputedStyle(element.closest(".sidebar-search") as HTMLElement).backgroundColor,
+      window.getComputedStyle(element.closest('[data-sidebar="group"]') as HTMLElement)
+        .backgroundColor,
   );
 
-  expect(activeLinkBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(activeLinkBackground.active).toBe("true");
+  expect(activeLinkBackground.background).not.toBe("rgba(0, 0, 0, 0)");
   expect(searchBackground).toBe("rgba(0, 0, 0, 0)");
 
-  if ((page.viewportSize()?.width ?? 0) >= 900) {
-    await sidebar.getByRole("link", { name: "Favorites", exact: true }).hover();
-    const hoveredLinkBackground = await sidebar
+  if (!isMobile) {
+    const beforeHoverBox = await sidebar
       .getByRole("link", { name: "Favorites", exact: true })
-      .evaluate((element) => window.getComputedStyle(element).backgroundColor);
-    expect(hoveredLinkBackground).toBe("rgba(0, 0, 0, 0)");
+      .boundingBox();
+    await sidebar.getByRole("link", { name: "Favorites", exact: true }).hover();
+    const afterHoverBox = await sidebar
+      .getByRole("link", { name: "Favorites", exact: true })
+      .boundingBox();
+    expect(beforeHoverBox).not.toBeNull();
+    expect(afterHoverBox).not.toBeNull();
+    expect(afterHoverBox!.width).toBeCloseTo(beforeHoverBox!.width, 0);
+    expect(afterHoverBox!.height).toBeCloseTo(beforeHoverBox!.height, 0);
   }
 
-  await search.fill("puzl");
+  const fillSidebarSearch = async (value: string) => {
+    if (isMobile && !(await search.isVisible())) {
+      await page.getByRole("button", { name: "Open navigation" }).click();
+      search = page.getByLabel("Search games");
+      await expect(search).toBeVisible();
+    }
+
+    await search.fill(value);
+
+    if (isMobile) {
+      await page.keyboard.press("Escape");
+      await expect(page.getByRole("button", { name: "Open navigation" })).toBeVisible();
+    }
+  };
+
+  await fillSidebarSearch("puzl");
   await expect(page.getByRole("heading", { name: "Playable results" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "In-progress results" })).toBeVisible();
   await expect(
@@ -87,11 +117,11 @@ test("filters sidebar search by fuzzy game and category names", async ({ page })
   await expect(page.locator('a.store-game-card[href="/games/tiles"]')).toHaveCount(0);
   await expect(page.getByText("Snake", { exact: true })).toHaveCount(0);
 
-  await search.fill("snkae");
+  await fillSidebarSearch("snkae");
   await expect(page.locator('a.store-game-card[href="/games/snake"]')).toBeVisible();
   await expect(page.locator(".store-game-card", { hasText: "Minesweeper" })).toHaveCount(0);
 
-  await search.fill("semantic");
+  await fillSidebarSearch("semantic");
   await expect(page.locator('a.store-game-card[href="/games/cipher"]')).toBeVisible();
 });
 

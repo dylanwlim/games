@@ -1,6 +1,22 @@
 "use client";
 
 import { DiscoverParallaxContent } from "@/components/ui/text-parallax-content-scroll";
+import {
+  Sidebar as SidebarShell,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInput,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { CipherwordGame } from "@/features/games/cipherword/CipherwordGame";
 import { DailyCipherwordCTA } from "@/features/games/cipherword/DailyCipherwordCTA";
 import { filterGamesBySearch, getSearchGenre } from "@/features/games/game-search";
@@ -24,7 +40,7 @@ import {
   Heart,
   Lock,
   Map,
-  Menu,
+  PanelLeft,
   Play,
   Puzzle,
   Rocket,
@@ -34,7 +50,6 @@ import {
   Trophy,
   Type,
   Users,
-  X,
   Zap,
   type LucideIcon,
 } from "lucide-react";
@@ -298,39 +313,6 @@ const pageItemVariants: Variants = {
   },
 };
 
-const sidebarPanelVariants: Variants = {
-  collapsed: {
-    width: 64,
-  },
-  expanded: {
-    width: 276,
-  },
-};
-
-const sidebarContentVariants: Variants = {
-  collapsed: {
-    opacity: 1,
-  },
-  expanded: {
-    opacity: 1,
-  },
-};
-
-const sidebarStaggerVariants: Variants = {
-  collapsed: {
-    transition: {
-      staggerChildren: 0.015,
-      staggerDirection: -1,
-    },
-  },
-  expanded: {
-    transition: {
-      staggerChildren: 0.03,
-      delayChildren: 0.02,
-    },
-  },
-};
-
 const gamePanelVariants: Variants = {
   hidden: { opacity: 0, y: 10 },
   visible: {
@@ -362,9 +344,7 @@ export function GameHub({
     () => getGameBySlug(initialSlug)?.slug ?? "snake",
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [sidebarPinned, setSidebarPinned] = useState(false);
-  const [sidebarHovered, setSidebarHovered] = useState(false);
-  const [suppressSidebarHover, setSuppressSidebarHover] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pageExiting, setPageExiting] = useState(false);
   const [mainScrolled, setMainScrolled] = useState(false);
   const mainRef = useRef<HTMLElement | null>(null);
@@ -372,10 +352,9 @@ export function GameHub({
   const selectedGame = useMemo(() => getGameBySlug(selectedSlug) ?? fallbackGame, [selectedSlug]);
   const selectedGenre = initialGenre ? getGenreBySlug(initialGenre) : undefined;
   const isGames = view === "games";
-  const sidebarExpanded = sidebarPinned || sidebarHovered;
   const contentKey = `${view}:${initialGenre ?? "all"}:${focusGame ? selectedSlug : "store"}`;
   const frameClassName = `arcade-frame ${focusGame ? "play-frame" : ""} ${
-    sidebarExpanded ? "sidebar-open" : ""
+    sidebarOpen ? "sidebar-open" : ""
   }`;
 
   useEffect(() => {
@@ -419,24 +398,6 @@ export function GameHub({
     };
   }, [contentKey]);
 
-  const collapseSidebar = useCallback(() => {
-    setSidebarPinned(false);
-    setSidebarHovered(false);
-    setSuppressSidebarHover(false);
-  }, []);
-
-  const closeSidebar = useCallback(() => {
-    setSidebarPinned(false);
-    setSidebarHovered(false);
-    setSuppressSidebarHover(true);
-  }, []);
-
-  const pinSidebar = useCallback(() => {
-    setSidebarPinned(true);
-    setSidebarHovered(true);
-    setSuppressSidebarHover(false);
-  }, []);
-
   const navigateWithMotion = useCallback(
     (href: string) => {
       if (!href.startsWith("/")) {
@@ -446,7 +407,7 @@ export function GameHub({
       const currentHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
 
       if (href === currentHref) {
-        collapseSidebar();
+        setSidebarOpen(false);
         return;
       }
 
@@ -454,7 +415,7 @@ export function GameHub({
         window.clearTimeout(navigationTimeoutRef.current);
       }
 
-      collapseSidebar();
+      setSidebarOpen(false);
 
       if (shouldReduceMotion) {
         router.push(href as Route);
@@ -466,7 +427,7 @@ export function GameHub({
         router.push(href as Route);
       }, routeExitDelayMs);
     },
-    [collapseSidebar, router, shouldReduceMotion],
+    [router, shouldReduceMotion],
   );
 
   const handleMainLinkClick = useCallback(
@@ -514,44 +475,22 @@ export function GameHub({
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className={frameClassName}>
+      <SidebarProvider
+        className={frameClassName}
+        defaultOpen={false}
+        open={sidebarOpen}
+        onOpenChange={setSidebarOpen}
+      >
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>
-        <AnimatePresence initial={false}>
-          {sidebarExpanded ? (
-            <m.button
-              className="sidebar-scrim"
-              type="button"
-              aria-label="Dismiss navigation"
-              onClick={closeSidebar}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.16, ease: "easeOut" }}
-            />
-          ) : null}
-        </AnimatePresence>
-        <Sidebar
+        <HubSidebar
           activeView={view}
           activeGenre={initialGenre}
-          expanded={sidebarExpanded}
           hideSearch={focusGame}
-          pinned={sidebarPinned}
           searchQuery={searchQuery}
           onNavigate={navigateWithMotion}
           onSearchChange={setSearchQuery}
-          onOpen={pinSidebar}
-          onClose={closeSidebar}
-          onHoverStart={() => {
-            if (!suppressSidebarHover) {
-              setSidebarHovered(true);
-            }
-          }}
-          onHoverEnd={() => {
-            setSidebarHovered(false);
-            setSuppressSidebarHover(false);
-          }}
         />
         <m.div
           className="arcade-scroll-blur"
@@ -566,6 +505,7 @@ export function GameHub({
           ref={mainRef}
           onClickCapture={handleMainLinkClick}
         >
+          <HubSidebarBar view={view} activeGenre={selectedGenre} focusGame={focusGame} />
           <AnimatePresence mode="wait" initial={false}>
             <m.div
               key={contentKey}
@@ -579,7 +519,7 @@ export function GameHub({
                 focusGame ? (
                   <GamePlayView
                     selectedGame={selectedGame}
-                    sidebarOpen={sidebarExpanded}
+                    sidebarOpen={sidebarOpen}
                     shouldReduceMotion={Boolean(shouldReduceMotion)}
                     onPlaySnake={() => selectGame(games[0])}
                   />
@@ -599,240 +539,240 @@ export function GameHub({
             </m.div>
           </AnimatePresence>
         </m.main>
-      </div>
+      </SidebarProvider>
     </LazyMotion>
   );
 }
 
-function Sidebar({
+function HubSidebar({
   activeView,
   activeGenre,
-  expanded,
   hideSearch,
-  pinned,
   searchQuery,
   onNavigate,
   onSearchChange,
-  onOpen,
-  onClose,
-  onHoverStart,
-  onHoverEnd,
 }: {
   activeView: GameHubView;
   activeGenre?: GenreSlug;
-  expanded: boolean;
   hideSearch: boolean;
-  pinned: boolean;
   searchQuery: string;
   onNavigate: (href: string) => void;
   onSearchChange: (value: string) => void;
-  onOpen: () => void;
-  onClose: () => void;
-  onHoverStart: () => void;
-  onHoverEnd: () => void;
 }) {
-  const sidebarState = expanded ? "expanded" : "collapsed";
-  const toggleLabel = pinned ? "Close navigation" : "Open navigation";
-  const shouldReduceMotion = useReducedMotion();
-  const sidebarTransition = shouldReduceMotion
-    ? { duration: 0 }
-    : { type: "tween" as const, ease: "easeOut" as const, duration: 0.2 };
-  const staggerVariants = useMemo<Variants>(
-    () =>
-      shouldReduceMotion
-        ? {
-            collapsed: {},
-            expanded: {},
-          }
-        : sidebarStaggerVariants,
-    [shouldReduceMotion],
-  );
-  const labelVariants = useMemo<Variants>(
-    () => ({
-      collapsed: {
-        opacity: 0,
-        x: -20,
-        transition: shouldReduceMotion
-          ? { duration: 0 }
-          : {
-              opacity: { duration: 0.1, ease: "easeOut" },
-              x: { type: "spring", stiffness: 100, damping: 24 },
-            },
-      },
-      expanded: {
-        opacity: 1,
-        x: 0,
-        transition: shouldReduceMotion
-          ? { duration: 0 }
-          : {
-              opacity: { duration: 0.16, ease: "easeOut" },
-              x: { type: "spring", stiffness: 1000, damping: 64, velocity: -100 },
-            },
-      },
-    }),
-    [shouldReduceMotion],
-  );
-
   return (
-    <m.aside
+    <SidebarShell
       id="arcade-sidebar"
-      className={`arcade-sidebar ${sidebarState}`}
+      className="game-sidebar"
       aria-label="Dylan Games navigation"
-      variants={sidebarPanelVariants}
-      initial={false}
-      animate={sidebarState}
-      transition={sidebarTransition}
-      data-pinned={pinned ? "true" : "false"}
-      onMouseEnter={onHoverStart}
-      onMouseLeave={() => {
-        if (!pinned) {
-          onHoverEnd();
-        }
-      }}
-      onPointerEnter={onHoverStart}
-      onPointerLeave={() => {
-        if (!pinned) {
-          onHoverEnd();
-        }
-      }}
-      onFocusCapture={onHoverStart}
-      onBlurCapture={(event) => {
-        if (!pinned && !event.currentTarget.contains(event.relatedTarget)) {
-          onHoverEnd();
-        }
-      }}
+      collapsible="icon"
     >
-      <m.div className="sidebar-topbar" variants={sidebarContentVariants}>
-        <button
-          className="sidebar-toggle"
-          type="button"
-          onClick={pinned ? onClose : onOpen}
-          aria-controls="arcade-sidebar"
-          aria-expanded={expanded}
-          aria-label={toggleLabel}
-        >
-          {pinned ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
-        </button>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={activeView === "games" && !activeGenre}
+              size="lg"
+              tooltip="Dylan Games"
+            >
+              <Link
+                href={"/" as Route}
+                onClick={(event) => handleSidebarNavigation(event, "/", onNavigate)}
+              >
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Gamepad2 aria-hidden="true" className="size-4" />
+                </div>
+                <div className="flex min-w-0 flex-col gap-0.5 leading-none">
+                  <span className="truncate font-semibold">Dylan Games</span>
+                  <span className="truncate text-xs text-sidebar-foreground/70">Quiet arcade</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         {!hideSearch ? (
-          <label className="sidebar-search">
-            <Search aria-hidden="true" />
-            <span className="sr-only">Search games</span>
-            <input
-              value={searchQuery}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Search"
-              tabIndex={expanded ? undefined : -1}
-              type="search"
-            />
-          </label>
+          <form
+            role="search"
+            onSubmit={(event) => {
+              event.preventDefault();
+            }}
+          >
+            <SidebarGroup className="game-sidebar-search-group py-0">
+              <SidebarGroupContent className="relative">
+                <label htmlFor="game-sidebar-search" className="sr-only">
+                  Search games
+                </label>
+                <SidebarInput
+                  id="game-sidebar-search"
+                  aria-label="Search games"
+                  value={searchQuery}
+                  onChange={(event) => onSearchChange(event.target.value)}
+                  placeholder="Search games..."
+                  className="game-sidebar-search pl-8"
+                  type="search"
+                />
+                <Search
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50"
+                />
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </form>
         ) : null}
-      </m.div>
+      </SidebarHeader>
 
-      <m.nav className="sidebar-nav" aria-label="Sections" variants={staggerVariants}>
-        <SidebarLink
-          href="/"
-          icon={Grid2X2}
-          label="Games"
-          active={activeView === "games" && !activeGenre}
-          expanded={expanded}
-          labelVariants={labelVariants}
-          onNavigate={onNavigate}
-        />
-        <SidebarLink
-          href={"/games/favorites" as Route}
-          icon={Heart}
-          label="Favorites"
-          active={activeView === "favorites"}
-          expanded={expanded}
-          labelVariants={labelVariants}
-          onNavigate={onNavigate}
-        />
-        <SidebarLink
-          href={"/discover" as Route}
-          icon={Star}
-          label="Discover"
-          active={activeView === "discover"}
-          expanded={expanded}
-          labelVariants={labelVariants}
-          onNavigate={onNavigate}
-        />
-        {gameGenres.map((genre) => (
-          <SidebarLink
-            key={genre.slug}
-            href={`/genres/${genre.slug}`}
-            icon={iconMap[genre.icon]}
-            label={genre.label}
-            active={activeGenre === genre.slug}
-            expanded={expanded}
-            labelVariants={labelVariants}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </m.nav>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Library</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <HubSidebarLink
+                href="/"
+                icon={Grid2X2}
+                label="Games"
+                active={activeView === "games" && !activeGenre}
+                onNavigate={onNavigate}
+              />
+              <HubSidebarLink
+                href="/games/favorites"
+                icon={Heart}
+                label="Favorites"
+                active={activeView === "favorites"}
+                onNavigate={onNavigate}
+              />
+              <HubSidebarLink
+                href="/discover"
+                icon={Star}
+                label="Discover"
+                active={activeView === "discover"}
+                onNavigate={onNavigate}
+              />
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-      <m.a
-        className="sidebar-profile"
-        href="https://dylanwlim.com"
-        rel="noreferrer"
-        variants={labelVariants}
-        aria-hidden={!expanded}
-        tabIndex={expanded ? undefined : -1}
-      >
-        <span className="sidebar-profile-label">dylanwlim.com</span>
-      </m.a>
-    </m.aside>
+        <SidebarGroup>
+          <SidebarGroupLabel>Genres</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {gameGenres.map((genre) => (
+                <HubSidebarLink
+                  key={genre.slug}
+                  href={`/genres/${genre.slug}`}
+                  icon={iconMap[genre.icon]}
+                  label={genre.label}
+                  active={activeGenre === genre.slug}
+                  onNavigate={onNavigate}
+                />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="dylanwlim.com">
+              <a href="https://dylanwlim.com" rel="noreferrer">
+                <ArrowUpRight aria-hidden="true" />
+                <span>dylanwlim.com</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+      <SidebarRail />
+    </SidebarShell>
   );
 }
 
-function SidebarLink({
+function HubSidebarLink({
   href,
   icon: Icon,
   label,
   active,
-  expanded,
-  labelVariants,
   onNavigate,
 }: {
   href: string;
   icon: LucideIcon;
   label: string;
   active: boolean;
-  expanded: boolean;
-  labelVariants: Variants;
   onNavigate: (href: string) => void;
 }) {
   return (
-    <m.div>
-      <Link
-        className={`sidebar-link ${active ? "active" : ""}`}
-        href={href as Route}
-        aria-current={active ? "page" : undefined}
-        aria-label={label}
-        onClick={(event) => {
-          if (
-            event.defaultPrevented ||
-            event.button !== 0 ||
-            event.metaKey ||
-            event.altKey ||
-            event.ctrlKey ||
-            event.shiftKey
-          ) {
-            return;
-          }
-
-          event.preventDefault();
-          onNavigate(href);
-        }}
-      >
-        <span className="sidebar-icon-slot" aria-hidden="true">
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={active} tooltip={label}>
+        <Link
+          href={href as Route}
+          aria-current={active ? "page" : undefined}
+          aria-label={label}
+          onClick={(event) => handleSidebarNavigation(event, href, onNavigate)}
+        >
           <Icon aria-hidden="true" />
-        </span>
-        <m.span className="sidebar-label" variants={labelVariants} aria-hidden={!expanded}>
-          {label}
-        </m.span>
-      </Link>
-    </m.div>
+          <span>{label}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   );
+}
+
+function HubSidebarBar({
+  view,
+  activeGenre,
+  focusGame,
+}: {
+  view: GameHubView;
+  activeGenre?: ReturnType<typeof getGenreBySlug>;
+  focusGame: boolean;
+}) {
+  const { open, openMobile, isMobile, toggleSidebar } = useSidebar();
+  const navigationOpen = isMobile ? openMobile : open;
+  const label = navigationOpen ? "Close navigation" : "Open navigation";
+  const pageLabel = focusGame
+    ? "Play"
+    : (activeGenre?.label ??
+      (view === "discover" ? "Discover" : view === "favorites" ? "Favorites" : "Games"));
+
+  return (
+    <header className="hub-sidebar-bar">
+      <button
+        className="hub-sidebar-trigger"
+        type="button"
+        onClick={toggleSidebar}
+        aria-controls="arcade-sidebar"
+        aria-expanded={navigationOpen}
+        aria-label={label}
+      >
+        <PanelLeft aria-hidden="true" />
+      </button>
+      <div className="hub-sidebar-breadcrumb" aria-label="Current section">
+        <span>Dylan Games</span>
+        <i aria-hidden="true" />
+        <strong>{pageLabel}</strong>
+      </div>
+    </header>
+  );
+}
+
+function handleSidebarNavigation(
+  event: MouseEvent<HTMLAnchorElement>,
+  href: string,
+  onNavigate: (href: string) => void,
+) {
+  if (
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.altKey ||
+    event.ctrlKey ||
+    event.shiftKey
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+  onNavigate(href);
 }
 
 function GamesView({
@@ -1084,8 +1024,7 @@ function FeatureHero({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
                 src={activeSlide.image}
                 alt=""
                 fill
-                priority={activeIndex === 0}
-                loading={activeIndex === 0 ? "eager" : "lazy"}
+                priority
                 sizes="(max-width: 900px) 100vw, calc(100vw - 96px)"
                 className={`feature-image ${activeSlide.preview}`}
                 style={{ objectPosition: activeSlide.imagePosition }}

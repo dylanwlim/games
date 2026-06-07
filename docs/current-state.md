@@ -6,6 +6,16 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-07: Replaced the old hover-expanded GameHub sidebar with the supplied
+  `sidebar-layout.zip` shadcn-style sidebar primitives, renamed/wired them into
+  repo-local `components/ui/*`, `hooks/use-mobile.ts`, `lib/utils.ts`, and the
+  GameHub shell. The sidebar now uses click/rail collapse, mobile sheet
+  navigation, game-specific Library/Genres groups, preserved fuzzy search,
+  light/dark color tokens, and Tailwind utility generation scoped to the app.
+  Verified with format, lint, typecheck, unit tests, production build,
+  desktop/mobile Playwright, Browser responsive screenshots/layout checks,
+  Chrome smoke/console checks, color-scheme emulation, and transition timing
+  above 60 fps.
 - 2026-06-02: Replaced the Dylan Games logo/favicon asset set with the supplied
   trophy logo from `Logo.png`. Regenerated the Next app icon files, root
   favicon PNG/ICO files, Apple touch icon, manifest PWA icons, and bumped icon
