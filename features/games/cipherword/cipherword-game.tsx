@@ -33,7 +33,7 @@ import { getDisplayLetterGroups, getNormalizedLetterCount, normalizeAnswer } fro
 import { getShareText } from "./share";
 import { cipherwordAchievements } from "./achievements";
 import type { CipherwordGuessResult, CipherwordMode, CipherwordRoundResult } from "./types";
-import { useCipherwordGame } from "./useCipherwordGame";
+import { useCipherwordGame } from "./use-cipherword-game";
 
 type CipherwordGameProps = {
   menuOpen?: boolean;

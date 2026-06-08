@@ -2,8 +2,8 @@ import {
   getCanonicalCipherwordDate,
   getCipherwordDailyAnswerForDate,
   getCipherwordDailyIndex,
-} from "./dailyAnswers";
-import { getLetterFeedback } from "./letterFeedback";
+} from "./daily-answers";
+import { getLetterFeedback } from "./letter-feedback";
 import {
   getAnswerShape,
   getNormalizedLetterCount,
@@ -15,9 +15,9 @@ import {
   getCipherwordPuzzleForAnswer,
   getCipherwordPuzzleIdForMode,
   getRandomCipherwordPuzzle,
-} from "./puzzleFactory";
+} from "./puzzle-factory";
 import type { CipherwordPuzzle } from "./puzzles";
-import { cipherwordLexicon, scoreGuess } from "./semanticScore";
+import { cipherwordLexicon, scoreGuess } from "./semantic-score";
 import type {
   CipherwordClue,
   CipherwordGuessResult,

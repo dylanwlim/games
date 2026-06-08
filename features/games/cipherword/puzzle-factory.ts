@@ -3,7 +3,7 @@ import {
   getCanonicalCipherwordDate,
   getCipherwordDailyAnswerForDate,
   getCipherwordPuzzleIdForDate,
-} from "./dailyAnswers";
+} from "./daily-answers";
 import { getAnswerShape, normalizeAnswer, normalizeDisplay } from "./normalize";
 import {
   CIPHERWORD_CATEGORIES,

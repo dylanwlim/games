@@ -14,7 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "cipherword:validate": "node scripts/validateCipherwordDailyAnswers.mjs",
+    "cipherword:validate": "node scripts/validate-cipherword-daily-answers.mjs",
     "validate": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build && npm run test:e2e",
     "verify:deployment": "node scripts/verify-deployment.mjs",
     "deploy:preview": "vercel deploy",

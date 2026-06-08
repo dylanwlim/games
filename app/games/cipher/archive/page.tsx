@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { CipherwordArchive } from "@/features/games/cipherword/CipherwordArchive";
+import { CipherwordArchive } from "@/features/games/cipherword/cipherword-archive";
 
 export const metadata: Metadata = {
   title: "Cipher Archive",

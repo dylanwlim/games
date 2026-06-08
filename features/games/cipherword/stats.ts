@@ -1,5 +1,5 @@
 import { cipherwordAchievements } from "./achievements";
-import { addDaysToIsoDate, utcOrdinalFromIsoDate } from "./dailyAnswers";
+import { addDaysToIsoDate, utcOrdinalFromIsoDate } from "./daily-answers";
 import { CIPHERWORD_CATEGORIES } from "./puzzles";
 import type {
   AchievementUnlock,

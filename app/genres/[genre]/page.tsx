@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { GameHub } from "@/features/games/components/GameHub";
+import { GameHub } from "@/features/games/components/game-hub";
 import { gameGenres, getGenreBySlug, isGenreSlug } from "@/features/games/genre-registry";
 import { siteConfig } from "@/lib/site";
 

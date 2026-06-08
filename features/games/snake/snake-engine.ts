@@ -6,7 +6,7 @@ import {
   type SnakeModeDefinition,
   type SnakeState,
   type SnakeStatus,
-} from "./snakeTypes";
+} from "./snake-types";
 
 const DEFAULT_BOARD_SIZE = 21;
 const INITIAL_LENGTH = 5;

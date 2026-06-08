@@ -23,6 +23,7 @@ This repo powers `games.dylanwlim.com`, a quiet browser-games hub adjacent to
 - Keep game metadata in `features/games/game-registry.ts`.
 - Keep deterministic game rules outside React/canvas renderers.
 - Keep UI components small and scoped to the launcher/game surface.
+- Follow `../naming-conventions.md` for new or renamed repo-owned files while preserving route URLs and exported component names.
 - Avoid backend code, secrets, and environment dependencies unless a real game
   feature requires them.
 

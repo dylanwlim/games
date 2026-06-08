@@ -17,12 +17,12 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { CipherwordGame } from "@/features/games/cipherword/CipherwordGame";
-import { DailyCipherwordCTA } from "@/features/games/cipherword/DailyCipherwordCTA";
+import { CipherwordGame } from "@/features/games/cipherword/cipherword-game";
+import { DailyCipherwordCTA } from "@/features/games/cipherword/daily-cipherword-cta";
 import { filterGamesBySearch, getSearchGenre } from "@/features/games/game-search";
 import { gameGenres, getGenreBySlug, type GenreSlug } from "@/features/games/genre-registry";
 import { games, getGameBySlug } from "@/features/games/game-registry";
-import { SnakeGame } from "@/features/games/snake/SnakeGame";
+import { SnakeGame } from "@/features/games/snake/snake-game";
 import type { GameDefinition } from "@/features/games/types";
 import type { Route } from "next";
 import Image from "next/image";

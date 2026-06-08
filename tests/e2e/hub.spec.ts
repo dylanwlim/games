@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import {
   getCanonicalCipherwordDate,
   getCipherwordDailyAnswerForDate,
-} from "../../features/games/cipherword/dailyAnswers";
+} from "../../features/games/cipherword/daily-answers";
 
 test("renders the hub and launches the featured Cipher game", async ({ page }) => {
   await page.goto("/");

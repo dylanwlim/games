@@ -6,6 +6,17 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-08: standardized internal game/source filenames without changing
+  public routes, visible game names, gameplay behavior, or product copy.
+  Cipherword/Cipher implementation files, Snake implementation files, the game
+  hub component, the daily-answer validation script, and the root logo source
+  asset now use lowercase kebab-case; imports, tests, package scripts, docs,
+  and AGENTS were updated. Validation passed `npm run typecheck` and
+  `npm run cipherword:validate` (8,980 unique answers, 2026-06-01 through
+  2050-12-31); targeted old-path searches for renamed files returned no active
+  references outside the root inventory/plan/report docs. Pre-existing
+  `public/art` working-tree changes were left untouched.
+
 - 2026-06-07: Replaced the old hover-expanded GameHub sidebar with the supplied
   `sidebar-layout.zip` shadcn-style sidebar primitives, renamed/wired them into
   repo-local `components/ui/*`, `hooks/use-mobile.ts`, `lib/utils.ts`, and the
@@ -17,7 +28,7 @@ that changes or verifies the project.
   Chrome smoke/console checks, color-scheme emulation, and transition timing
   above 60 fps.
 - 2026-06-02: Replaced the Dylan Games logo/favicon asset set with the supplied
-  trophy logo from `Logo.png`. Regenerated the Next app icon files, root
+  trophy logo from `dylan-games-logo-source.png`. Regenerated the Next app icon files, root
   favicon PNG/ICO files, Apple touch icon, manifest PWA icons, and bumped icon
   metadata query versions for cache refresh. Updated the date-sensitive Cipher
   daily/archive E2E to derive the current daily answer, then verified with
@@ -93,7 +104,7 @@ that changes or verifies the project.
   active icons kept blue, and immediate reduced-motion behavior. Verified
   desktop, tablet, and mobile sidebar behavior locally.
 - 2026-06-01: Replaced the Dylan Games favicon with the updated black
-  controller mark from `UpdatedLogo.png`, renamed it into
+  controller mark from `Updateddylan-games-logo-source.png`, renamed it into
   `public/icons/dylan-games-icon.png`, regenerated the favicon/app icon/PWA
   PNG and ICO variants with transparency, and versioned icon metadata links for
   cache refresh. Vercel preview deployment `dpl_6EYD2E61qtkERAtFE1MGDGPDzykS`

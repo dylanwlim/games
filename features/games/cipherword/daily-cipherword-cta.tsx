@@ -6,7 +6,7 @@ import { CalendarDays, Flame } from "lucide-react";
 import { m, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
-import { getCanonicalCipherwordDate, getCipherwordDailyIndex } from "./dailyAnswers";
+import { getCanonicalCipherwordDate, getCipherwordDailyIndex } from "./daily-answers";
 import { cipherwordStatsStorageKey, parseCipherwordStats } from "./stats";
 
 type DailyCipherwordCTAVariant = "card" | "compact" | "banner";

@@ -12,7 +12,7 @@ import {
   stepSnake,
   toggleSnakePlay,
 } from "./snake-engine";
-import { snakeModes, type Direction, type SnakeMode, type SnakeState } from "./snakeTypes";
+import { snakeModes, type Direction, type SnakeMode, type SnakeState } from "./snake-types";
 
 const bestScoresKey = "dylan-games:snake-best-scores";
 const lastModeKey = "dylan-games:snake-last-mode";

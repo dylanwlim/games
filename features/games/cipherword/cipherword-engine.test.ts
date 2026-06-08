@@ -7,17 +7,17 @@ import {
   getCipherwordDailyIndex,
   getCipherwordDateForIndex,
   validateCipherwordDailyBank,
-} from "./dailyAnswers";
+} from "./daily-answers";
 import {
   createCipherwordRound,
   getVisibleScore,
   submitCipherwordGuess,
   toCipherwordRoundResult,
 } from "./game-engine";
-import { getLetterFeedback } from "./letterFeedback";
+import { getLetterFeedback } from "./letter-feedback";
 import { normalizeAnswer, normalizeDisplay } from "./normalize";
-import { getCipherwordPuzzleForAnswer } from "./puzzleFactory";
-import { scoreGuess } from "./semanticScore";
+import { getCipherwordPuzzleForAnswer } from "./puzzle-factory";
+import { scoreGuess } from "./semantic-score";
 import { getShareText } from "./share";
 import {
   createDefaultCipherwordStats,

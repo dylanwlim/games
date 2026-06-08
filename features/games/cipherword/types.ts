@@ -1,4 +1,4 @@
-import type { TileState } from "./letterFeedback";
+import type { TileState } from "./letter-feedback";
 import type { CipherwordCategory, CipherwordPuzzle } from "./puzzles";
 
 export const cipherwordModes = ["daily", "archive", "unlimited", "hard", "zen"] as const;

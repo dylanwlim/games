@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 
 const source = readFileSync(
-  new URL("../features/games/cipherword/dailyAnswers.ts", import.meta.url),
+  new URL("../features/games/cipherword/daily-answers.ts", import.meta.url),
   "utf8",
 );
 const match = source.match(/export const CIPHERWORD_DAILY_ANSWERS = \[([\s\S]*?)\] as const;/);

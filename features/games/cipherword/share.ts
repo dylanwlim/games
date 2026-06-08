@@ -1,4 +1,4 @@
-import { getCipherwordDailyIndex } from "./dailyAnswers";
+import { getCipherwordDailyIndex } from "./daily-answers";
 import type { CipherwordRoundResult } from "./types";
 
 const routeUrl = "https://games.dylanwlim.com/games/cipher";

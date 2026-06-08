@@ -31,8 +31,8 @@ import {
   type Point,
   type SnakeMode,
   type SnakeState,
-} from "./snakeTypes";
-import { useSnakeGame } from "./useSnakeGame";
+} from "./snake-types";
+import { useSnakeGame } from "./use-snake-game";
 
 const directionKeys: Record<string, Direction> = {
   ArrowUp: "up",

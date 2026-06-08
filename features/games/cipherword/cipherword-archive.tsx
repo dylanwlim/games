@@ -13,7 +13,7 @@ import {
   getCipherwordArchiveEntry,
   isoDateFromUtcOrdinal,
   utcOrdinalFromIsoDate,
-} from "./dailyAnswers";
+} from "./daily-answers";
 import { cipherwordStatsStorageKey, parseCipherwordStats } from "./stats";
 
 export function CipherwordArchive() {
