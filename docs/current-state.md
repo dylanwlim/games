@@ -6,6 +6,19 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-09: Reworked the non-play launcher/storefront into a darker
+  poster-led game library while leaving the Snake and Cipher play routes and
+  sidebar behavior protected. The hub now uses dark gallery surfaces, cleaner
+  feature/continue/genre section rhythm, poster-style playable and upcoming
+  game cards, unified dark preview-art treatment across unfinished games, and
+  removed continuous BorderTrail loops from launcher cards in favor of quieter
+  Spotlight/transform motion. Browser/Chrome plugin localhost access was
+  blocked by `ERR_BLOCKED_BY_CLIENT`, so visual proof used one-shot local
+  Playwright Chromium scripts. Desktop and 390px mobile screenshots verified no
+  console warnings/errors, no horizontal overflow, stable poster-card
+  dimensions, and unclipped mobile card text/actions; `npm run validate` passed
+  end to end.
+
 - 2026-06-09: Replaced the Games logo/favicon set with the official provided
   SVG group. Metadata, manifest, the app-router icon, and the GameHub sidebar
   brand now use `favicon.svg`, `icon.svg`, `logo-light.svg`, and

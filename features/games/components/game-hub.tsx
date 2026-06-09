@@ -2,7 +2,6 @@
 
 import { DiscoverParallaxContent } from "@/components/ui/text-parallax-content-scroll";
 import { AnimatedBackground } from "@/components/core/animated-background";
-import { BorderTrail } from "@/components/core/border-trail";
 import { Magnetic } from "@/components/core/magnetic";
 import { ProgressiveBlur } from "@/components/core/progressive-blur";
 import { Spotlight } from "@/components/core/spotlight";
@@ -1133,14 +1132,7 @@ function FeatureHero({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
         onPointerLeave={() => setHoverPaused(false)}
       >
         {!shouldReduceMotion ? (
-          <>
-            <Spotlight className="feature-components-spotlight" size={360} />
-            <BorderTrail
-              className="feature-components-border"
-              size={90}
-              transition={{ repeat: Infinity, duration: 7, ease: "linear" }}
-            />
-          </>
+          <Spotlight className="feature-components-spotlight" size={360} />
         ) : null}
         <m.div
           className="feature-swipe-layer"
@@ -1625,18 +1617,7 @@ function StoreGameCard({
           : getUpcomingDescription(game);
   const cardContent = (
     <>
-      {!shouldReduceMotion ? (
-        <>
-          <Spotlight className="store-components-spotlight" size={190} />
-          {isPlayable ? (
-            <BorderTrail
-              className={`store-components-border accent-${game.accent}`}
-              size={54}
-              transition={{ repeat: Infinity, duration: 5.8, ease: "linear" }}
-            />
-          ) : null}
-        </>
-      ) : null}
+      {!shouldReduceMotion ? <Spotlight className="store-components-spotlight" size={190} /> : null}
       <ArcadeAppIcon game={game} />
       <span className="store-game-copy">
         <span className="store-game-title-row">

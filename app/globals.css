@@ -465,6 +465,10 @@ img {
   border-color: rgb(var(--tw-sidebar-border) / 1);
 }
 
+.game-sidebar [data-sidebar="menu-button"] {
+  transition-property: background-color, color, box-shadow;
+}
+
 #arcade-sidebar.game-sidebar {
   transition-property: left, right;
 }
@@ -6901,6 +6905,791 @@ img {
 
   .cipherword-streak-panel {
     grid-template-columns: 1fr;
+  }
+}
+
+.arcade-frame:not(.play-frame) .arcade-main {
+  --hub-bg: #070a10;
+  --hub-bg-soft: #0b1018;
+  --hub-surface: rgba(13, 18, 28, 0.92);
+  --hub-surface-strong: #101722;
+  --hub-surface-soft: rgba(255, 255, 255, 0.055);
+  --hub-line: rgba(255, 255, 255, 0.105);
+  --hub-line-strong: rgba(255, 255, 255, 0.18);
+  --hub-text: #f7f9fc;
+  --hub-muted: #aeb8c7;
+  --hub-subtle: #748094;
+  --hub-blue: #4aa3ff;
+  --hub-green: #86f26c;
+  --hub-violet: #a98bff;
+  --hub-amber: #ffd166;
+  --hub-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+  background:
+    radial-gradient(circle at 72% -8%, rgba(74, 163, 255, 0.16), transparent 32rem),
+    radial-gradient(circle at 22% 8%, rgba(134, 242, 108, 0.12), transparent 26rem),
+    linear-gradient(180deg, #070a10 0%, #0a0f17 46%, #080b11 100%);
+  color: var(--hub-text);
+  scrollbar-color: rgba(174, 184, 199, 0.48) transparent;
+}
+
+.arcade-frame:not(.play-frame) .hub-sidebar-bar {
+  border-bottom-color: var(--hub-line);
+  background: rgba(7, 10, 16, 0.86);
+  color: var(--hub-text);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.arcade-frame:not(.play-frame) .hub-sidebar-trigger {
+  border-color: var(--hub-line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--hub-text);
+}
+
+.arcade-frame:not(.play-frame) .hub-sidebar-trigger:hover,
+.arcade-frame:not(.play-frame) .hub-sidebar-trigger:focus-visible {
+  border-color: rgba(74, 163, 255, 0.42);
+  background: rgba(74, 163, 255, 0.12);
+  color: var(--hub-blue);
+}
+
+.arcade-frame:not(.play-frame) .hub-sidebar-breadcrumb {
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .hub-sidebar-breadcrumb strong,
+.arcade-frame:not(.play-frame) .arcade-title h1,
+.arcade-frame:not(.play-frame) .store-section h2,
+.arcade-frame:not(.play-frame) .continue-section h2,
+.arcade-frame:not(.play-frame) .collection-copy h1,
+.arcade-frame:not(.play-frame) .template-panel h2,
+.arcade-frame:not(.play-frame) .template-game-copy strong,
+.arcade-frame:not(.play-frame) .store-game-title-row strong,
+.arcade-frame:not(.play-frame) .compact-empty-state strong,
+.arcade-frame:not(.play-frame) .empty-genre-state h3,
+.arcade-frame:not(.play-frame) .unavailable-state h3 {
+  color: var(--hub-text);
+}
+
+.arcade-frame:not(.play-frame) .page-motion-shell {
+  padding-top: 84px;
+}
+
+.arcade-frame:not(.play-frame) .arcade-title {
+  margin-bottom: 14px;
+}
+
+.arcade-frame:not(.play-frame) .arcade-title h1 {
+  font-size: clamp(2.35rem, 3.4vw, 3.35rem);
+  font-weight: 720;
+}
+
+.arcade-frame:not(.play-frame) .feature-spotlight {
+  margin-bottom: 18px;
+}
+
+.arcade-frame:not(.play-frame) .feature-card {
+  height: clamp(330px, 36vw, 460px);
+  min-height: 330px;
+  border-color: var(--hub-line-strong);
+  border-radius: 8px;
+  background: #05070c;
+  box-shadow: var(--hub-shadow);
+}
+
+.arcade-frame:not(.play-frame) .feature-components-border,
+.arcade-frame:not(.play-frame) .store-components-border {
+  display: none;
+}
+
+.arcade-frame:not(.play-frame) .feature-copy p {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.arcade-frame:not(.play-frame) .feature-copy h2 {
+  max-width: 520px;
+  font-size: clamp(3.2rem, 6.4vw, 5.25rem);
+  letter-spacing: 0;
+}
+
+.arcade-frame:not(.play-frame) .feature-game-preview {
+  border-radius: 8px;
+  background: rgba(5, 8, 14, 0.78);
+}
+
+.arcade-frame:not(.play-frame) .feature-arrow,
+.arcade-frame:not(.play-frame) .feature-secondary-button {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.arcade-frame:not(.play-frame) .primary-play-button,
+.arcade-frame:not(.play-frame) .collection-primary-action,
+.arcade-frame:not(.play-frame) .primary-link,
+.arcade-frame:not(.play-frame) .primary-action,
+.arcade-frame:not(.play-frame) .store-get-button,
+.arcade-frame:not(.play-frame) .cipherword-cta-action,
+.arcade-frame:not(.play-frame) .discover-action {
+  background: #2388ff;
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(35, 136, 255, 0.22);
+}
+
+.arcade-frame:not(.play-frame) .primary-play-button:hover,
+.arcade-frame:not(.play-frame) .collection-primary-action:hover,
+.arcade-frame:not(.play-frame) .primary-link:hover,
+.arcade-frame:not(.play-frame) .primary-action:hover,
+.arcade-frame:not(.play-frame) .store-game-card:not(.is-disabled):hover .store-get-button,
+.arcade-frame:not(.play-frame) .continue-card:hover .store-get-button,
+.arcade-frame:not(.play-frame) .discover-action:hover {
+  background: #4aa3ff;
+}
+
+.arcade-frame:not(.play-frame) .arcade-storefront {
+  gap: 20px;
+}
+
+.arcade-frame:not(.play-frame) .store-section {
+  border-top-color: var(--hub-line);
+  padding: 22px 0 24px;
+}
+
+.arcade-frame:not(.play-frame) .store-section-header {
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.arcade-frame:not(.play-frame) .store-section-header p,
+.arcade-frame:not(.play-frame) .collection-copy p,
+.arcade-frame:not(.play-frame) .template-panel span,
+.arcade-frame:not(.play-frame) .template-game-copy small,
+.arcade-frame:not(.play-frame)
+  .store-game-copy
+  > span:not(.store-game-title-row):not(.store-game-meta),
+.arcade-frame:not(.play-frame) .compact-empty-state span,
+.arcade-frame:not(.play-frame) .empty-genre-state p,
+.arcade-frame:not(.play-frame) .unavailable-state span {
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .section-count-badge,
+.arcade-frame:not(.play-frame) .genre-pill.static,
+.arcade-frame:not(.play-frame) .store-game-meta small,
+.arcade-frame:not(.play-frame) .coming-soon-meta span,
+.arcade-frame:not(.play-frame) .status-badge,
+.arcade-frame:not(.play-frame) .mini-status,
+.arcade-frame:not(.play-frame) .coming-soon-copy small {
+  border-color: var(--hub-line);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .genre-pills {
+  gap: 8px;
+  border: 1px solid var(--hub-line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+  padding: 8px;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 24px), transparent 100%);
+}
+
+.arcade-frame:not(.play-frame) .genre-filter-label,
+.arcade-frame:not(.play-frame) .genre-result-count,
+.arcade-frame:not(.play-frame) .store-section-header > span,
+.arcade-frame:not(.play-frame) .collection-actions > span {
+  color: var(--hub-subtle);
+}
+
+.arcade-frame:not(.play-frame) .genre-pill {
+  min-height: 34px;
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--hub-text);
+}
+
+.arcade-frame:not(.play-frame) .genre-pill:hover:not(.static) {
+  border-color: rgba(74, 163, 255, 0.32);
+  background: rgba(74, 163, 255, 0.12);
+  color: var(--hub-text);
+}
+
+.arcade-frame:not(.play-frame) .genre-pill.active {
+  color: #07101a;
+}
+
+.arcade-frame:not(.play-frame) .genre-pill-background {
+  background: linear-gradient(135deg, #86f26c, #4aa3ff);
+  box-shadow: 0 10px 24px rgba(74, 163, 255, 0.18);
+}
+
+.arcade-frame:not(.play-frame) .store-card-grid {
+  gap: 14px;
+}
+
+.arcade-frame:not(.play-frame) .store-card-grid.live {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+
+.arcade-frame:not(.play-frame) .store-card-grid.planned {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.arcade-frame:not(.play-frame) .store-game-card {
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(178px, 0.9fr) minmax(132px, auto) auto;
+  align-items: stretch;
+  min-height: 344px;
+  gap: 0;
+  border-color: var(--hub-line);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
+    var(--hub-surface);
+  color: var(--hub-text);
+  padding: 0;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.18);
+}
+
+.arcade-frame:not(.play-frame) .store-game-card:not(.is-disabled):hover,
+.arcade-frame:not(.play-frame) .store-game-card:not(.is-disabled):focus-visible {
+  border-color: rgba(74, 163, 255, 0.45);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+  color: var(--hub-blue);
+}
+
+.arcade-frame:not(.play-frame) .store-game-card.is-disabled {
+  grid-template-columns: 1fr;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .store-game-card.is-disabled .store-app-icon,
+.arcade-frame:not(.play-frame) .template-game-card.is-disabled .game-preview {
+  filter: saturate(0.76) contrast(1.04);
+  opacity: 0.78;
+}
+
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon {
+  width: 100%;
+  height: 100%;
+  min-height: 178px;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.arcade-frame:not(.play-frame) .store-game-copy {
+  align-content: start;
+  gap: 10px;
+  min-height: 132px;
+  padding: 16px 16px 12px;
+}
+
+.arcade-frame:not(.play-frame) .store-game-title-row {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.arcade-frame:not(.play-frame) .store-game-title-row strong {
+  white-space: normal;
+}
+
+.arcade-frame:not(.play-frame)
+  .store-game-copy
+  > span:not(.store-game-title-row):not(.store-game-meta) {
+  display: -webkit-box;
+  min-height: 2.7em;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+}
+
+.arcade-frame:not(.play-frame) .store-game-meta small,
+.arcade-frame:not(.play-frame) .coming-soon-meta span {
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 6px;
+}
+
+.arcade-frame:not(.play-frame) .store-game-card .store-get-button {
+  justify-self: start;
+  min-height: 34px;
+  margin: 0 16px 16px;
+  border-radius: 7px;
+}
+
+.arcade-frame:not(.play-frame) .mini-status.playable {
+  border-color: rgba(74, 163, 255, 0.28);
+  background: rgba(74, 163, 255, 0.13);
+  color: #9fd0ff;
+}
+
+.arcade-frame:not(.play-frame) .continue-card {
+  height: clamp(148px, 13vw, 174px);
+  border-color: var(--hub-line);
+  border-radius: 8px;
+  background: #05070c;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.arcade-frame:not(.play-frame) .continue-footer {
+  border-radius: 8px;
+}
+
+.arcade-frame:not(.play-frame) .continue-stats {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.arcade-frame:not(.play-frame) .cipherword-cta {
+  border-color: var(--hub-line);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(169, 139, 255, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
+    var(--hub-surface);
+  color: var(--hub-text);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
+}
+
+.arcade-frame:not(.play-frame) .cipherword-cta-copy span {
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .cipherword-cta-details > span,
+.arcade-frame:not(.play-frame) .cipherword-cta-meta,
+.arcade-frame:not(.play-frame) .cipherword-cta-archive {
+  background: rgba(255, 255, 255, 0.075);
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .cipherword-cta-details > .cipherword-cta-badge {
+  background: rgba(255, 209, 102, 0.13);
+  color: #ffe0a0;
+}
+
+.arcade-frame:not(.play-frame) .cipherword-cta-details > .cipherword-cta-badge.progress {
+  background: rgba(74, 163, 255, 0.14);
+  color: #9fd0ff;
+}
+
+.arcade-frame:not(.play-frame) .cipherword-cta-details > .cipherword-cta-badge.solved {
+  background: rgba(134, 242, 108, 0.13);
+  color: #b9fca8;
+}
+
+.arcade-frame:not(.play-frame) .coming-soon-layout {
+  grid-template-columns: minmax(0, 0.88fr) minmax(340px, 1.12fr);
+  gap: 14px;
+}
+
+.arcade-frame:not(.play-frame) .coming-soon-card {
+  grid-template-columns: 0.96fr 1.04fr;
+  min-height: 282px;
+  border-color: var(--hub-line);
+  border-radius: 8px;
+  background: var(--hub-surface);
+  color: var(--hub-text);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+}
+
+.arcade-frame:not(.play-frame) .coming-soon-card.is-disabled {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .coming-soon-card.is-disabled .coming-soon-image {
+  filter: saturate(0.9) contrast(1.04) brightness(0.9);
+  opacity: 0.88;
+}
+
+.arcade-frame:not(.play-frame) .coming-soon-status {
+  border-color: var(--hub-line);
+  border-radius: 6px;
+  background: rgba(5, 8, 14, 0.68);
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .coming-soon-copy strong {
+  color: var(--hub-text);
+}
+
+.arcade-frame:not(.play-frame)
+  .coming-soon-copy
+  > span:not(.coming-soon-meta):not(.store-get-button) {
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .coming-soon-media {
+  min-height: 282px;
+  background: #05070c;
+}
+
+.arcade-frame:not(.play-frame) .compact-empty-state,
+.arcade-frame:not(.play-frame) .empty-genre-state,
+.arcade-frame:not(.play-frame) .launcher-panel {
+  border-color: var(--hub-line);
+  border-radius: 8px;
+  background: var(--hub-surface);
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .collection-hero {
+  border: 1px solid var(--hub-line);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 86% 10%, rgba(74, 163, 255, 0.14), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)),
+    var(--hub-surface);
+  box-shadow: var(--hub-shadow);
+}
+
+.arcade-frame:not(.play-frame) .collection-art {
+  border-color: var(--hub-line);
+  border-radius: 8px;
+  background: #05070c;
+}
+
+.arcade-frame:not(.play-frame) .collection-art > span {
+  border: 1px solid var(--hub-line);
+  border-radius: 6px;
+  background: rgba(5, 8, 14, 0.7);
+  color: var(--hub-text);
+}
+
+.arcade-frame:not(.play-frame) .template-panel,
+.arcade-frame:not(.play-frame) .template-game-card {
+  border-color: var(--hub-line);
+  border-radius: 8px;
+  background: var(--hub-surface);
+  color: var(--hub-text);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.16);
+}
+
+.arcade-frame:not(.play-frame) .template-game-card {
+  grid-template-columns: minmax(160px, 0.72fr) minmax(0, 1fr);
+}
+
+.arcade-frame:not(.play-frame) .template-game-card.is-disabled {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .template-game-card.is-disabled .template-game-copy strong,
+.arcade-frame:not(.play-frame) .template-game-card.is-disabled .template-game-copy small {
+  color: var(--hub-muted);
+}
+
+.arcade-frame:not(.play-frame) .game-preview,
+.arcade-frame:not(.play-frame) .unavailable-art,
+.arcade-frame:not(.play-frame) .store-app-icon,
+.arcade-frame:not(.play-frame) .coming-soon-media.preview-art,
+.arcade-frame:not(.play-frame) .collection-art {
+  background:
+    radial-gradient(circle at 24% 16%, rgba(255, 255, 255, 0.08), transparent 32%),
+    linear-gradient(135deg, #0c1520, #05070c);
+}
+
+.arcade-frame:not(.play-frame) .game-preview::before,
+.arcade-frame:not(.play-frame) .store-app-icon::before,
+.arcade-frame:not(.play-frame) .coming-soon-media.preview-art::before,
+.arcade-frame:not(.play-frame) .collection-art::before {
+  background-image:
+    linear-gradient(rgba(134, 242, 108, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 163, 255, 0.055) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.arcade-frame:not(.play-frame) .store-app-icon.small {
+  border-radius: 8px;
+}
+
+.arcade-frame:not(.play-frame) .mine-scene,
+.arcade-frame:not(.play-frame) .pong-scene,
+.arcade-frame:not(.play-frame) .tiles-scene,
+.arcade-frame:not(.play-frame) .orbit-scene,
+.arcade-frame:not(.play-frame) .sky-scene,
+.arcade-frame:not(.play-frame) .word-scene,
+.arcade-frame:not(.play-frame) .stack-scene,
+.arcade-frame:not(.play-frame) .garden-scene,
+.arcade-frame:not(.play-frame) .route-scene,
+.arcade-frame:not(.play-frame) .number-scene {
+  background:
+    radial-gradient(circle at 72% 18%, rgba(74, 163, 255, 0.18), transparent 26%),
+    radial-gradient(circle at 22% 78%, rgba(134, 242, 108, 0.12), transparent 28%),
+    linear-gradient(135deg, #0e1824, #05070c);
+}
+
+.arcade-frame:not(.play-frame) .tiles-scene,
+.arcade-frame:not(.play-frame) .word-scene {
+  background:
+    radial-gradient(circle at 72% 18%, rgba(169, 139, 255, 0.26), transparent 28%),
+    linear-gradient(135deg, #150f2a, #06070d);
+}
+
+.arcade-frame:not(.play-frame) .sky-scene,
+.arcade-frame:not(.play-frame) .pong-scene {
+  background:
+    radial-gradient(circle at 78% 20%, rgba(74, 163, 255, 0.28), transparent 28%),
+    linear-gradient(135deg, #071827, #05070c);
+}
+
+.arcade-frame:not(.play-frame) .stack-scene,
+.arcade-frame:not(.play-frame) .garden-scene {
+  background:
+    radial-gradient(circle at 34% 22%, rgba(134, 242, 108, 0.22), transparent 28%),
+    linear-gradient(135deg, #071b16, #05070c);
+}
+
+.arcade-frame:not(.play-frame) .route-scene,
+.arcade-frame:not(.play-frame) .number-scene,
+.arcade-frame:not(.play-frame) .mine-scene {
+  background:
+    radial-gradient(circle at 78% 20%, rgba(255, 209, 102, 0.22), transparent 26%),
+    linear-gradient(135deg, #17140a, #05070c);
+}
+
+.arcade-frame:not(.play-frame) .mine-radar,
+.arcade-frame:not(.play-frame) .orbit-scene .orbit-ring {
+  border-color: rgba(74, 163, 255, 0.28);
+}
+
+.arcade-frame:not(.play-frame) .mine-grid i,
+.arcade-frame:not(.play-frame) .number-board i {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.09);
+  color: #cfe7ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.arcade-frame:not(.play-frame) .mine-grid i.revealed {
+  background: rgba(74, 163, 255, 0.16);
+}
+
+.arcade-frame:not(.play-frame) .mine-grid i.mine {
+  background:
+    radial-gradient(circle at 50% 52%, #f7f9fc 0 28%, transparent 29%), rgba(255, 255, 255, 0.1);
+}
+
+.arcade-frame:not(.play-frame) .tile-board i,
+.arcade-frame:not(.play-frame) .route-board i {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.arcade-frame:not(.play-frame) .sky-scene .sky-cloud {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow:
+    12px 2px 0 rgba(255, 255, 255, 0.46),
+    -8px 4px 0 rgba(255, 255, 255, 0.38);
+}
+
+.arcade-frame:not(.play-frame) .garden-scene .garden-bed,
+.arcade-frame:not(.play-frame) .stack-scene .stack-shadow {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.arcade-frame:not(.play-frame) .route-board i.blocked {
+  background:
+    linear-gradient(45deg, transparent 42%, rgba(255, 255, 255, 0.26) 43% 57%, transparent 58%),
+    rgba(255, 255, 255, 0.08);
+}
+
+.arcade-frame:not(.play-frame) .cipherword-preview-art {
+  inset: 24% 20%;
+}
+
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .snake-preview-route,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .snake-preview-route,
+.arcade-frame:not(.play-frame) .collection-art .snake-preview-route,
+.arcade-frame:not(.play-frame) .unavailable-art .snake-preview-route {
+  top: 24%;
+  right: auto;
+  bottom: auto;
+  left: 13%;
+  width: 72%;
+  height: 52%;
+}
+
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .snake-route,
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .snake-head-dot,
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .food-dot,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .snake-route,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .snake-head-dot,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .food-dot,
+.arcade-frame:not(.play-frame) .collection-art .snake-route,
+.arcade-frame:not(.play-frame) .collection-art .snake-head-dot,
+.arcade-frame:not(.play-frame) .collection-art .food-dot,
+.arcade-frame:not(.play-frame) .unavailable-art .snake-route,
+.arcade-frame:not(.play-frame) .unavailable-art .snake-head-dot,
+.arcade-frame:not(.play-frame) .unavailable-art .food-dot {
+  box-shadow:
+    0 10px 22px rgba(134, 242, 108, 0.22),
+    0 0 24px rgba(134, 242, 108, 0.18);
+}
+
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .snake-route.tail,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .snake-route.tail,
+.arcade-frame:not(.play-frame) .collection-art .snake-route.tail,
+.arcade-frame:not(.play-frame) .unavailable-art .snake-route.tail {
+  top: 4%;
+  left: 0;
+  width: 48%;
+  height: 16%;
+}
+
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .snake-route.turn,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .snake-route.turn,
+.arcade-frame:not(.play-frame) .collection-art .snake-route.turn,
+.arcade-frame:not(.play-frame) .unavailable-art .snake-route.turn {
+  top: 4%;
+  left: 41%;
+  width: 16%;
+  height: 55%;
+}
+
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .snake-route.neck,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .snake-route.neck,
+.arcade-frame:not(.play-frame) .collection-art .snake-route.neck,
+.arcade-frame:not(.play-frame) .unavailable-art .snake-route.neck {
+  top: 43%;
+  left: 41%;
+  width: 42%;
+  height: 16%;
+}
+
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .snake-head-dot,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .snake-head-dot,
+.arcade-frame:not(.play-frame) .collection-art .snake-head-dot,
+.arcade-frame:not(.play-frame) .unavailable-art .snake-head-dot {
+  top: 34%;
+  left: 74%;
+  width: 22%;
+  height: 32%;
+}
+
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .snake-head-dot::before,
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .snake-head-dot::after,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .snake-head-dot::before,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .snake-head-dot::after,
+.arcade-frame:not(.play-frame) .collection-art .snake-head-dot::before,
+.arcade-frame:not(.play-frame) .collection-art .snake-head-dot::after,
+.arcade-frame:not(.play-frame) .unavailable-art .snake-head-dot::before,
+.arcade-frame:not(.play-frame) .unavailable-art .snake-head-dot::after {
+  width: 14%;
+  height: 14%;
+}
+
+.arcade-frame:not(.play-frame) .store-game-card .store-app-icon .food-dot,
+.arcade-frame:not(.play-frame) .template-game-card .game-preview .food-dot,
+.arcade-frame:not(.play-frame) .collection-art .food-dot,
+.arcade-frame:not(.play-frame) .unavailable-art .food-dot {
+  top: 34%;
+  right: 20%;
+  width: 7%;
+  height: 9%;
+}
+
+.arcade-frame:not(.play-frame) .discover-parallax,
+.arcade-frame:not(.play-frame) .text-parallax-content {
+  background: transparent;
+}
+
+@media (max-width: 1280px) {
+  .arcade-frame:not(.play-frame) .coming-soon-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .arcade-frame:not(.play-frame) .page-motion-shell {
+    padding-top: 74px;
+  }
+
+  .arcade-frame:not(.play-frame) .coming-soon-layout,
+  .arcade-frame:not(.play-frame) .coming-soon-card {
+    grid-template-columns: 1fr;
+  }
+
+  .arcade-frame:not(.play-frame) .store-card-grid.planned {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  }
+
+  .arcade-frame:not(.play-frame) .coming-soon-media {
+    min-height: 230px;
+  }
+
+  .arcade-frame:not(.play-frame) .template-game-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .arcade-frame:not(.play-frame) .feature-card {
+    height: 360px;
+    min-height: 360px;
+  }
+
+  .arcade-frame:not(.play-frame) .feature-copy h2 {
+    font-size: 2.55rem;
+  }
+
+  .arcade-frame:not(.play-frame) .feature-copy > span {
+    max-width: 310px;
+  }
+
+  .arcade-frame:not(.play-frame) .store-game-card {
+    min-height: 328px;
+  }
+
+  .arcade-frame:not(.play-frame) .store-game-card .store-app-icon {
+    width: 100%;
+    height: 178px;
+    border-radius: 0;
+  }
+
+  .arcade-frame:not(.play-frame) .store-game-title-row {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 430px) {
+  .arcade-frame:not(.play-frame) .arcade-title h1 {
+    font-size: 2.25rem;
+  }
+
+  .arcade-frame:not(.play-frame) .feature-card {
+    height: 360px;
+    min-height: 360px;
+  }
+
+  .arcade-frame:not(.play-frame) .feature-copy {
+    top: 47%;
+  }
+
+  .arcade-frame:not(.play-frame) .feature-copy h2 {
+    font-size: 2.25rem;
+  }
+
+  .arcade-frame:not(.play-frame) .feature-meta span {
+    font-size: 0.68rem;
+  }
+
+  .arcade-frame:not(.play-frame) .store-section-header {
+    align-items: flex-start;
+  }
+
+  .arcade-frame:not(.play-frame) .continue-footer {
+    border-radius: 8px;
+  }
+
+  .arcade-frame:not(.play-frame) .cipherword-cta.banner {
+    min-height: 0;
   }
 }
 
