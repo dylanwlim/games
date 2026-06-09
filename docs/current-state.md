@@ -6,6 +6,18 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-09: Fixed the GameHub sidebar/header regression from the Safari
+  screenshots. The sidebar brand now shows only `Dylan Games`, the sidebar
+  search icon is explicitly centered inside the search input with safe left
+  inset on desktop and mobile, and the hub header is fixed to the top through
+  scroll extremes while preserving play-route controls. Added Playwright
+  coverage for the removed subtitle, fixed header top position at scroll
+  top/bottom, and search icon geometry. Validation passed targeted Prettier,
+  scoped ESLint, `npm run typecheck`, `npm run test`, `npm run build`, focused
+  desktop/mobile `tests/e2e/hub.spec.ts`, and Browser desktop/mobile rendered
+  checks. Full `npm run validate` is currently blocked before this pass's checks
+  by pre-existing Prettier failures in DWL/auth files.
+
 - 2026-06-08: standardized internal game/source filenames without changing
   public routes, visible game names, gameplay behavior, or product copy.
   Cipherword/Cipher implementation files, Snake implementation files, the game
@@ -140,7 +152,7 @@ that changes or verifies the project.
   registry-backed collection template.
 - 2026-05-30: Added the standardized `docs-public/` guide set and
   `.github/workflows/publish-public-docs.yml` so public manuals/changelog files
-  can be mirrored to `dylanwlim/dylan-games-docs` on docs changes, manual
+  can be mirrored to `dylanwlim/games-docs` on docs changes, manual
   dispatch, and the daily sync.
 - 2026-05-30: Scaffolded and deployed Dylan Games as a production Next.js App
   Router app for `games.dylanwlim.com`. The app includes a hub-first UI,
@@ -154,6 +166,9 @@ that changes or verifies the project.
   `team_bbLoVoshgKMbjGs5UhmJM5kZ`, added `games.dylanwlim.com`, created the
   Cloudflare DNS-only `A` record for `games` -> `76.76.21.21`, and verified the
   production domain with `npm run verify:deployment -- https://games.dylanwlim.com`.
+- 2026-06-08: Renamed the local repo folder, GitHub repo, and Vercel project
+  from `dylan-games` to `games`; renamed the public docs repo from
+  `dylan-games-docs` to `games-docs`.
 - 2026-05-30: Reworked the UI to match the supplied Apple Arcade-style
   reference: sidebar-first app shell, `Games` title, `Discover` page, genre
   pages, genre chips, screenshot-matched feature banner, `dylanwlim.com`
@@ -170,11 +185,32 @@ that changes or verifies the project.
 ## Current Deployment
 
 - Production: `https://games.dylanwlim.com`
-- Vercel project: `dylan-games`
+- Vercel project: `games`
   (`prj_cgKDdPzQttp7ubHyaBuYRRXVHX0m`)
+- GitHub repo: `https://github.com/dylanwlim/games`
+- Public docs repo: `https://github.com/dylanwlim/games-docs`
 - Vercel framework preset: `Next.js`
 - Direct Vercel preview URLs may require Vercel authentication because
   deployment protection is enabled; the custom production domain is publicly
   reachable and verified.
 - Inspect the active production deployment id with
   `vercel inspect https://games.dylanwlim.com --scope dylans-projects-73251aac`.
+
+## DWL Accounts Readiness
+
+- Public sign-in/sign-up controls are now visible in the existing sidebar
+  footer on desktop and inside the mobile sidebar drawer.
+- `app/auth/callback/route.ts` exchanges the one-time DWL Accounts code and
+  sets the `games_dwl_session` HttpOnly cookie.
+- `app/api/dwl/session/route.ts` exposes the account summary. `app/api/dwl/state/route.ts`
+  proxies game progress to Accounts app state under key `progress`.
+- `features/games/components/dwl-game-sync.tsx` syncs existing `games:*` and
+  legacy `dylan-games:*` localStorage progress keys to/from DWL Accounts. A
+  fresh device reloads once after remote progress is applied so existing game
+  hooks read the restored values.
+- Stable DWL app id is `games`, matching the repo rename from `dylan-games` to
+  `games`.
+- `.env.example` documents `DWL_APP_SECRET` plus public routing variables.
+- Validation for this pass: `npm run typecheck`, `npm run lint`,
+  `npm run build`, and Playwright rendered checks at `127.0.0.1:3102`
+  desktop/mobile with no overflow or console errors.

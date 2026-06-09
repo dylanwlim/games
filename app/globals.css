@@ -488,19 +488,25 @@ img {
 .game-sidebar-search {
   height: 36px;
   border-radius: 18px;
+  padding-left: 44px;
   padding-block: 0;
   line-height: 1;
 }
 
 .game-sidebar-search-icon {
   color: currentColor;
+  left: 16px;
+  transform: translateY(-50%);
 }
 
 .hub-sidebar-bar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  right: 0;
+  left: var(--sidebar-width-icon);
   z-index: 43;
   display: flex;
+  height: 58px;
   min-height: 58px;
   flex: 0 0 auto;
   align-items: center;
@@ -508,6 +514,11 @@ img {
   border-bottom: 1px solid var(--line);
   background: var(--background);
   padding: 0 22px;
+  transition: left 200ms ease-linear;
+}
+
+.arcade-frame.sidebar-open .hub-sidebar-bar {
+  left: var(--sidebar-width);
 }
 
 .hub-sidebar-trigger {
@@ -573,7 +584,7 @@ img {
 .page-motion-shell {
   flex: 1 1 auto;
   min-width: 0;
-  padding: 22px 48px 42px;
+  padding: 80px 48px 42px;
 }
 
 .play-main .page-motion-shell {
@@ -585,7 +596,9 @@ img {
 .play-main .hub-sidebar-bar {
   position: fixed;
   top: 12px;
+  right: auto;
   left: calc(var(--sidebar-width-icon) + 12px);
+  height: auto;
   min-height: 0;
   border: 0;
   background: transparent;
@@ -5204,6 +5217,9 @@ img {
   }
 
   .hub-sidebar-bar {
+    right: 0;
+    left: 0;
+    height: 56px;
     min-height: 56px;
     padding: 0 14px;
   }
@@ -5213,7 +5229,7 @@ img {
   }
 
   .page-motion-shell {
-    padding: 18px 16px 40px;
+    padding: 74px 16px 40px;
   }
 
   .arcade-frame.play-frame {

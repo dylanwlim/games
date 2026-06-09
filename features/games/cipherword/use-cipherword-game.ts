@@ -16,6 +16,8 @@ import {
   cipherwordStatsStorageKey,
   createDefaultCipherwordStats,
   getUnlockedAchievements,
+  legacyCipherwordRecentUnlimitedKey,
+  legacyCipherwordStatsStorageKey,
   parseCipherwordStats,
   serializeCipherwordStats,
   updateStatsAfterRound,
@@ -28,7 +30,8 @@ import type {
   CipherwordStats,
 } from "./types";
 
-const progressPrefix = "dylan-games:cipherword-progress:v1";
+const progressPrefix = "games:cipherword-progress:v1";
+const legacyProgressPrefix = "dylan-games:cipherword-progress:v1";
 
 export function useCipherwordGame() {
   const router = useRouter();
@@ -51,7 +54,9 @@ export function useCipherwordGame() {
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      const storedStats = readStorage(cipherwordStatsStorageKey, setStorageAvailable);
+      const storedStats =
+        readStorage(cipherwordStatsStorageKey, setStorageAvailable) ??
+        readStorage(legacyCipherwordStatsStorageKey, setStorageAvailable);
       setStats(parseCipherwordStats(storedStats));
     }, 0);
 
@@ -70,7 +75,9 @@ export function useCipherwordGame() {
         seed: Date.now(),
       });
       const key = getProgressKey(nextRound);
-      const rawProgress = readStorage(key, setStorageAvailable);
+      const rawProgress =
+        readStorage(key, setStorageAvailable) ??
+        readStorage(getLegacyProgressKey(nextRound), setStorageAvailable);
       const completed = stats.completedPuzzles[nextRound.puzzleId];
       const savedGuesses = completed?.guesses ?? parseProgress(rawProgress);
       const replayed = savedGuesses.length
@@ -148,6 +155,7 @@ export function useCipherwordGame() {
     });
 
     removeStorage(getProgressKey(round), setStorageAvailable);
+    removeStorage(getLegacyProgressKey(round), setStorageAvailable);
     setRound(nextRound);
     setLastResult(null);
     setAchievementUnlocks([]);
@@ -208,6 +216,10 @@ function getProgressKey(round: CipherwordRoundState) {
   return `${progressPrefix}:${round.mode}:${round.dateKey ?? round.puzzleId}`;
 }
 
+function getLegacyProgressKey(round: CipherwordRoundState) {
+  return `${legacyProgressPrefix}:${round.mode}:${round.dateKey ?? round.puzzleId}`;
+}
+
 function parseProgress(raw: string | null) {
   if (!raw) {
     return [];
@@ -266,7 +278,10 @@ function removeStorage(key: string, setStorageAvailable: (available: boolean) =>
 }
 
 function readRecentUnlimitedIds(setStorageAvailable: (available: boolean) => void) {
-  return parseProgress(readStorage(cipherwordRecentUnlimitedKey, setStorageAvailable));
+  return parseProgress(
+    readStorage(cipherwordRecentUnlimitedKey, setStorageAvailable) ??
+      readStorage(legacyCipherwordRecentUnlimitedKey, setStorageAvailable),
+  );
 }
 
 function writeRecentUnlimitedId(

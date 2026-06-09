@@ -9,8 +9,11 @@ import type {
 } from "./types";
 
 export const cipherwordStatsVersion = 1;
-export const cipherwordStatsStorageKey = "dylan-games:cipherword-stats:v1";
-export const cipherwordRecentUnlimitedKey = "dylan-games:cipherword-recent-unlimited:v1";
+export const cipherwordStatsStorageKey = "games:cipherword-stats:v1";
+export const legacyCipherwordStatsStorageKey = "dylan-games:cipherword-stats:v1";
+export const cipherwordRecentUnlimitedKey = "games:cipherword-recent-unlimited:v1";
+export const legacyCipherwordRecentUnlimitedKey =
+  "dylan-games:cipherword-recent-unlimited:v1";
 
 export function createDefaultCipherwordStats(): CipherwordStats {
   return {

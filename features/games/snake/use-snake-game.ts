@@ -14,8 +14,10 @@ import {
 } from "./snake-engine";
 import { snakeModes, type Direction, type SnakeMode, type SnakeState } from "./snake-types";
 
-const bestScoresKey = "dylan-games:snake-best-scores";
-const lastModeKey = "dylan-games:snake-last-mode";
+const bestScoresKey = "games:snake-best-scores";
+const lastModeKey = "games:snake-last-mode";
+const legacyBestScoresKey = "dylan-games:snake-best-scores";
+const legacyLastModeKey = "dylan-games:snake-last-mode";
 
 type SnakeViewState = {
   game: SnakeState;
@@ -64,8 +66,11 @@ export function useSnakeGame() {
     let storedMode: SnakeMode | undefined;
     let storedBestScores = { ...initialBestScores };
 
-    const rawMode = window.localStorage.getItem(lastModeKey);
-    const rawBestScores = window.localStorage.getItem(bestScoresKey);
+    const rawMode =
+      window.localStorage.getItem(lastModeKey) ?? window.localStorage.getItem(legacyLastModeKey);
+    const rawBestScores =
+      window.localStorage.getItem(bestScoresKey) ??
+      window.localStorage.getItem(legacyBestScoresKey);
 
     if (rawMode && isSnakeMode(rawMode)) {
       storedMode = rawMode;

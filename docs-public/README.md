@@ -10,7 +10,7 @@
   <a href="https://games.dylanwlim.com">Open the public site</a> ·
   <a href="product-guide.md">Product guide</a> ·
   <a href="changelog.md">Changelog</a> ·
-  <a href="https://github.com/dylanwlim/dylan-games-docs/discussions">Discussions</a>
+  <a href="https://github.com/dylanwlim/games-docs/discussions">Discussions</a>
 </p>
 
 Dylan Games is a browser-games hub at games.dylanwlim.com. The current public play path is Snake, with Discover and genre pages for browsing the live catalog.

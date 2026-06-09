@@ -33,7 +33,7 @@ Next.js browser-games hub for `games.dylanwlim.com`.
 
 ## Deployment Record
 
-- Vercel project: `dylan-games` (`prj_cgKDdPzQttp7ubHyaBuYRRXVHX0m`)
+- Vercel project: `games` (`prj_cgKDdPzQttp7ubHyaBuYRRXVHX0m`)
 - Vercel team: `team_bbLoVoshgKMbjGs5UhmJM5kZ`
 - Production deployment: `dpl_7x9McVjNta9pfSkAjz53iYYR3bzm`
 - Preview deployment: `dpl_ES6A9dUYv8Pem5NmFmQ1AWviZFYC`

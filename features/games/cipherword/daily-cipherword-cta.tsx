@@ -7,7 +7,11 @@ import { m, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
 import { getCanonicalCipherwordDate, getCipherwordDailyIndex } from "./daily-answers";
-import { cipherwordStatsStorageKey, parseCipherwordStats } from "./stats";
+import {
+  cipherwordStatsStorageKey,
+  legacyCipherwordStatsStorageKey,
+  parseCipherwordStats,
+} from "./stats";
 
 type DailyCipherwordCTAVariant = "card" | "compact" | "banner";
 
@@ -22,10 +26,13 @@ export function DailyCipherwordCTA({ variant = "card" }: { variant?: DailyCipher
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       try {
-        const stats = parseCipherwordStats(window.localStorage.getItem(cipherwordStatsStorageKey));
-        const rawProgress = window.localStorage.getItem(
-          `dylan-games:cipherword-progress:v1:daily:${todayKey}`,
+        const stats = parseCipherwordStats(
+          window.localStorage.getItem(cipherwordStatsStorageKey) ??
+            window.localStorage.getItem(legacyCipherwordStatsStorageKey),
         );
+        const rawProgress =
+          window.localStorage.getItem(`games:cipherword-progress:v1:daily:${todayKey}`) ??
+          window.localStorage.getItem(`dylan-games:cipherword-progress:v1:daily:${todayKey}`);
         const progress = rawProgress ? (JSON.parse(rawProgress) as unknown) : [];
 
         setSolved(stats.daily.solvedDates.includes(todayKey));

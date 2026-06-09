@@ -3,7 +3,7 @@
 ## Open The Public Surface
 
 - Public site: [https://games.dylanwlim.com](https://games.dylanwlim.com)
-- Discussions: [https://github.com/dylanwlim/dylan-games-docs/discussions](https://github.com/dylanwlim/dylan-games-docs/discussions)
+- Discussions: [https://github.com/dylanwlim/games-docs/discussions](https://github.com/dylanwlim/games-docs/discussions)
 
 ## Use The Current Flow
 
@@ -17,7 +17,7 @@ The public hub is live with Snake, New Game, keyboard/on-screen controls, Discov
 
 ## Source Development
 
-The source repository is public at [https://github.com/dylanwlim/dylan-games](https://github.com/dylanwlim/dylan-games).
+The source repository is public at [https://github.com/dylanwlim/games](https://github.com/dylanwlim/games).
 
 ```bash
 npm ci

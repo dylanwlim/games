@@ -2,7 +2,7 @@
 
 ## Production Target
 
-- Vercel project: `dylan-games` (`prj_cgKDdPzQttp7ubHyaBuYRRXVHX0m`)
+- Vercel project: `games` (`prj_cgKDdPzQttp7ubHyaBuYRRXVHX0m`)
 - Vercel team: `team_bbLoVoshgKMbjGs5UhmJM5kZ`
 - Production domain: `games.dylanwlim.com`
 - Main site boundary: do not modify or link from `dylanwlim.com`
@@ -18,7 +18,7 @@ project inspect currently reports the same values:
 - Development command: `npm run dev`
 - Output directory: `.next`
 
-No environment variables are required for the current app.
+DWL Accounts routing variables are optional and remain hidden from public UI.
 
 ## DNS
 

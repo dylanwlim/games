@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
+import { DwlGameSync } from "@/features/games/components/dwl-game-sync";
 import { siteConfig } from "@/lib/site";
 
 import "./globals.css";
@@ -87,7 +88,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <DwlGameSync />
+        {children}
+      </body>
     </html>
   );
 }

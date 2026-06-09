@@ -10,6 +10,7 @@ test("renders the hub and launches the featured Cipher game", async ({ page }) =
 
   await expect(page).toHaveTitle(/Dylan Games/);
   await expect(page.getByRole("heading", { name: "Games", level: 1 })).toBeVisible();
+  await expect(page.getByText("Quiet arcade")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Open navigation" })).toBeVisible();
   if ((page.viewportSize()?.width ?? 0) >= 900) {
     const sidebar = page.locator("#arcade-sidebar");
@@ -50,6 +51,57 @@ test("renders the hub and launches the featured Cipher game", async ({ page }) =
   );
 });
 
+test("keeps the hub header fixed through scroll extremes", async ({ page }) => {
+  await page.goto("/");
+
+  const header = page.locator(".hub-sidebar-bar");
+  await expect(header).toBeVisible();
+
+  const readHeader = () =>
+    header.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+
+      return {
+        position: window.getComputedStyle(element).position,
+        top: rect.top,
+      };
+    });
+
+  await expect
+    .poll(async () => {
+      const state = await readHeader();
+
+      return `${state.position}:${Math.round(state.top)}`;
+    })
+    .toBe("fixed:0");
+
+  await page.evaluate(() => {
+    const main = document.querySelector(".arcade-main") as HTMLElement | null;
+
+    if (main && window.getComputedStyle(main).overflowY !== "visible") {
+      main.scrollTop = main.scrollHeight;
+      return;
+    }
+
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  });
+
+  await expect.poll(async () => Math.round((await readHeader()).top)).toBe(0);
+
+  await page.evaluate(() => {
+    const main = document.querySelector(".arcade-main") as HTMLElement | null;
+
+    if (main && window.getComputedStyle(main).overflowY !== "visible") {
+      main.scrollTop = 0;
+      return;
+    }
+
+    window.scrollTo(0, 0);
+  });
+
+  await expect.poll(async () => Math.round((await readHeader()).top)).toBe(0);
+});
+
 test("filters sidebar search by fuzzy game and category names", async ({ page }) => {
   await page.goto("/");
 
@@ -58,6 +110,27 @@ test("filters sidebar search by fuzzy game and category names", async ({ page })
   let search = page.getByLabel("Search games");
   const sidebar = page.locator("#arcade-sidebar");
   await expect(search).toBeVisible();
+  const searchGeometry = await search.evaluate((element) => {
+    const icon = element.parentElement?.querySelector(".game-sidebar-search-icon");
+    const inputRect = element.getBoundingClientRect();
+    const iconRect = icon?.getBoundingClientRect();
+
+    return iconRect
+      ? {
+          centerInset: iconRect.left + iconRect.width / 2 - inputRect.left,
+          leftInset: iconRect.left - inputRect.left,
+          rightInset: inputRect.right - iconRect.right,
+          verticalDelta: Math.abs(
+            iconRect.top + iconRect.height / 2 - (inputRect.top + inputRect.height / 2),
+          ),
+        }
+      : null;
+  });
+  expect(searchGeometry).not.toBeNull();
+  expect(searchGeometry!.leftInset).toBeGreaterThanOrEqual(14);
+  expect(searchGeometry!.centerInset).toBeLessThanOrEqual(28);
+  expect(searchGeometry!.rightInset).toBeGreaterThan(0);
+  expect(searchGeometry!.verticalDelta).toBeLessThanOrEqual(1);
 
   const activeLinkBackground = await page
     .locator("#arcade-sidebar")

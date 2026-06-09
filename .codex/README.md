@@ -25,5 +25,6 @@ Use `npm run validate` for the complete local gate.
 
 ## Vercel
 
-The intended production project is `dylan-games`, serving
-`games.dylanwlim.com`. The app currently has no required environment variables.
+The intended production project is `games`, serving `games.dylanwlim.com`.
+The app has optional DWL Accounts routing variables documented in
+`.env.example`, but no visible auth UI.

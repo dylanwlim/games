@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  PUBLIC_DOCS_REPO: dylanwlim/dylan-games-docs
+  PUBLIC_DOCS_REPO: dylanwlim/games-docs
   PUBLIC_DOCS_HOMEPAGE_URL: "https://games.dylanwlim.com"
 
 jobs:

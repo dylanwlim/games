@@ -16,4 +16,4 @@ All Games, Discover, and genre pages provide public browsing paths around the cu
 
 ## Publishing Model
 
-The public guide files live under `docs-public/` in the source repository. The publishing workflow captures the current homepage screenshot, validates the public docs allowlist, and mirrors the result into `dylanwlim/dylan-games-docs`.
+The public guide files live under `docs-public/` in the source repository. The publishing workflow captures the current homepage screenshot, validates the public docs allowlist, and mirrors the result into `dylanwlim/games-docs`.

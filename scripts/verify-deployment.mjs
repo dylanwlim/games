@@ -1,4 +1,8 @@
-const target = process.argv[2] ?? process.env.DYLAN_GAMES_URL ?? "https://games.dylanwlim.com";
+const target =
+  process.argv[2] ??
+  process.env.GAMES_URL ??
+  process.env.DYLAN_GAMES_URL ??
+  "https://games.dylanwlim.com";
 
 const normalizeUrl = (value) => {
   try {
@@ -11,7 +15,7 @@ const normalizeUrl = (value) => {
 const fetchText = async (url) => {
   const response = await fetch(url, {
     headers: {
-      "User-Agent": "dylan-games-deployment-verifier/1.0",
+      "User-Agent": "games-deployment-verifier/1.0",
     },
   });
 

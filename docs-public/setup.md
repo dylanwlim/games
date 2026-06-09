@@ -3,7 +3,7 @@
 ## Public Entry Points
 
 - Public site: [https://games.dylanwlim.com](https://games.dylanwlim.com)
-- Public discussions: [https://github.com/dylanwlim/dylan-games-docs/discussions](https://github.com/dylanwlim/dylan-games-docs/discussions)
+- Public discussions: [https://github.com/dylanwlim/games-docs/discussions](https://github.com/dylanwlim/games-docs/discussions)
 
 ## Current Use
 

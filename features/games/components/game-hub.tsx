@@ -39,6 +39,8 @@ import {
   Grid2X2,
   Heart,
   Lock,
+  LogIn,
+  LogOut,
   Map,
   PanelLeft,
   Play,
@@ -49,6 +51,7 @@ import {
   Star,
   Trophy,
   Type,
+  UserRound,
   Users,
   Zap,
   type LucideIcon,
@@ -71,6 +74,12 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  getDwlAccountUrl,
+  getDwlSignInUrl,
+  getDwlSignUpUrl,
+  type DwlAccountUser,
+} from "@/lib/dwl-accounts";
 
 type GameHubView = "games" | "discover" | "favorites" | "genre";
 
@@ -543,7 +552,6 @@ function HubSidebar({
                 </div>
                 <div className="flex min-w-0 flex-col gap-0.5 leading-none">
                   <span className="truncate font-semibold">Dylan Games</span>
-                  <span className="truncate text-xs text-sidebar-foreground/70">Quiet arcade</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -563,7 +571,7 @@ function HubSidebar({
                 </label>
                 <Search
                   aria-hidden="true"
-                  className="game-sidebar-search-icon pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 select-none opacity-50"
+                  className="game-sidebar-search-icon pointer-events-none absolute top-1/2 size-4 select-none opacity-50"
                 />
                 <SidebarInput
                   id="game-sidebar-search"
@@ -631,6 +639,7 @@ function HubSidebar({
 
       <SidebarFooter>
         <SidebarMenu>
+          <DwlAccountSidebarItems />
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="dylanwlim.com">
               <a href="https://dylanwlim.com" rel="noreferrer">
@@ -644,6 +653,81 @@ function HubSidebar({
       <SidebarRail />
     </SidebarShell>
   );
+}
+
+function DwlAccountSidebarItems() {
+  const [user, setUser] = useState<DwlAccountUser | null>(null);
+  const authReturnPath = getCurrentAuthReturnPath();
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/dwl/session", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body: { user?: DwlAccountUser | null } | null) => {
+        if (!cancelled) {
+          setUser(body?.user ?? null);
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (user) {
+    return (
+      <>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild tooltip={user.email}>
+            <a href={getDwlAccountUrl({ returnPath: authReturnPath })}>
+              <UserRound aria-hidden="true" />
+              <span>{user.name || user.email}</span>
+            </a>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild tooltip="Sign out">
+            <a href="/auth/sign-out">
+              <LogOut aria-hidden="true" />
+              <span>Sign out</span>
+            </a>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild tooltip="Sign in">
+          <a href={getDwlSignInUrl({ returnPath: authReturnPath })}>
+            <LogIn aria-hidden="true" />
+            <span>Sign in</span>
+          </a>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild tooltip="Create account">
+          <a href={getDwlSignUpUrl({ returnPath: authReturnPath })}>
+            <UserRound aria-hidden="true" />
+            <span>Create account</span>
+          </a>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    </>
+  );
+}
+
+function getCurrentAuthReturnPath() {
+  if (typeof window === "undefined") {
+    return "/auth/callback";
+  }
+
+  const currentPath =
+    `${window.location.pathname}${window.location.search}${window.location.hash}` || "/";
+  return `/auth/callback?next=${encodeURIComponent(currentPath)}`;
 }
 
 function HubSidebarLink({
@@ -1271,7 +1355,9 @@ function ContinueCard({
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       try {
-        const rawScores = window.localStorage.getItem("dylan-games:snake-best-scores");
+        const rawScores =
+          window.localStorage.getItem("games:snake-best-scores") ??
+          window.localStorage.getItem("dylan-games:snake-best-scores");
         const parsed = rawScores ? (JSON.parse(rawScores) as Record<string, unknown>) : {};
         const scores = Object.values(parsed).filter(
           (score): score is number => typeof score === "number" && Number.isFinite(score),
