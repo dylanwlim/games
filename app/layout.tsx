@@ -7,7 +7,7 @@ import { siteConfig } from "@/lib/site";
 
 import "./globals.css";
 
-const iconVersion = "20260602";
+const iconVersion = "20260609";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,13 +37,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: `/favicon.ico?v=${iconVersion}`, sizes: "any" },
-      { url: `/favicon-16x16.png?v=${iconVersion}`, sizes: "16x16", type: "image/png" },
-      { url: `/favicon-32x32.png?v=${iconVersion}`, sizes: "32x32", type: "image/png" },
-      { url: `/icon.png?v=${iconVersion}`, sizes: "512x512", type: "image/png" },
+      { url: `/favicon.svg?v=${iconVersion}`, sizes: "any", type: "image/svg+xml" },
+      { url: `/icon.svg?v=${iconVersion}`, sizes: "512x512", type: "image/svg+xml" },
     ],
-    shortcut: [`/favicon.ico?v=${iconVersion}`],
-    apple: [{ url: `/apple-touch-icon.png?v=${iconVersion}`, sizes: "180x180", type: "image/png" }],
+    shortcut: [`/favicon.svg?v=${iconVersion}`],
+    apple: [{ url: `/logo-light.svg?v=${iconVersion}`, sizes: "512x512", type: "image/svg+xml" }],
   },
   manifest: "/manifest.webmanifest",
   robots: {

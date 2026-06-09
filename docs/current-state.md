@@ -6,6 +6,15 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-09: Replaced the Games logo/favicon set with the official provided
+  SVG group. Metadata, manifest, the app-router icon, and the GameHub sidebar
+  brand now use `favicon.svg`, `icon.svg`, `logo-light.svg`, and
+  `logo-dark.svg`; old PNG/ICO favicon/app-icon files and auto-generated
+  `app/icon.png`/`app/apple-icon.png` were removed. Ascent, Meadow, and
+  Thefrenchmani source sections were blank and were left unchanged. Validation
+  passed SVG XML parsing, `git diff --check`, `npm run format:check`,
+  `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`.
+
 - 2026-06-09: Reworked the non-Snake hub, Discover, favorites, genre, and
   unavailable-game UI around Components repo primitives (`TextEffect`,
   `TextShimmer`, `AnimatedBackground`, `Magnetic`, `Spotlight`,

@@ -633,9 +633,15 @@ function HubSidebar({
                 href={"/" as Route}
                 onClick={(event) => handleSidebarNavigation(event, "/", onNavigate)}
               >
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Gamepad2 aria-hidden="true" className="size-4" />
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element -- Official SVG logo is a static public asset. */}
+                <img
+                  alt=""
+                  aria-hidden="true"
+                  className="aspect-square size-8"
+                  height={32}
+                  src="/logo-dark.svg"
+                  width={32}
+                />
                 <div className="flex min-w-0 flex-col gap-0.5 leading-none">
                   <span className="truncate font-semibold">Dylan Games</span>
                 </div>

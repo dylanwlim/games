@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/lib/site";
 
-const iconVersion = "20260602";
+const iconVersion = "20260609";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -15,15 +15,21 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#f7f8fb",
     icons: [
       {
-        src: `/icons/icon-192x192.png?v=${iconVersion}`,
-        sizes: "192x192",
-        type: "image/png",
+        src: `/icon.svg?v=${iconVersion}`,
+        sizes: "512x512",
+        type: "image/svg+xml",
         purpose: "any",
       },
       {
-        src: `/icons/icon-512x512.png?v=${iconVersion}`,
+        src: `/logo-light.svg?v=${iconVersion}`,
         sizes: "512x512",
-        type: "image/png",
+        type: "image/svg+xml",
+        purpose: "any",
+      },
+      {
+        src: `/logo-dark.svg?v=${iconVersion}`,
+        sizes: "512x512",
+        type: "image/svg+xml",
         purpose: "any",
       },
     ],
