@@ -465,6 +465,10 @@ img {
   border-color: rgb(var(--tw-sidebar-border) / 1);
 }
 
+#arcade-sidebar.game-sidebar {
+  transition-property: left, right;
+}
+
 .game-sidebar-search-group {
   transition:
     opacity 160ms ease,

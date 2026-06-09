@@ -6,6 +6,18 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-09: Reworked the non-Snake hub, Discover, favorites, genre, and
+  unavailable-game UI around Components repo primitives (`TextEffect`,
+  `TextShimmer`, `AnimatedBackground`, `Magnetic`, `Spotlight`,
+  `BorderTrail`, and `ProgressiveBlur`) while leaving Snake gameplay and route
+  chrome untouched. Built completed preview-art scenes for the unfinished
+  Minesweeper, Pong, Tiles, Orbit, 2048, Sky Courier, Stack Party, Garden Loop,
+  and Route Tactics artwork branches; Cipher, Dashline, and Snake artwork paths
+  remain preserved. Browser desktop/mobile checks, Chrome smoke checks, and
+  Playwright dark-mode desktop/mobile probes verified no console errors, no
+  horizontal overflow, and complete artwork coverage. `npm run validate` passed
+  end to end.
+
 - 2026-06-09: Reworked `/games/snake` art and route chrome without changing
   the visible page copy or information set. The Snake canvas now uses a
   60 fps paint budget with richer board frame detail, apple animation, snake
