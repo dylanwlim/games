@@ -6,6 +6,17 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-09: Reworked `/games/snake` art and route chrome without changing
+  the visible page copy or information set. The Snake canvas now uses a
+  60 fps paint budget with richer board frame detail, apple animation, snake
+  trail/scales/head treatment, bite feedback, and crash sparks; the surrounding
+  toolbar/stats/mode controls now use component-library-inspired animated
+  selection bubbles and springing numeric text. Browser desktop/mobile checks
+  verified rendered layout, controls, no console errors, no mobile body
+  overflow, and the mobile back-link overlap fix. A Playwright canvas probe
+  measured steady gameplay painting at 60.3 fps average; `npm run validate`
+  passed end to end.
+
 - 2026-06-09: Fixed the DWL account sidebar link hydration mismatch that
   appeared in Browser/dev output. DWL auth links now start from a stable
   server/client default callback URL and switch to the current local route only

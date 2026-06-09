@@ -15,7 +15,7 @@ import {
   Trophy,
   type LucideIcon,
 } from "lucide-react";
-import { AnimatePresence, m } from "motion/react";
+import { AnimatePresence, m, useSpring, useTransform } from "motion/react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
@@ -58,6 +58,8 @@ const modeShortDescriptions = {
   zen: "Wraps",
 } satisfies Record<SnakeMode, string>;
 
+const targetFrameMs = 1000 / 60;
+
 type PointerStart = {
   pointerId: number;
   x: number;
@@ -75,6 +77,7 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
   const boardRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const lastFrameRef = useRef(0);
+  const lastPaintRef = useRef(0);
   const moveAccumulatorRef = useRef(0);
   const clockAccumulatorRef = useRef(0);
   const pointerStartRef = useRef<PointerStart | null>(null);
@@ -244,12 +247,19 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
       }
 
       const drawState = stateRef.current;
-      const progress =
-        drawState.status === "playing"
-          ? Math.min(1, moveAccumulatorRef.current / drawState.speedMs)
-          : 1;
+      const paintDelta = timestamp - lastPaintRef.current;
 
-      drawSnakeBoard(canvasRef.current, drawState, progress, timestamp);
+      if (lastPaintRef.current === 0 || paintDelta >= targetFrameMs - 1) {
+        const progress =
+          drawState.status === "playing"
+            ? Math.min(1, moveAccumulatorRef.current / drawState.speedMs)
+            : 1;
+
+        drawSnakeBoard(canvasRef.current, drawState, progress, timestamp);
+        lastPaintRef.current =
+          paintDelta > targetFrameMs ? timestamp - (paintDelta % targetFrameMs) : timestamp;
+      }
+
       animationRef.current = window.requestAnimationFrame(loop);
     };
 
@@ -262,6 +272,7 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
 
       animationRef.current = null;
       lastFrameRef.current = 0;
+      lastPaintRef.current = 0;
     };
   }, [actions, stateRef]);
 
@@ -361,7 +372,9 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
           <span className={`snake-status-chip status-${state.status}`} aria-live="polite">
             {statusLabel}
           </span>
-          <span>Best {bestScore}</span>
+          <span>
+            Best <AnimatedNumber value={bestScore} />
+          </span>
         </div>
       </header>
 
@@ -447,8 +460,19 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
                 disabled={state.status === "playing"}
                 onClick={() => actions.selectMode(mode)}
               >
-                <span>{snakeModeDefinitions[mode].label}</span>
-                <small>{modeShortDescriptions[mode]}</small>
+                <AnimatePresence initial={false}>
+                  {state.mode === mode ? (
+                    <m.span
+                      className="snake-mode-tab-bubble"
+                      layoutId="snake-mode-tab-bubble"
+                      transition={{ duration: 0.22, ease: "easeInOut" }}
+                    />
+                  ) : null}
+                </AnimatePresence>
+                <span className="snake-mode-tab-content">
+                  <span>{snakeModeDefinitions[mode].label}</span>
+                  <small>{modeShortDescriptions[mode]}</small>
+                </span>
               </button>
             ))}
           </div>
@@ -600,17 +624,9 @@ function RunSummary({
     <div className="snake-run-summary" aria-label="Current Snake run">
       <div>
         <span>Score</span>
-        <AnimatePresence mode="popLayout" initial={false}>
-          <m.strong
-            key={score}
-            initial={{ opacity: 0.5, y: 8, scale: 0.94 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ duration: 0.16, ease: "easeOut" }}
-          >
-            {score}
-          </m.strong>
-        </AnimatePresence>
+        <strong>
+          <AnimatedNumber value={score} />
+        </strong>
       </div>
       <div className="snake-run-summary-meta">
         <span>{modeLabel}</span>
@@ -640,7 +656,9 @@ function BestScoresPanel({ bestScores }: { bestScores: Record<SnakeMode, number>
           {snakeModes.map((mode) => (
             <span key={mode}>
               {snakeModeDefinitions[mode].label}
-              <strong>{bestScores[mode] ?? 0}</strong>
+              <strong>
+                <AnimatedNumber value={bestScores[mode] ?? 0} />
+              </strong>
             </span>
           ))}
         </div>
@@ -662,15 +680,36 @@ function Metric({
   muted?: boolean;
   value: string;
 }) {
+  const numericValue = parsePlainNumber(value);
+
   return (
     <div className={`metric ${muted ? "muted" : ""}`}>
       <span>
         <Icon aria-hidden="true" />
         {label}
       </span>
-      <strong>{value}</strong>
+      <strong>{numericValue === null ? value : <AnimatedNumber value={numericValue} />}</strong>
     </div>
   );
+}
+
+function AnimatedNumber({ value }: { value: number }) {
+  const spring = useSpring(value, {
+    stiffness: 260,
+    damping: 34,
+    mass: 0.7,
+  });
+  const display = useTransform(spring, (current) => Math.round(current).toLocaleString());
+
+  useEffect(() => {
+    spring.set(value);
+  }, [spring, value]);
+
+  return <m.span className="animated-number">{display}</m.span>;
+}
+
+function parsePlainNumber(value: string) {
+  return /^\d+$/u.test(value) ? Number(value) : null;
 }
 
 function getOverlayCopy(state: SnakeState) {
@@ -795,10 +834,11 @@ function drawSnakeBoard(
   const originY = (height - boardPixels) / 2;
 
   drawGrid(context, state.boardSize, originX, originY, boardPixels, cellSize, dpr);
+  drawBoardFrame(context, originX, originY, boardPixels, dpr, timestamp, state.status);
   if (state.status !== "ready") {
     drawFood(context, state, originX, originY, cellSize, dpr, timestamp);
   }
-  drawSnake(context, state, progress, originX, originY, cellSize, dpr);
+  drawSnake(context, state, progress, originX, originY, cellSize, dpr, timestamp);
 
   if (state.status === "game-over") {
     context.fillStyle = "rgba(5, 10, 17, 0.38)";
@@ -842,6 +882,55 @@ function drawGrid(
   context.restore();
 }
 
+function drawBoardFrame(
+  context: CanvasRenderingContext2D,
+  originX: number,
+  originY: number,
+  boardPixels: number,
+  dpr: number,
+  timestamp: number,
+  status: SnakeState["status"],
+) {
+  const activePulse = status === "playing" ? 0.28 + Math.sin(timestamp / 480) * 0.08 : 0.16;
+
+  context.save();
+  context.lineWidth = 2 * dpr;
+  context.strokeStyle = `rgba(131, 228, 111, ${activePulse})`;
+  roundedRect(
+    context,
+    originX + 1.5 * dpr,
+    originY + 1.5 * dpr,
+    boardPixels - 3 * dpr,
+    boardPixels - 3 * dpr,
+    12 * dpr,
+  );
+  context.stroke();
+
+  context.strokeStyle = "rgba(255, 255, 255, 0.06)";
+  context.lineWidth = 1 * dpr;
+  roundedRect(
+    context,
+    originX + 8 * dpr,
+    originY + 8 * dpr,
+    boardPixels - 16 * dpr,
+    boardPixels - 16 * dpr,
+    9 * dpr,
+  );
+  context.stroke();
+
+  context.fillStyle = "rgba(255, 255, 255, 0.045)";
+  for (let index = 0; index < 18; index += 1) {
+    const orbit = (index * 97 + timestamp * 0.018) % boardPixels;
+    const x = originX + ((index * 53 + orbit) % boardPixels);
+    const y = originY + ((index * 31 + orbit * 0.58) % boardPixels);
+    context.beginPath();
+    context.arc(x, y, Math.max(0.7 * dpr, boardPixels * 0.0018), 0, Math.PI * 2);
+    context.fill();
+  }
+
+  context.restore();
+}
+
 function drawFood(
   context: CanvasRenderingContext2D,
   state: SnakeState,
@@ -856,9 +945,10 @@ function drawFood(
   }
 
   const pulse = 1 + Math.sin(timestamp / 170) * 0.07;
-  const foodSize = cellSize * 0.6 * pulse;
+  const bob = Math.sin(timestamp / 240) * cellSize * 0.035;
+  const foodSize = cellSize * 0.62 * pulse;
   const foodX = originX + state.food.x * cellSize + (cellSize - foodSize) / 2;
-  const foodY = originY + state.food.y * cellSize + (cellSize - foodSize) / 2;
+  const foodY = originY + state.food.y * cellSize + (cellSize - foodSize) / 2 + bob;
   const centerX = foodX + foodSize / 2;
   const centerY = foodY + foodSize / 2;
 
@@ -869,7 +959,7 @@ function drawFood(
   context.beginPath();
   context.arc(centerX, centerY, foodSize * 1.05, 0, Math.PI * 2);
   context.fill();
-  context.shadowBlur = 8 * dpr;
+  context.shadowBlur = 10 * dpr;
   const appleGradient = context.createRadialGradient(
     centerX - foodSize * 0.18,
     centerY - foodSize * 0.2,
@@ -883,7 +973,32 @@ function drawFood(
   appleGradient.addColorStop(1, "#cd3f3c");
   context.fillStyle = appleGradient;
   context.beginPath();
-  context.arc(centerX, centerY, foodSize * 0.48, 0, Math.PI * 2);
+  context.moveTo(centerX, centerY - foodSize * 0.46);
+  context.bezierCurveTo(
+    centerX - foodSize * 0.52,
+    centerY - foodSize * 0.42,
+    centerX - foodSize * 0.58,
+    centerY + foodSize * 0.08,
+    centerX - foodSize * 0.28,
+    centerY + foodSize * 0.42,
+  );
+  context.bezierCurveTo(
+    centerX - foodSize * 0.08,
+    centerY + foodSize * 0.6,
+    centerX + foodSize * 0.08,
+    centerY + foodSize * 0.6,
+    centerX + foodSize * 0.28,
+    centerY + foodSize * 0.42,
+  );
+  context.bezierCurveTo(
+    centerX + foodSize * 0.58,
+    centerY + foodSize * 0.08,
+    centerX + foodSize * 0.52,
+    centerY - foodSize * 0.42,
+    centerX,
+    centerY - foodSize * 0.46,
+  );
+  context.closePath();
   context.fill();
   context.shadowBlur = 0;
   context.strokeStyle = "rgba(255, 255, 255, 0.28)";
@@ -910,14 +1025,29 @@ function drawFood(
   context.fill();
   context.fillStyle = "rgba(255, 255, 255, 0.74)";
   context.beginPath();
-  context.arc(
-    foodX + foodSize * 0.62,
-    foodY + foodSize * 0.34,
-    Math.max(1.4 * dpr, foodSize * 0.08),
+  context.ellipse(
+    foodX + foodSize * 0.66,
+    foodY + foodSize * 0.35,
+    Math.max(1.5 * dpr, foodSize * 0.09),
+    Math.max(1 * dpr, foodSize * 0.045),
+    -0.55,
     0,
     Math.PI * 2,
   );
   context.fill();
+  context.fillStyle = "rgba(255, 210, 120, 0.65)";
+  for (let index = 0; index < 3; index += 1) {
+    const angle = timestamp / 420 + index * 2.1;
+    context.beginPath();
+    context.arc(
+      centerX + Math.cos(angle) * foodSize * 0.78,
+      centerY + Math.sin(angle) * foodSize * 0.78,
+      Math.max(0.9 * dpr, foodSize * 0.035),
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
+  }
   context.restore();
 }
 
@@ -929,6 +1059,7 @@ function drawSnake(
   originY: number,
   cellSize: number,
   dpr: number,
+  timestamp: number,
 ) {
   const drawPoints = state.snake.map((point, index) => {
     const previousPoint =
@@ -939,12 +1070,49 @@ function drawSnake(
       : point;
   });
 
+  drawSnakeTrail(context, drawPoints, originX, originY, cellSize, dpr);
   drawSnakeBodyPath(context, drawPoints, state.boardSize, originX, originY, cellSize, dpr);
-  drawSnakeHead(context, drawPoints[0], state.direction, originX, originY, cellSize, dpr);
+  drawSnakeScales(context, drawPoints, originX, originY, cellSize, dpr, timestamp);
+  drawSnakeHead(
+    context,
+    drawPoints[0],
+    state.direction,
+    originX,
+    originY,
+    cellSize,
+    dpr,
+    timestamp,
+  );
 
   if (state.lastEvent === "ate") {
-    drawBiteBurst(context, state, drawPoints[0], originX, originY, cellSize, dpr);
+    drawBiteBurst(context, state, drawPoints[0], originX, originY, cellSize, dpr, timestamp);
   }
+}
+
+function drawSnakeTrail(
+  context: CanvasRenderingContext2D,
+  drawPoints: Point[],
+  originX: number,
+  originY: number,
+  cellSize: number,
+  dpr: number,
+) {
+  const head = drawPoints[0];
+
+  if (!head) {
+    return;
+  }
+
+  const center = getCellCenter(head, originX, originY, cellSize);
+
+  context.save();
+  context.fillStyle = "rgba(131, 228, 111, 0.07)";
+  context.shadowColor = "rgba(131, 228, 111, 0.2)";
+  context.shadowBlur = 14 * dpr;
+  context.beginPath();
+  context.arc(center.x, center.y, cellSize * 1.08, 0, Math.PI * 2);
+  context.fill();
+  context.restore();
 }
 
 function drawSnakeBodyPath(
@@ -963,10 +1131,10 @@ function drawSnakeBodyPath(
   context.save();
   context.lineCap = "round";
   context.lineJoin = "round";
-  context.lineWidth = cellSize * 0.58;
-  context.shadowColor = "rgba(105, 218, 98, 0.26)";
-  context.shadowBlur = 12 * dpr;
-  context.strokeStyle = "#75d66c";
+  context.lineWidth = cellSize * 0.68;
+  context.shadowColor = "rgba(105, 218, 98, 0.32)";
+  context.shadowBlur = 14 * dpr;
+  context.strokeStyle = "#55b862";
 
   const points = [...drawPoints].reverse();
   let drawing = false;
@@ -997,9 +1165,45 @@ function drawSnakeBodyPath(
   }
 
   context.shadowBlur = 0;
-  context.lineWidth = cellSize * 0.34;
-  context.strokeStyle = "rgba(193, 255, 160, 0.16)";
+  context.lineWidth = cellSize * 0.44;
+  context.strokeStyle = "#8eeb78";
   context.stroke();
+  context.lineWidth = cellSize * 0.16;
+  context.strokeStyle = "rgba(239, 255, 218, 0.42)";
+  context.stroke();
+  context.restore();
+}
+
+function drawSnakeScales(
+  context: CanvasRenderingContext2D,
+  drawPoints: Point[],
+  originX: number,
+  originY: number,
+  cellSize: number,
+  dpr: number,
+  timestamp: number,
+) {
+  const maxScaleDots = Math.min(drawPoints.length, 56);
+
+  context.save();
+  context.fillStyle = "rgba(229, 255, 200, 0.22)";
+  for (let index = 1; index < maxScaleDots; index += 2) {
+    const point = drawPoints[index];
+    const center = getCellCenter(point, originX, originY, cellSize);
+    const shimmer = 0.78 + Math.sin(timestamp / 260 + index * 0.62) * 0.18;
+
+    context.beginPath();
+    context.ellipse(
+      center.x,
+      center.y,
+      Math.max(1.2 * dpr, cellSize * 0.08 * shimmer),
+      Math.max(0.8 * dpr, cellSize * 0.045),
+      (index % 4) * 0.5,
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
+  }
   context.restore();
 }
 
@@ -1011,6 +1215,7 @@ function drawSnakeHead(
   originY: number,
   cellSize: number,
   dpr: number,
+  timestamp: number,
 ) {
   if (!point) {
     return;
@@ -1033,9 +1238,14 @@ function drawSnakeHead(
   roundedRect(context, x, y, size, size, radius);
   context.fill();
   context.shadowBlur = 0;
+  context.strokeStyle = "rgba(255, 255, 255, 0.18)";
+  context.lineWidth = 1 * dpr;
+  roundedRect(context, x + 0.5 * dpr, y + 0.5 * dpr, size - 1 * dpr, size - 1 * dpr, radius);
+  context.stroke();
   context.fillStyle = "rgba(255, 255, 255, 0.22)";
   roundedRect(context, x + size * 0.12, y + size * 0.1, size * 0.38, size * 0.2, size * 0.1);
   context.fill();
+  drawSnakeTongue(context, x, y, size, dpr, direction, timestamp);
   drawSnakeEyes(context, x, y, size, dpr, direction);
   context.restore();
 }
@@ -1048,18 +1258,20 @@ function drawBiteBurst(
   originY: number,
   cellSize: number,
   dpr: number,
+  timestamp: number,
 ) {
   if (!point || state.lastScoreDelta <= 0) {
     return;
   }
 
   const center = getCellCenter(point, originX, originY, cellSize);
+  const ringProgress = (timestamp % 460) / 460;
 
   context.save();
-  context.strokeStyle = "rgba(255, 111, 99, 0.5)";
-  context.lineWidth = 1.5 * dpr;
+  context.strokeStyle = `rgba(255, 111, 99, ${0.55 * (1 - ringProgress)})`;
+  context.lineWidth = (1.4 + ringProgress * 1.2) * dpr;
   context.beginPath();
-  context.arc(center.x, center.y, cellSize * 0.58, 0, Math.PI * 2);
+  context.arc(center.x, center.y, cellSize * (0.52 + ringProgress * 0.42), 0, Math.PI * 2);
   context.stroke();
   context.fillStyle = "rgba(255, 245, 237, 0.94)";
   context.font = `700 ${Math.max(10 * dpr, cellSize * 0.3)}px ui-sans-serif, system-ui, sans-serif`;
@@ -1106,6 +1318,21 @@ function drawCrashMarker(
   context.moveTo(center.x + cellSize * 0.18, center.y - cellSize * 0.18);
   context.lineTo(center.x - cellSize * 0.18, center.y + cellSize * 0.18);
   context.stroke();
+  context.fillStyle = "rgba(255, 210, 120, 0.8)";
+  for (let index = 0; index < 7; index += 1) {
+    const angle = index * 0.9 + timestamp / 180;
+    const distance = cellSize * (0.54 + (index % 3) * 0.11);
+
+    context.beginPath();
+    context.arc(
+      center.x + Math.cos(angle) * distance,
+      center.y + Math.sin(angle) * distance,
+      Math.max(0.9 * dpr, cellSize * 0.035),
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
+  }
   context.restore();
 }
 
@@ -1157,6 +1384,55 @@ function drawSnakeEyes(
     context.arc(x + size * eyeX, y + size * eyeY, eyeRadius, 0, Math.PI * 2);
     context.fill();
   });
+}
+
+function drawSnakeTongue(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  dpr: number,
+  direction: Direction,
+  timestamp: number,
+) {
+  const flick = 0.76 + Math.sin(timestamp / 120) * 0.16;
+  const centerX = x + size / 2;
+  const centerY = y + size / 2;
+  const length = size * 0.24 * flick;
+  const fork = size * 0.07;
+  const vector: Record<Direction, Point> = {
+    up: { x: 0, y: -1 },
+    right: { x: 1, y: 0 },
+    down: { x: 0, y: 1 },
+    left: { x: -1, y: 0 },
+  };
+  const normal: Record<Direction, Point> = {
+    up: { x: 1, y: 0 },
+    right: { x: 0, y: 1 },
+    down: { x: 1, y: 0 },
+    left: { x: 0, y: 1 },
+  };
+  const nose = {
+    x: centerX + vector[direction].x * size * 0.42,
+    y: centerY + vector[direction].y * size * 0.42,
+  };
+  const tip = {
+    x: nose.x + vector[direction].x * length,
+    y: nose.y + vector[direction].y * length,
+  };
+
+  context.save();
+  context.strokeStyle = "rgba(255, 118, 131, 0.88)";
+  context.lineWidth = Math.max(1 * dpr, size * 0.035);
+  context.lineCap = "round";
+  context.beginPath();
+  context.moveTo(nose.x, nose.y);
+  context.lineTo(tip.x, tip.y);
+  context.lineTo(tip.x + normal[direction].x * fork, tip.y + normal[direction].y * fork);
+  context.moveTo(tip.x, tip.y);
+  context.lineTo(tip.x - normal[direction].x * fork, tip.y - normal[direction].y * fork);
+  context.stroke();
+  context.restore();
 }
 
 function interpolatePoint(from: Point, to: Point, progress: number, boardSize: number): Point {
