@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORT = Number(process.env.PLAYWRIGHT_PORT ?? 3100);
 const baseURL = `http://127.0.0.1:${PORT}`;
+const dwlAppSecret = process.env.DWL_APP_SECRET ?? "playwright-secret";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -14,7 +15,7 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   webServer: {
-    command: `npm run dev -- --hostname 127.0.0.1 --port ${PORT}`,
+    command: `DWL_APP_SECRET="${dwlAppSecret.replaceAll('"', '\\"')}" npm run dev -- --hostname 127.0.0.1 --port ${PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

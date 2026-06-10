@@ -33,6 +33,7 @@ import {
   type SnakeState,
 } from "./snake-types";
 import { useSnakeGame } from "./use-snake-game";
+import { useGameProgression } from "@/features/games/use-game-progression";
 
 const directionKeys: Record<string, Direction> = {
   ArrowUp: "up",
@@ -73,6 +74,7 @@ type SnakeGameProps = {
 export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
   const { state, stateRef, bestScore, bestScores, topScore, modeDefinition, actions } =
     useSnakeGame();
+  const { levelProgress, progression, recordSnakeRun } = useGameProgression();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -81,6 +83,7 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
   const moveAccumulatorRef = useRef(0);
   const clockAccumulatorRef = useRef(0);
   const pointerStartRef = useRef<PointerStart | null>(null);
+  const reportedRoundRef = useRef<string | null>(null);
   const statusLabel = getSnakeStatusLabel(state.status);
   const remainingMs = getRemainingMs(state);
   const speedLabel = `${(1000 / state.speedMs).toFixed(1)}/s`;
@@ -183,6 +186,38 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
       actions.pause();
     }
   }, [actions, menuOpen]);
+
+  useEffect(() => {
+    if (state.status !== "game-over") {
+      if (state.status === "ready" || state.status === "playing") {
+        reportedRoundRef.current = null;
+      }
+
+      return;
+    }
+
+    const roundKey = `${state.mode}:${state.tick}:${state.score}:${state.foodsEaten}:${state.elapsedMs}`;
+
+    if (reportedRoundRef.current === roundKey) {
+      return;
+    }
+
+    reportedRoundRef.current = roundKey;
+    recordSnakeRun({
+      elapsedMs: state.elapsedMs,
+      foodsEaten: state.foodsEaten,
+      mode: state.mode,
+      score: state.score,
+    });
+  }, [
+    recordSnakeRun,
+    state.elapsedMs,
+    state.foodsEaten,
+    state.mode,
+    state.score,
+    state.status,
+    state.tick,
+  ]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyboardInput);
@@ -441,6 +476,12 @@ export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
           </div>
 
           <BestScoresPanel bestScores={bestScores} />
+          <ProgressionPanel
+            level={progression.level}
+            nextLevelProgress={`${levelProgress.earnedThisLevel}/${levelProgress.neededThisLevel}`}
+            totalXp={progression.totalXp}
+            unlockedCount={Object.keys(progression.achievements).length}
+          />
 
           <div
             className="snake-mode-tabs"
@@ -665,6 +706,38 @@ function BestScoresPanel({ bestScores }: { bestScores: Record<SnakeMode, number>
       ) : (
         <span>No best yet. Start a run.</span>
       )}
+    </section>
+  );
+}
+
+function ProgressionPanel({
+  level,
+  nextLevelProgress,
+  totalXp,
+  unlockedCount,
+}: {
+  level: number;
+  nextLevelProgress: string;
+  totalXp: number;
+  unlockedCount: number;
+}) {
+  return (
+    <section className="snake-progression-panel" aria-label="Account progression">
+      <div>
+        <span>
+          <Sparkles aria-hidden="true" />
+          Level {level}
+        </span>
+        <strong>{totalXp.toLocaleString()} XP</strong>
+      </div>
+      <div>
+        <span>
+          <Trophy aria-hidden="true" />
+          Achievements
+        </span>
+        <strong>{unlockedCount}</strong>
+      </div>
+      <small>Next level {nextLevelProgress}</small>
     </section>
   );
 }

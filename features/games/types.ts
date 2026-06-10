@@ -1,50 +1,21 @@
-export type GameStatus = "playable" | "coming-soon";
+export type GameStatus = "playable";
 
-export type GameGenre =
-  | "Action"
-  | "Adventure"
-  | "Casual"
-  | "Family"
-  | "Puzzle"
-  | "Racing"
-  | "Simulation"
-  | "Sports"
-  | "Strategy"
-  | "Word";
+export type GameGenre = "Action";
 
-export type GameAccent = "green" | "blue" | "amber" | "violet" | "slate" | "teal";
+export type GameAccent = "green";
 
-export type GamePreviewKind =
-  | "snake"
-  | "cipherword"
-  | "minesweeper"
-  | "pong"
-  | "tiles"
-  | "orbit"
-  | "number"
-  | "dashline"
-  | "sky-courier"
-  | "word"
-  | "stack"
-  | "garden"
-  | "route";
+export type GamePreviewKind = "snake";
 
 export type GameDefinition = {
-  id?: string;
-  slug: string;
-  title: string;
-  genre: GameGenre;
-  status: GameStatus;
-  summary: string;
-  description: string;
   accent: GameAccent;
+  description: string;
+  duration?: string;
+  genre: GameGenre;
   preview: GamePreviewKind;
   priority: number;
-  path?: string;
-  featured?: boolean;
-  favoriteReady?: boolean;
-  daily?: boolean;
-  modes?: string[];
-  duration?: string;
+  slug: string;
+  status: GameStatus;
+  summary: string;
   tags?: string[];
+  title: string;
 };

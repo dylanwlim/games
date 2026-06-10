@@ -6,6 +6,21 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-10: Scrapped the hub back to the preserved sidebar/auth shell plus
+  Snake-only game surfaces. The sidebar now has Library links for Games and
+  Achievements, and the old Genres section is replaced by a Games section with
+  only Snake. The Games page now consists of a DWL Components carousel showcase
+  followed by a rounded-rectangle grid of available games. Cipher, Discover,
+  Favorites, genre routes, coming-soon registry entries, and the Cipher daily
+  validation script were removed. `/games/snake` now requires a DWL Accounts
+  session before rendering the play surface. Cross-game progression now lives in
+  `features/games/progression.ts`, stores XP/achievements under
+  `games:progression-v1`, and syncs through the existing DWL Accounts app-state
+  bridge. Validation passed `npm run validate`; Browser desktop/mobile checks
+  verified the stripped Snake-only hub, achievements page, signed-out DWL
+  account gate, readable shell headings, no changed-content clipping or
+  horizontal overflow, and no actionable console errors.
+
 - 2026-06-09: Reworked the non-play launcher/storefront into a darker
   poster-led game library while leaving the Snake and Cipher play routes and
   sidebar behavior protected. The hub now uses dark gallery surfaces, cleaner

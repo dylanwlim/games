@@ -32,3 +32,7 @@ Game rules should be deterministic and testable outside React. The starter
 Snake implementation keeps movement, collision, scoring, and food placement in
 `features/games/snake/snake-engine.ts`; React owns rendering, controls, local
 storage, and motion.
+
+Cross-game XP and achievements live in `features/games/progression.ts` and are
+persisted under the `games:progression-v1` localStorage key. `DwlGameSync`
+syncs that key through DWL Accounts app state when a user is signed in.

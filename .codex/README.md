@@ -26,5 +26,6 @@ Use `npm run validate` for the complete local gate.
 ## Vercel
 
 The intended production project is `games`, serving `games.dylanwlim.com`.
-The app has optional DWL Accounts routing variables documented in
-`.env.example`, but no visible auth UI.
+Snake play requires DWL Accounts. The app uses the DWL Accounts routes in
+`app/auth/*` plus `app/api/dwl/*` and stores cross-device progress under the
+Accounts app-state key `progress`.

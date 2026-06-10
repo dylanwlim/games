@@ -1,12 +1,12 @@
 "use client";
 
-import { DiscoverParallaxContent } from "@/components/ui/text-parallax-content-scroll";
-import { AnimatedBackground } from "@/components/core/animated-background";
-import { Magnetic } from "@/components/core/magnetic";
-import { ProgressiveBlur } from "@/components/core/progressive-blur";
-import { Spotlight } from "@/components/core/spotlight";
-import { TextEffect, type PresetType } from "@/components/core/text-effect";
-import { TextShimmer } from "@/components/core/text-shimmer";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselIndicator,
+  CarouselItem,
+  CarouselNavigation,
+} from "@/components/core/carousel";
 import {
   Sidebar as SidebarShell,
   SidebarContent,
@@ -23,43 +23,35 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { CipherwordGame } from "@/features/games/cipherword/cipherword-game";
-import { DailyCipherwordCTA } from "@/features/games/cipherword/daily-cipherword-cta";
-import { filterGamesBySearch, getSearchGenre } from "@/features/games/game-search";
-import { gameGenres, getGenreBySlug, type GenreSlug } from "@/features/games/genre-registry";
-import { games, getGameBySlug } from "@/features/games/game-registry";
+import { achievementDefinitions } from "@/features/games/progression";
+import { games, getGameBySlug, playableGames } from "@/features/games/game-registry";
 import { SnakeGame } from "@/features/games/snake/snake-game";
 import type { GameDefinition } from "@/features/games/types";
+import { useGameProgression } from "@/features/games/use-game-progression";
+import {
+  DWL_DEFAULT_AUTH_RETURN_URL,
+  getDwlAccountUrl,
+  getDwlAuthReturnUrl,
+  getDwlSignInUrl,
+  getDwlSignUpUrl,
+  type DwlAccountUser,
+} from "@/lib/dwl-accounts";
 import type { Route } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
-  Boxes,
-  ChevronLeft,
-  ChevronRight,
-  Crosshair,
-  Flag,
+  CheckCircle2,
   Gamepad2,
   Grid2X2,
-  Heart,
   Lock,
   LogIn,
   LogOut,
-  Map,
   PanelLeft,
   Play,
-  Puzzle,
-  Rocket,
   Search,
-  Sparkles,
-  Star,
   Trophy,
-  Type,
   UserRound,
-  Users,
-  Zap,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -70,260 +62,27 @@ import {
   useReducedMotion,
   type Variants,
 } from "motion/react";
-import {
-  type FocusEvent,
-  type KeyboardEvent,
-  type MouseEvent,
-  createElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  getDwlAccountUrl,
-  getDwlAuthReturnUrl,
-  DWL_DEFAULT_AUTH_RETURN_URL,
-  getDwlSignInUrl,
-  getDwlSignUpUrl,
-  type DwlAccountUser,
-} from "@/lib/dwl-accounts";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 
-type GameHubView = "games" | "discover" | "favorites" | "genre";
+type GameHubView = "games" | "achievements";
 
 type GameHubProps = {
-  initialSlug?: string;
-  initialGenre?: GenreSlug;
   focusGame?: boolean;
+  initialSlug?: string;
   view?: GameHubView;
 };
 
-const gameComponents = {
-  cipher: CipherwordGame,
-  snake: SnakeGame,
-} as const;
-
-const allGames: GameDefinition[] = games;
-const fallbackGame = allGames[0] as GameDefinition;
-const favoriteGameSlugs = ["cipher", "snake", "minesweeper", "orbit"] as const;
-
-const genrePreviewArt: Partial<
-  Record<GenreSlug, { accent: GameDefinition["accent"]; preview: GameDefinition["preview"] }>
-> = {
-  action: { accent: "green", preview: "snake" },
-  adventure: { accent: "teal", preview: "orbit" },
-  casual: { accent: "blue", preview: "sky-courier" },
-  family: { accent: "green", preview: "stack" },
-  puzzle: { accent: "blue", preview: "minesweeper" },
-  racing: { accent: "slate", preview: "dashline" },
-  simulation: { accent: "teal", preview: "garden" },
-  sports: { accent: "slate", preview: "pong" },
-  strategy: { accent: "amber", preview: "route" },
-  word: { accent: "violet", preview: "cipherword" },
-};
-
-const genrePageCopy: Partial<
-  Record<GenreSlug, { description: string; focus: string; rhythm: string }>
-> = {
-  action: {
-    description: "Fast rounds, clean restarts, and games that make sense the moment they open.",
-    focus: "Immediate loops",
-    rhythm: "Short sessions with room for tighter arcade builds.",
-  },
-  adventure: {
-    description:
-      "Small exploration ideas reserved for readable maps, simple movement, and playful goals.",
-    focus: "Readable worlds",
-    rhythm: "Calm routes, compact scenes, and clear next steps.",
-  },
-  puzzle: {
-    description:
-      "Quiet boards and logic-first layouts for games that reward focus over visual noise.",
-    focus: "Finished puzzle shells",
-    rhythm: "Stable routes for Minesweeper, Tiles, and 2048.",
-  },
-  racing: {
-    description:
-      "A prepared shelf for quick races, time trials, and motion-led browser experiments.",
-    focus: "Fast starts",
-    rhythm: "Lean game slots that can become playable without reshaping the hub.",
-  },
-  simulation: {
-    description: "A slower shelf for small systems, toy economies, and readable state changes.",
-    focus: "Tiny systems",
-    rhythm: "Simple loops that make cause and effect visible.",
-  },
-  strategy: {
-    description: "A planning shelf for turn-based ideas, clean boards, and tactical constraints.",
-    focus: "Clear decisions",
-    rhythm: "Compact rulesets with visible outcomes.",
-  },
-  word: {
-    description: "Daily word games built around clean typing, fair clues, and fast return rituals.",
-    focus: "Daily meaning",
-    rhythm: "Cipher leads the shelf with meaning scores, letter clues, and archive play.",
-  },
-};
-
-const iconMap = {
-  boxes: Boxes,
-  crosshair: Crosshair,
-  flag: Flag,
-  gamepad: Gamepad2,
-  grid: Grid2X2,
-  map: Map,
-  puzzle: Puzzle,
-  rocket: Rocket,
-  search: Search,
-  spark: Sparkles,
-  star: Star,
-  trophy: Trophy,
-  type: Type,
-  users: Users,
-  zap: Zap,
-} satisfies Record<string, LucideIcon>;
-
-type FeaturedGameSlide = {
-  title: string;
-  description: string;
-  detail: string;
-  mode: string;
-  tags: string[];
-  image: string;
-  imagePosition: string;
-  route: Route;
-  primaryCta: string;
-  primaryAriaLabel: string;
-  secondaryCta: {
-    label: string;
-    route: Route;
-    ariaLabel: string;
-  };
-  accent: GameDefinition["accent"];
-  preview: GameDefinition["preview"];
-};
-
+const fallbackGame = games[0] as GameDefinition;
 const featureAutoplayMs = 6200;
-
-const featuredGames: FeaturedGameSlide[] = [
-  {
-    title: "Cipher",
-    description: "Find the hidden concept using letters, meaning, and unlocked clues.",
-    detail: "A daily word-logic puzzle built around meaning, clues, and deduction.",
-    mode: "Today's Challenge",
-    tags: ["Daily #001", "Word logic", "2-4 min"],
-    image: "/art/feature-cipherword.png",
-    imagePosition: "center 54%",
-    route: "/games/cipher" as Route,
-    primaryCta: "Play today's puzzle",
-    primaryAriaLabel: "Play Cipher from Featured",
-    secondaryCta: {
-      label: "View archive",
-      route: "/games/cipher/archive" as Route,
-      ariaLabel: "View Cipher archive from Featured",
-    },
-    accent: "violet",
-    preview: "cipherword",
-  },
-  {
-    title: "Snake",
-    description: "Guide the snake, chain apples, and beat your best run.",
-    detail: "A quick arcade run with clean turns, instant restarts, and saved best scores.",
-    mode: "Arcade Run",
-    tags: ["Action", "1-min rounds", "Best-score chase"],
-    image: "/art/feature-snake.png",
-    imagePosition: "center 42%",
-    route: "/games/snake" as Route,
-    primaryCta: "Play Snake",
-    primaryAriaLabel: "Play Snake from Featured",
-    secondaryCta: {
-      label: "Action shelf",
-      route: "/genres/action" as Route,
-      ariaLabel: "Open Action shelf from Featured",
-    },
-    accent: "green",
-    preview: "snake",
-  },
-  {
-    title: "Dashline",
-    description: "A quick racing challenge built for clean routes, tight turns, and fast restarts.",
-    detail: "Featured upcoming work for short races, readable routes, and quick resets.",
-    mode: "Featured Upcoming",
-    tags: ["Expected Summer 2026", "Racing", "Prototype"],
-    image: "/art/discover-racing.png",
-    imagePosition: "center 50%",
-    route: "/games/dashline" as Route,
-    primaryCta: "Preview Dashline",
-    primaryAriaLabel: "Preview Dashline from Featured",
-    secondaryCta: {
-      label: "Racing shelf",
-      route: "/genres/racing" as Route,
-      ariaLabel: "Open Racing shelf from Featured",
-    },
-    accent: "slate",
-    preview: "dashline",
-  },
-];
-
-const motionEase = [0.22, 1, 0.36, 1] as const;
 const routeExitDelayMs = 150;
+const motionEase = [0.22, 1, 0.36, 1] as const;
 
 const pageMotionVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 16,
-    scale: 0.992,
-  },
+  hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.34,
-      ease: motionEase,
-      when: "beforeChildren",
-      staggerChildren: 0.045,
-      delayChildren: 0.03,
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: -10,
-    scale: 0.996,
-    transition: {
-      duration: 0.16,
-      ease: [0.4, 0, 1, 1],
-      when: "afterChildren",
-      staggerChildren: 0.018,
-      staggerDirection: -1,
-    },
-  },
-};
-
-const pageCascadeVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.045,
-      delayChildren: 0.02,
-    },
-  },
-  exit: {
-    transition: {
-      staggerChildren: 0.018,
-      staggerDirection: -1,
-    },
-  },
-};
-
-const pageItemVariants: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: motionEase },
+    transition: { duration: 0.24, ease: motionEase },
   },
   exit: {
     opacity: 0,
@@ -332,120 +91,27 @@ const pageItemVariants: Variants = {
   },
 };
 
-const gamePanelVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
+const pageItemVariants: Variants = {
+  hidden: { opacity: 0, y: 14 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.24,
-      ease: motionEase,
-      when: "beforeChildren",
-      staggerChildren: 0.045,
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: -8,
-    transition: { duration: 0.16, ease: "easeIn" },
+    transition: { duration: 0.24, ease: "easeOut" },
   },
 };
 
-function ComponentsText({
-  as,
-  children,
-  id,
-  className,
-  preset = "slide",
-  shouldReduceMotion,
-  delay = 0,
-}: {
-  as: "h1" | "h2" | "h3" | "p" | "span" | "strong" | "small";
-  children: string;
-  id?: string;
-  className?: string;
-  preset?: PresetType;
-  shouldReduceMotion?: boolean;
-  delay?: number;
-}) {
-  if (shouldReduceMotion) {
-    return createElement(as, { className, id }, children);
-  }
-
-  return (
-    <TextEffect
-      as={as}
-      id={id}
-      className={className}
-      preset={preset}
-      per="word"
-      delay={delay}
-      speedReveal={1.35}
-      speedSegment={1.15}
-    >
-      {children}
-    </TextEffect>
-  );
-}
-
-function ComponentsShimmer({
-  as = "span",
-  children,
-  className,
-  shouldReduceMotion,
-}: {
-  as?: "p" | "span" | "small";
-  children: string;
-  className?: string;
-  shouldReduceMotion?: boolean;
-}) {
-  if (shouldReduceMotion) {
-    return createElement(as, { className }, children);
-  }
-
-  return (
-    <TextShimmer as={as} className={className} duration={3.8} spread={1.2}>
-      {children}
-    </TextShimmer>
-  );
-}
-
-function MaybeMagnetic({ enabled, children }: { enabled: boolean; children: ReactNode }) {
-  if (!enabled) {
-    return <>{children}</>;
-  }
-
-  return (
-    <Magnetic
-      intensity={0.18}
-      range={92}
-      springOptions={{ stiffness: 180, damping: 18, mass: 0.2 }}
-    >
-      {children}
-    </Magnetic>
-  );
-}
-
 export function GameHub({
-  initialSlug = "snake",
-  initialGenre,
   focusGame = false,
+  initialSlug = "snake",
   view = "games",
 }: GameHubProps) {
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
-  const [selectedSlug, setSelectedSlug] = useState(
-    () => getGameBySlug(initialSlug)?.slug ?? "snake",
-  );
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pageExiting, setPageExiting] = useState(false);
-  const mainRef = useRef<HTMLElement | null>(null);
   const navigationTimeoutRef = useRef<number | null>(null);
-  const selectedGame = useMemo(() => getGameBySlug(selectedSlug) ?? fallbackGame, [selectedSlug]);
-  const selectedGenre = initialGenre ? getGenreBySlug(initialGenre) : undefined;
-  const isGames = view === "games";
-  const contentKey = `${view}:${initialGenre ?? "all"}:${focusGame ? selectedSlug : "store"}`;
+  const selectedGame = useMemo(() => getGameBySlug(initialSlug) ?? fallbackGame, [initialSlug]);
   const frameClassName = `arcade-frame ${focusGame ? "play-frame" : ""} ${
     sidebarOpen ? "sidebar-open" : ""
   }`;
@@ -528,11 +194,6 @@ export function GameHub({
     [navigateWithMotion],
   );
 
-  const selectGame = (game: GameDefinition) => {
-    setSelectedSlug(game.slug);
-    router.push(`/games/${game.slug}` as Route, { scroll: false });
-  };
-
   return (
     <LazyMotion features={domAnimation}>
       <SidebarProvider
@@ -545,9 +206,9 @@ export function GameHub({
           Skip to content
         </a>
         <HubSidebar
+          activeGameSlug={focusGame ? selectedGame.slug : undefined}
           activeView={view}
-          activeGenre={initialGenre}
-          hideSearch={focusGame}
+          hideSearch={focusGame || view === "achievements"}
           searchQuery={searchQuery}
           onNavigate={navigateWithMotion}
           onSearchChange={setSearchQuery}
@@ -555,39 +216,31 @@ export function GameHub({
         <m.main
           id="main-content"
           className={`arcade-main ${focusGame ? "play-main" : ""}`}
-          ref={mainRef}
           onClickCapture={handleMainLinkClick}
         >
-          <HubSidebarBar view={view} activeGenre={selectedGenre} focusGame={focusGame} />
+          <HubSidebarBar focusGame={focusGame} view={view} />
           <AnimatePresence mode="wait" initial={false}>
             <m.div
-              key={contentKey}
+              key={`${view}:${focusGame ? selectedGame.slug : "index"}`}
               className="page-motion-shell"
               variants={pageMotionVariants}
               initial={shouldReduceMotion ? false : "hidden"}
               animate={pageExiting && !shouldReduceMotion ? "exit" : "visible"}
               exit={shouldReduceMotion ? undefined : "exit"}
             >
-              {isGames ? (
-                focusGame ? (
-                  <GamePlayView
-                    selectedGame={selectedGame}
-                    sidebarOpen={sidebarOpen}
-                    shouldReduceMotion={Boolean(shouldReduceMotion)}
-                    onPlaySnake={() => selectGame(games[0])}
-                  />
-                ) : (
-                  <GamesView
-                    activeGenre={selectedGenre}
-                    focusGame={false}
-                    searchQuery={searchQuery}
-                    selectedGame={selectedGame}
-                    shouldReduceMotion={Boolean(shouldReduceMotion)}
-                    onGameSelect={selectGame}
-                  />
-                )
+              {focusGame ? (
+                <GamePlayView
+                  selectedGame={selectedGame}
+                  sidebarOpen={sidebarOpen}
+                  shouldReduceMotion={Boolean(shouldReduceMotion)}
+                />
+              ) : view === "achievements" ? (
+                <AchievementsView shouldReduceMotion={Boolean(shouldReduceMotion)} />
               ) : (
-                <CollectionView activeGenre={selectedGenre} searchQuery={searchQuery} view={view} />
+                <GamesView
+                  searchQuery={searchQuery}
+                  shouldReduceMotion={Boolean(shouldReduceMotion)}
+                />
               )}
             </m.div>
           </AnimatePresence>
@@ -598,15 +251,15 @@ export function GameHub({
 }
 
 function HubSidebar({
+  activeGameSlug,
   activeView,
-  activeGenre,
   hideSearch,
   searchQuery,
   onNavigate,
   onSearchChange,
 }: {
+  activeGameSlug?: string;
   activeView: GameHubView;
-  activeGenre?: GenreSlug;
   hideSearch: boolean;
   searchQuery: string;
   onNavigate: (href: string) => void;
@@ -624,7 +277,7 @@ function HubSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={activeView === "games" && !activeGenre}
+              isActive={activeView === "games" && !activeGameSlug}
               size="lg"
               tooltip="Dylan Games"
             >
@@ -688,21 +341,14 @@ function HubSidebar({
                 href="/"
                 icon={Grid2X2}
                 label="Games"
-                active={activeView === "games" && !activeGenre}
+                active={activeView === "games" && !activeGameSlug}
                 onNavigate={onNavigate}
               />
               <HubSidebarLink
-                href="/games/favorites"
-                icon={Heart}
-                label="Favorites"
-                active={activeView === "favorites"}
-                onNavigate={onNavigate}
-              />
-              <HubSidebarLink
-                href="/discover"
-                icon={Star}
-                label="Discover"
-                active={activeView === "discover"}
+                href="/achievements"
+                icon={Trophy}
+                label="Achievements"
+                active={activeView === "achievements"}
                 onNavigate={onNavigate}
               />
             </SidebarMenu>
@@ -710,16 +356,16 @@ function HubSidebar({
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Genres</SidebarGroupLabel>
+          <SidebarGroupLabel>Games</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {gameGenres.map((genre) => (
+              {playableGames.map((game) => (
                 <HubSidebarLink
-                  key={genre.slug}
-                  href={`/genres/${genre.slug}`}
-                  icon={iconMap[genre.icon]}
-                  label={genre.label}
-                  active={activeGenre === genre.slug}
+                  key={game.slug}
+                  href={`/games/${game.slug}`}
+                  icon={Gamepad2}
+                  label={game.title}
+                  active={activeGameSlug === game.slug}
                   onNavigate={onNavigate}
                 />
               ))}
@@ -746,32 +392,65 @@ function HubSidebar({
   );
 }
 
+function HubSidebarLink({
+  active,
+  href,
+  icon: Icon,
+  label,
+  onNavigate,
+}: {
+  active: boolean;
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  onNavigate: (href: string) => void;
+}) {
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={active} tooltip={label}>
+        <Link
+          href={href as Route}
+          aria-current={active ? "page" : undefined}
+          aria-label={label}
+          onClick={(event) => handleSidebarNavigation(event, href, onNavigate)}
+        >
+          <Icon aria-hidden="true" />
+          <span>{label}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
+
+function HubSidebarBar({ focusGame, view }: { focusGame: boolean; view: GameHubView }) {
+  const { isMobile, open, openMobile, toggleSidebar } = useSidebar();
+  const navigationOpen = isMobile ? openMobile : open;
+  const label = navigationOpen ? "Close navigation" : "Open navigation";
+  const pageLabel = focusGame ? "Play" : view === "achievements" ? "Achievements" : "Games";
+
+  return (
+    <header className="hub-sidebar-bar">
+      <button
+        className="hub-sidebar-trigger"
+        type="button"
+        onClick={toggleSidebar}
+        aria-controls="arcade-sidebar"
+        aria-expanded={navigationOpen}
+        aria-label={label}
+      >
+        <PanelLeft aria-hidden="true" />
+      </button>
+      <div className="hub-sidebar-breadcrumb" aria-label="Current section">
+        <span>Dylan Games</span>
+        <i aria-hidden="true" />
+        <strong>{pageLabel}</strong>
+      </div>
+    </header>
+  );
+}
+
 function DwlAccountSidebarItems() {
-  const [user, setUser] = useState<DwlAccountUser | null>(null);
-  const [authReturnUrl, setAuthReturnUrl] = useState(DWL_DEFAULT_AUTH_RETURN_URL);
-
-  useEffect(() => {
-    let cancelled = false;
-    const authReturnFrame = window.requestAnimationFrame(() => {
-      if (!cancelled) {
-        setAuthReturnUrl(getDwlAuthReturnUrl(getCurrentAuthReturnPath()));
-      }
-    });
-
-    void fetch("/api/dwl/session", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((body: { user?: DwlAccountUser | null } | null) => {
-        if (!cancelled) {
-          setUser(body?.user ?? null);
-        }
-      })
-      .catch(() => undefined);
-
-    return () => {
-      cancelled = true;
-      window.cancelAnimationFrame(authReturnFrame);
-    };
-  }, []);
+  const { authReturnUrl, user } = useDwlSession();
 
   if (user) {
     return (
@@ -818,6 +497,381 @@ function DwlAccountSidebarItems() {
   );
 }
 
+function GamesView({
+  searchQuery,
+  shouldReduceMotion,
+}: {
+  searchQuery: string;
+  shouldReduceMotion: boolean;
+}) {
+  const visibleGames = useMemo(() => filterPlayableGames(searchQuery), [searchQuery]);
+
+  return (
+    <m.div className="games-page compact-games-page" variants={pageMotionVariants}>
+      <m.header className="arcade-title" variants={pageItemVariants}>
+        <h1>Games</h1>
+      </m.header>
+      <FeatureCarousel shouldReduceMotion={shouldReduceMotion} />
+      <m.section
+        className="available-games-section"
+        aria-labelledby="available-games-title"
+        variants={pageItemVariants}
+      >
+        <div className="available-games-heading">
+          <h2 id="available-games-title">Games</h2>
+          <span>{visibleGames.length} available</span>
+        </div>
+        {visibleGames.length ? (
+          <div className="available-games-grid" role="list">
+            {visibleGames.map((game) => (
+              <AvailableGameCard key={game.slug} game={game} />
+            ))}
+          </div>
+        ) : (
+          <div className="compact-empty-state">
+            <strong>No available games match.</strong>
+            <span>Clear search to show Snake.</span>
+          </div>
+        )}
+      </m.section>
+    </m.div>
+  );
+}
+
+function FeatureCarousel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const featured = playableGames;
+
+  useEffect(() => {
+    if (shouldReduceMotion || featured.length < 2) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setActiveIndex((currentIndex) => (currentIndex + 1) % featured.length);
+    }, featureAutoplayMs);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeIndex, featured.length, shouldReduceMotion]);
+
+  return (
+    <m.section className="games-showcase" aria-label="Featured games" variants={pageItemVariants}>
+      <Carousel
+        className="games-showcase-carousel"
+        disableDrag={shouldReduceMotion || featured.length < 2}
+        index={activeIndex}
+        onIndexChange={setActiveIndex}
+      >
+        <CarouselContent>
+          {featured.map((game) => (
+            <CarouselItem key={game.slug} className="games-showcase-item">
+              <ShowcaseSlide game={game} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        {featured.length > 1 ? (
+          <>
+            <CarouselNavigation
+              alwaysShow
+              className="games-showcase-navigation"
+              classNameButton="games-showcase-nav-button"
+            />
+            <CarouselIndicator className="games-showcase-indicator" />
+          </>
+        ) : null}
+      </Carousel>
+    </m.section>
+  );
+}
+
+function ShowcaseSlide({ game }: { game: GameDefinition }) {
+  return (
+    <div className={`games-showcase-slide accent-${game.accent}`}>
+      <div className="games-showcase-copy">
+        <span className="showcase-kicker">Available now</span>
+        <h2>{game.title}</h2>
+        <p>{game.description}</p>
+        <div className="showcase-actions">
+          <Link
+            className="primary-play-button"
+            href={`/games/${game.slug}` as Route}
+            aria-label={`Play ${game.title} from showcase`}
+          >
+            <Play aria-hidden="true" />
+            Play {game.title}
+          </Link>
+          <Link
+            className="feature-secondary-button"
+            href={"/achievements" as Route}
+            aria-label="View achievements"
+          >
+            Achievements
+            <Trophy aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+      <div className="games-showcase-art" aria-hidden="true">
+        <PreviewArt kind={game.preview} />
+      </div>
+    </div>
+  );
+}
+
+function AvailableGameCard({ game }: { game: GameDefinition }) {
+  return (
+    <Link
+      className={`available-game-card accent-${game.accent}`}
+      href={`/games/${game.slug}` as Route}
+      role="listitem"
+      aria-label={`Play ${game.title}`}
+    >
+      <span className="available-game-art" aria-hidden="true">
+        <PreviewArt kind={game.preview} />
+      </span>
+      <span className="available-game-copy">
+        <strong>{game.title}</strong>
+        <span>{game.summary}</span>
+        <small>{game.duration}</small>
+      </span>
+      <span className="store-get-button">Play</span>
+    </Link>
+  );
+}
+
+function AchievementsView({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
+  const { levelProgress, loaded, progression } = useGameProgression();
+  const unlockedCount = Object.keys(progression.achievements).length;
+  const unlockedXp = Object.values(progression.achievements).reduce(
+    (total, achievement) => total + achievement.xp,
+    0,
+  );
+
+  return (
+    <m.div className="achievements-page" variants={pageMotionVariants}>
+      <m.header className="achievements-hero" variants={pageItemVariants}>
+        <div>
+          <h1>Achievements</h1>
+          <p>XP and unlocks add up across every game on Dylan Games.</p>
+        </div>
+        <div className="xp-ring" aria-label={`Level ${progression.level}`}>
+          <span>Level</span>
+          <strong>{loaded ? progression.level : 1}</strong>
+        </div>
+      </m.header>
+
+      <m.section className="xp-overview-grid" aria-label="XP summary" variants={pageItemVariants}>
+        <ProgressStat label="Total XP" value={progression.totalXp.toLocaleString()} />
+        <ProgressStat
+          label="Next level"
+          value={`${levelProgress.earnedThisLevel}/${levelProgress.neededThisLevel}`}
+        />
+        <ProgressStat
+          label="Achievements"
+          value={`${unlockedCount}/${achievementDefinitions.length}`}
+        />
+        <ProgressStat label="Unlock XP" value={unlockedXp.toLocaleString()} />
+      </m.section>
+
+      <m.section
+        className="achievement-grid-section"
+        aria-labelledby="achievement-grid-title"
+        variants={pageItemVariants}
+      >
+        <div className="available-games-heading">
+          <h2 id="achievement-grid-title">All Achievements</h2>
+          <span>{unlockedCount} unlocked</span>
+        </div>
+        <div className="achievement-grid" role="list">
+          {achievementDefinitions.map((achievement) => {
+            const unlocked = Boolean(progression.achievements[achievement.id]);
+
+            return (
+              <article
+                key={achievement.id}
+                className={`achievement-card ${unlocked ? "unlocked" : ""}`}
+                role="listitem"
+              >
+                <span className="achievement-icon" aria-hidden="true">
+                  {unlocked ? <CheckCircle2 /> : <Lock />}
+                </span>
+                <span className="achievement-copy">
+                  <strong>{achievement.title}</strong>
+                  <span>{achievement.description}</span>
+                  <small>{achievement.xp} XP</small>
+                </span>
+              </article>
+            );
+          })}
+        </div>
+      </m.section>
+      <m.div className="achievements-play-link" variants={pageItemVariants}>
+        <Link className="primary-play-button" href="/games/snake">
+          <Gamepad2 aria-hidden="true" />
+          Play Snake
+        </Link>
+      </m.div>
+      {shouldReduceMotion ? null : <span className="achievements-glow" aria-hidden="true" />}
+    </m.div>
+  );
+}
+
+function ProgressStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="progress-stat">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function GamePlayView({
+  selectedGame,
+  sidebarOpen,
+  shouldReduceMotion,
+}: {
+  selectedGame: GameDefinition;
+  sidebarOpen: boolean;
+  shouldReduceMotion: boolean;
+}) {
+  const { authReturnUrl, loading, user } = useDwlSession();
+
+  return (
+    <m.div className="play-page" variants={pageMotionVariants}>
+      <AnimatePresence mode="wait">
+        <m.div
+          key={user ? selectedGame.slug : "account-required"}
+          className="play-game-surface"
+          variants={pageMotionVariants}
+          initial={shouldReduceMotion ? false : "hidden"}
+          animate="visible"
+          exit={shouldReduceMotion ? undefined : "exit"}
+        >
+          {loading ? (
+            <AccountGate loading />
+          ) : user ? (
+            <SnakeGame menuOpen={sidebarOpen} />
+          ) : (
+            <AccountGate authReturnUrl={authReturnUrl} game={selectedGame} />
+          )}
+        </m.div>
+      </AnimatePresence>
+    </m.div>
+  );
+}
+
+function AccountGate({
+  authReturnUrl,
+  game,
+  loading = false,
+}: {
+  authReturnUrl?: string;
+  game?: GameDefinition;
+  loading?: boolean;
+}) {
+  return (
+    <section className="account-gate" aria-labelledby="account-gate-title">
+      <div className="account-gate-art" aria-hidden="true">
+        <PreviewArt kind="snake" />
+      </div>
+      <div className="account-gate-copy">
+        <span>{loading ? "Checking account" : "DWL Accounts required"}</span>
+        <h1 id="account-gate-title">
+          {loading ? "Loading account status." : `Sign in to play ${game?.title ?? "Snake"}.`}
+        </h1>
+        <p>
+          Game access, XP, achievements, and cross-device progress use your DWL Accounts session.
+        </p>
+        {!loading && authReturnUrl ? (
+          <div className="account-gate-actions">
+            <a className="primary-play-button" href={getDwlSignInUrl({ returnUrl: authReturnUrl })}>
+              <LogIn aria-hidden="true" />
+              Sign in
+            </a>
+            <a
+              className="feature-secondary-button"
+              href={getDwlSignUpUrl({ returnUrl: authReturnUrl })}
+            >
+              Create account
+              <UserRound aria-hidden="true" />
+            </a>
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function PreviewArt({ kind }: { kind: GameDefinition["preview"] }) {
+  if (kind !== "snake") {
+    return null;
+  }
+
+  return (
+    <span className="snake-preview-route">
+      <i className="snake-route tail" />
+      <i className="snake-route turn" />
+      <i className="snake-route neck" />
+      <i className="snake-head-dot" />
+      <i className="food-dot" />
+    </span>
+  );
+}
+
+function filterPlayableGames(searchQuery: string) {
+  const query = searchQuery.trim().toLowerCase();
+
+  if (!query) {
+    return playableGames;
+  }
+
+  return playableGames.filter((game) =>
+    [game.title, game.summary, game.description, game.genre, ...(game.tags ?? [])]
+      .join(" ")
+      .toLowerCase()
+      .includes(query),
+  );
+}
+
+function useDwlSession() {
+  const [user, setUser] = useState<DwlAccountUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [authReturnUrl, setAuthReturnUrl] = useState(DWL_DEFAULT_AUTH_RETURN_URL);
+
+  useEffect(() => {
+    let cancelled = false;
+    const authReturnFrame = window.requestAnimationFrame(() => {
+      if (!cancelled) {
+        setAuthReturnUrl(getDwlAuthReturnUrl(getCurrentAuthReturnPath()));
+      }
+    });
+
+    void fetch("/api/dwl/session", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body: { user?: DwlAccountUser | null } | null) => {
+        if (!cancelled) {
+          setUser(body?.user ?? null);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(authReturnFrame);
+    };
+  }, []);
+
+  return {
+    authReturnUrl,
+    loading,
+    user,
+  };
+}
+
 function getCurrentAuthReturnPath() {
   if (typeof window === "undefined") {
     return "/auth/callback";
@@ -826,74 +880,6 @@ function getCurrentAuthReturnPath() {
   const currentPath =
     `${window.location.pathname}${window.location.search}${window.location.hash}` || "/";
   return `/auth/callback?next=${encodeURIComponent(currentPath)}`;
-}
-
-function HubSidebarLink({
-  href,
-  icon: Icon,
-  label,
-  active,
-  onNavigate,
-}: {
-  href: string;
-  icon: LucideIcon;
-  label: string;
-  active: boolean;
-  onNavigate: (href: string) => void;
-}) {
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={active} tooltip={label}>
-        <Link
-          href={href as Route}
-          aria-current={active ? "page" : undefined}
-          aria-label={label}
-          onClick={(event) => handleSidebarNavigation(event, href, onNavigate)}
-        >
-          <Icon aria-hidden="true" />
-          <span>{label}</span>
-        </Link>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
-  );
-}
-
-function HubSidebarBar({
-  view,
-  activeGenre,
-  focusGame,
-}: {
-  view: GameHubView;
-  activeGenre?: ReturnType<typeof getGenreBySlug>;
-  focusGame: boolean;
-}) {
-  const { open, openMobile, isMobile, toggleSidebar } = useSidebar();
-  const navigationOpen = isMobile ? openMobile : open;
-  const label = navigationOpen ? "Close navigation" : "Open navigation";
-  const pageLabel = focusGame
-    ? "Play"
-    : (activeGenre?.label ??
-      (view === "discover" ? "Discover" : view === "favorites" ? "Favorites" : "Games"));
-
-  return (
-    <header className="hub-sidebar-bar">
-      <button
-        className="hub-sidebar-trigger"
-        type="button"
-        onClick={toggleSidebar}
-        aria-controls="arcade-sidebar"
-        aria-expanded={navigationOpen}
-        aria-label={label}
-      >
-        <PanelLeft aria-hidden="true" />
-      </button>
-      <div className="hub-sidebar-breadcrumb" aria-label="Current section">
-        <span>Dylan Games</span>
-        <i aria-hidden="true" />
-        <strong>{pageLabel}</strong>
-      </div>
-    </header>
-  );
 }
 
 function handleSidebarNavigation(
@@ -914,1623 +900,4 @@ function handleSidebarNavigation(
 
   event.preventDefault();
   onNavigate(href);
-}
-
-function GamesView({
-  activeGenre,
-  focusGame,
-  searchQuery,
-  selectedGame,
-  shouldReduceMotion,
-  onGameSelect,
-}: {
-  activeGenre?: ReturnType<typeof getGenreBySlug>;
-  focusGame: boolean;
-  searchQuery: string;
-  selectedGame: GameDefinition;
-  shouldReduceMotion: boolean;
-  onGameSelect: (game: GameDefinition) => void;
-}) {
-  const [activeFilter, setActiveFilter] = useState<GenreSlug | undefined>(activeGenre?.slug);
-  const visibleGames = filterGamesBySearch(games, searchQuery, activeGenre?.slug);
-
-  return (
-    <m.div className="games-page" variants={pageCascadeVariants}>
-      <m.header className="arcade-title" variants={pageItemVariants}>
-        <ComponentsText as="h1" shouldReduceMotion={shouldReduceMotion}>
-          Games
-        </ComponentsText>
-      </m.header>
-
-      {focusGame ? (
-        <>
-          <m.section
-            className="game-shelf"
-            aria-labelledby="game-shelf-title"
-            variants={pageItemVariants}
-          >
-            <div className="shelf-heading">
-              <div>
-                <p>{activeGenre ? activeGenre.label : "All Games"}</p>
-                <h2 id="game-shelf-title">
-                  {searchQuery
-                    ? "Search results"
-                    : activeGenre
-                      ? `${activeGenre.label} games`
-                      : "Available and upcoming"}
-                </h2>
-              </div>
-              <span>{visibleGames.length} shown</span>
-            </div>
-
-            {visibleGames.length ? (
-              <div className="shelf-grid" role="list">
-                {visibleGames.map((game) => (
-                  <GameTile
-                    key={game.slug}
-                    game={game}
-                    selected={game.slug === selectedGame.slug}
-                    onSelect={() => onGameSelect(game)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyGenreState genre={activeGenre?.label ?? "Games"} />
-            )}
-          </m.section>
-
-          <GameLauncher
-            selectedGame={selectedGame}
-            shouldReduceMotion={shouldReduceMotion}
-            onPlaySnake={() => onGameSelect(games[0])}
-          />
-        </>
-      ) : (
-        <m.div variants={pageItemVariants}>
-          {searchQuery.trim() ? null : <FeatureHero shouldReduceMotion={shouldReduceMotion} />}
-          <ArcadeStorefront
-            activeGenre={activeFilter}
-            searchQuery={searchQuery}
-            shouldReduceMotion={shouldReduceMotion}
-            onGenreChange={setActiveFilter}
-          />
-        </m.div>
-      )}
-    </m.div>
-  );
-}
-
-function FeatureHero({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
-  const [hoverPaused, setHoverPaused] = useState(false);
-  const [focusPaused, setFocusPaused] = useState(false);
-  const [dragPaused, setDragPaused] = useState(false);
-  const [documentHidden, setDocumentHidden] = useState(false);
-  const activeSlide = featuredGames[activeIndex] ?? featuredGames[0];
-  const autoplayPaused =
-    shouldReduceMotion || hoverPaused || focusPaused || dragPaused || documentHidden;
-  const slideVariants = useMemo<Variants>(
-    () => ({
-      enter: (travelDirection: number) => ({
-        opacity: 0,
-        x: shouldReduceMotion ? 0 : travelDirection > 0 ? 24 : -24,
-        scale: shouldReduceMotion ? 1 : 0.985,
-      }),
-      center: {
-        opacity: 1,
-        x: 0,
-        scale: 1,
-        transition: {
-          duration: shouldReduceMotion ? 0 : 0.58,
-          ease: motionEase,
-        },
-      },
-      exit: (travelDirection: number) => ({
-        opacity: 0,
-        x: shouldReduceMotion ? 0 : travelDirection > 0 ? -24 : 24,
-        scale: shouldReduceMotion ? 1 : 0.985,
-        transition: {
-          duration: shouldReduceMotion ? 0 : 0.24,
-          ease: "easeIn",
-        },
-      }),
-    }),
-    [shouldReduceMotion],
-  );
-
-  const goToSlide = useCallback(
-    (nextIndex: number, nextDirection = nextIndex > activeIndex ? 1 : -1) => {
-      const total = featuredGames.length;
-      const boundedIndex = ((nextIndex % total) + total) % total;
-
-      if (boundedIndex === activeIndex) {
-        return;
-      }
-
-      setDirection(nextDirection);
-      setActiveIndex(boundedIndex);
-    },
-    [activeIndex],
-  );
-
-  const showPreviousSlide = useCallback(() => {
-    goToSlide(activeIndex - 1, -1);
-  }, [activeIndex, goToSlide]);
-
-  const showNextSlide = useCallback(() => {
-    goToSlide(activeIndex + 1, 1);
-  }, [activeIndex, goToSlide]);
-
-  useEffect(() => {
-    const updateVisibility = () => {
-      setDocumentHidden(document.visibilityState === "hidden");
-    };
-
-    updateVisibility();
-    document.addEventListener("visibilitychange", updateVisibility);
-
-    return () => {
-      document.removeEventListener("visibilitychange", updateVisibility);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (autoplayPaused) {
-      return;
-    }
-
-    const timeout = window.setTimeout(showNextSlide, featureAutoplayMs);
-
-    return () => {
-      window.clearTimeout(timeout);
-    };
-  }, [autoplayPaused, showNextSlide]);
-
-  const handleCarouselKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLElement>) => {
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        showPreviousSlide();
-      }
-
-      if (event.key === "ArrowRight") {
-        event.preventDefault();
-        showNextSlide();
-      }
-    },
-    [showNextSlide, showPreviousSlide],
-  );
-
-  const handleCarouselBlur = useCallback((event: FocusEvent<HTMLElement>) => {
-    const nextTarget = event.relatedTarget;
-
-    if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
-      setFocusPaused(false);
-    }
-  }, []);
-
-  return (
-    <m.section
-      className="feature-spotlight"
-      aria-label="Featured games"
-      variants={pageItemVariants}
-    >
-      <m.div
-        className={`feature-card accent-${activeSlide.accent}`}
-        aria-label={`Featured games carousel, slide ${activeIndex + 1} of ${featuredGames.length}`}
-        aria-roledescription="carousel"
-        role="region"
-        tabIndex={0}
-        initial={shouldReduceMotion ? false : { opacity: 0.92, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: "easeOut" }}
-        onBlurCapture={handleCarouselBlur}
-        onFocusCapture={() => setFocusPaused(true)}
-        onKeyDown={handleCarouselKeyDown}
-        onPointerEnter={() => setHoverPaused(true)}
-        onPointerLeave={() => setHoverPaused(false)}
-      >
-        {!shouldReduceMotion ? (
-          <Spotlight className="feature-components-spotlight" size={360} />
-        ) : null}
-        <m.div
-          className="feature-swipe-layer"
-          drag={shouldReduceMotion ? false : "x"}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.18}
-          onDragStart={() => setDragPaused(true)}
-          onDragEnd={(_, info) => {
-            setDragPaused(false);
-
-            const swipe = info.offset.x + info.velocity.x * 0.16;
-
-            if (swipe < -52) {
-              showNextSlide();
-            }
-
-            if (swipe > 52) {
-              showPreviousSlide();
-            }
-          }}
-        >
-          <AnimatePresence custom={direction} initial={false} mode="popLayout">
-            <m.div
-              key={activeSlide.title}
-              className="feature-slide"
-              aria-label={`${activeSlide.title}, ${activeIndex + 1} of ${featuredGames.length}`}
-              aria-roledescription="slide"
-              custom={direction}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              variants={slideVariants}
-            >
-              <Image
-                src={activeSlide.image}
-                alt=""
-                fill
-                priority
-                sizes="(max-width: 900px) 100vw, calc(100vw - 96px)"
-                className={`feature-image ${activeSlide.preview}`}
-                style={{ objectPosition: activeSlide.imagePosition }}
-              />
-              <div className="feature-scrim" aria-hidden="true" />
-              <ProgressiveBlur
-                aria-hidden="true"
-                className="feature-progressive-blur"
-                direction="right"
-                blurIntensity={0.55}
-                blurLayers={6}
-              />
-              <div className="feature-copy">
-                <ComponentsShimmer as="p" shouldReduceMotion={shouldReduceMotion}>
-                  {activeSlide.mode}
-                </ComponentsShimmer>
-                <ComponentsText as="h2" shouldReduceMotion={shouldReduceMotion}>
-                  {activeSlide.title}
-                </ComponentsText>
-                <span>{activeSlide.description}</span>
-                <div className="feature-actions">
-                  <MaybeMagnetic enabled={!shouldReduceMotion}>
-                    <Link
-                      className="primary-play-button"
-                      href={activeSlide.route}
-                      aria-label={activeSlide.primaryAriaLabel}
-                    >
-                      <Play aria-hidden="true" />
-                      {activeSlide.primaryCta}
-                    </Link>
-                  </MaybeMagnetic>
-                  <Link
-                    className="feature-secondary-button"
-                    href={activeSlide.secondaryCta.route}
-                    aria-label={activeSlide.secondaryCta.ariaLabel}
-                  >
-                    {activeSlide.secondaryCta.label}
-                    <ArrowUpRight aria-hidden="true" />
-                  </Link>
-                </div>
-                <div className="feature-meta" aria-label={`${activeSlide.title} details`}>
-                  {activeSlide.tags.map((item) => (
-                    <span key={item}>{item}</span>
-                  ))}
-                </div>
-              </div>
-              <div className="feature-game-preview" aria-hidden="true">
-                <ArcadeAppIcon
-                  game={{
-                    ...fallbackGame,
-                    slug: activeSlide.title.toLowerCase(),
-                    title: activeSlide.title,
-                    genre:
-                      activeSlide.title === "Snake"
-                        ? "Action"
-                        : activeSlide.title === "Dashline"
-                          ? "Racing"
-                          : "Word",
-                    status: activeSlide.title === "Dashline" ? "coming-soon" : "playable",
-                    summary: activeSlide.detail,
-                    description: activeSlide.detail,
-                    accent: activeSlide.accent,
-                    preview: activeSlide.preview,
-                    priority: activeIndex,
-                  }}
-                  small
-                />
-                <span className="feature-app-copy">
-                  <strong>{activeSlide.mode}</strong>
-                  <small>{activeSlide.detail}</small>
-                </span>
-              </div>
-            </m.div>
-          </AnimatePresence>
-        </m.div>
-        <button
-          className="feature-arrow previous"
-          type="button"
-          onClick={showPreviousSlide}
-          aria-label="Show previous featured game"
-        >
-          <ChevronLeft aria-hidden="true" />
-        </button>
-        <button
-          className="feature-arrow next"
-          type="button"
-          onClick={showNextSlide}
-          aria-label="Show next featured game"
-        >
-          <ChevronRight aria-hidden="true" />
-        </button>
-        <div className="feature-carousel-controls" aria-label="Featured game slides">
-          <div className="feature-dots">
-            {featuredGames.map((slide, index) => (
-              <button
-                key={slide.title}
-                className={`feature-dot accent-${slide.accent} ${index === activeIndex ? "active" : ""}`}
-                type="button"
-                onClick={() => goToSlide(index)}
-                aria-label={`Show ${slide.title} featured slide`}
-                aria-pressed={index === activeIndex}
-              />
-            ))}
-          </div>
-          <span className="feature-progress" aria-hidden="true">
-            <span
-              key={`${activeIndex}-${autoplayPaused ? "paused" : "running"}`}
-              className={autoplayPaused ? "is-paused" : "is-running"}
-            />
-          </span>
-        </div>
-      </m.div>
-    </m.section>
-  );
-}
-
-const storefrontEase = [0.22, 1, 0.36, 1] as const;
-
-const storefrontContainerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.055,
-    },
-  },
-};
-
-const storefrontSectionVariants: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.28, ease: storefrontEase },
-  },
-};
-
-const storefrontItemVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.22, ease: "easeOut" },
-  },
-};
-
-function ArcadeStorefront({
-  activeGenre,
-  searchQuery,
-  shouldReduceMotion,
-  onGenreChange,
-}: {
-  activeGenre?: GenreSlug;
-  searchQuery: string;
-  shouldReduceMotion: boolean;
-  onGenreChange: (genre: GenreSlug | undefined) => void;
-}) {
-  const hasSearch = Boolean(searchQuery.trim());
-  const searchGenre = getSearchGenre(searchQuery);
-  const effectiveGenre = searchGenre ?? activeGenre;
-  const liveGames = filterStorefrontGames(
-    games.filter((game) => game.status === "playable"),
-    searchQuery,
-    activeGenre,
-  );
-  const plannedGames = filterStorefrontGames(
-    games.filter((game) => game.status === "coming-soon"),
-    searchQuery,
-    activeGenre,
-  );
-  const visibleCount = liveGames.length + plannedGames.length;
-  const motionProps = shouldReduceMotion
-    ? { initial: false as const }
-    : {
-        initial: "hidden" as const,
-        animate: "visible" as const,
-        variants: storefrontContainerVariants,
-      };
-
-  if (searchQuery.trim() && visibleCount === 0) {
-    return (
-      <m.div className="arcade-storefront" {...motionProps}>
-        <GenrePills
-          activeGenre={effectiveGenre}
-          playableOnly={!hasSearch}
-          resultCount={0}
-          shouldReduceMotion={shouldReduceMotion}
-          onGenreChange={onGenreChange}
-        />
-        <EmptyGenreState genre="Search" />
-      </m.div>
-    );
-  }
-
-  return (
-    <m.div className="arcade-storefront" {...motionProps}>
-      {!hasSearch ? <ContinuePlayingSection shouldReduceMotion={shouldReduceMotion} /> : null}
-      <GenrePills
-        activeGenre={effectiveGenre}
-        playableOnly={!hasSearch}
-        resultCount={visibleCount}
-        shouldReduceMotion={shouldReduceMotion}
-        onGenreChange={onGenreChange}
-      />
-      <AllGamesSection
-        activeGenre={effectiveGenre}
-        games={liveGames}
-        searchQuery={searchQuery}
-        shouldReduceMotion={shouldReduceMotion}
-      />
-      <ComingSoonSection
-        games={plannedGames}
-        searching={hasSearch}
-        shouldReduceMotion={shouldReduceMotion}
-      />
-    </m.div>
-  );
-}
-
-function AllGamesSection({
-  activeGenre,
-  games: sectionGames,
-  searchQuery,
-  shouldReduceMotion,
-}: {
-  activeGenre?: GenreSlug;
-  games: GameDefinition[];
-  searchQuery: string;
-  shouldReduceMotion: boolean;
-}) {
-  const activeLabel = activeGenre ? getGenreBySlug(activeGenre)?.label : undefined;
-  const titleId = "playable-games-title";
-
-  return (
-    <m.section
-      className="store-section all-games-section"
-      id="playable-games"
-      aria-labelledby={titleId}
-      variants={storefrontSectionVariants}
-    >
-      <div className="store-section-header">
-        <div>
-          <ComponentsText as="h2" id={titleId} shouldReduceMotion={shouldReduceMotion}>
-            {searchQuery.trim() ? "Playable results" : "Playable Games"}
-          </ComponentsText>
-          <p>
-            {activeLabel
-              ? `${activeLabel} games that are playable in the browser right now.`
-              : "Ready for a quick browser session."}
-          </p>
-        </div>
-        <span className="section-count-badge">Playable {sectionGames.length}</span>
-      </div>
-      {sectionGames.length ? (
-        <div className="store-card-grid live" role="list">
-          {sectionGames.map((game) => (
-            <m.div key={game.slug} role="listitem" variants={storefrontItemVariants}>
-              <StoreGameCard
-                game={game}
-                source="All Games"
-                shouldReduceMotion={shouldReduceMotion}
-              />
-            </m.div>
-          ))}
-        </div>
-      ) : (
-        <div className="compact-empty-state">
-          <strong>No live games match yet.</strong>
-          <span>
-            {searchQuery.trim()
-              ? "Clear search or choose another category."
-              : "Playable releases stay separate from upcoming previews below."}
-          </span>
-        </div>
-      )}
-    </m.section>
-  );
-}
-
-function ContinuePlayingSection({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
-  const snake = getGameBySlug("snake") ?? fallbackGame;
-
-  return (
-    <m.section
-      className="store-section continue-section"
-      aria-labelledby="continue-playing-title"
-      variants={storefrontSectionVariants}
-    >
-      <div className="store-section-header compact">
-        <div>
-          <ComponentsText
-            as="h2"
-            id="continue-playing-title"
-            shouldReduceMotion={shouldReduceMotion}
-          >
-            Continue Playing
-          </ComponentsText>
-          <p>Resume today&apos;s puzzle or jump back into your latest run.</p>
-        </div>
-      </div>
-      <div className="continue-rail">
-        <DailyCipherwordCTA variant="banner" />
-        <ContinueCard
-          game={snake}
-          image="/art/feature-snake.png"
-          summary="Eat apples, chase streaks, and restart in one click."
-        />
-      </div>
-    </m.section>
-  );
-}
-
-function ContinueCard({
-  game,
-  image,
-  summary,
-}: {
-  game: GameDefinition;
-  image: string;
-  summary: string;
-}) {
-  const [bestScore, setBestScore] = useState(0);
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      try {
-        const rawScores =
-          window.localStorage.getItem("games:snake-best-scores") ??
-          window.localStorage.getItem("dylan-games:snake-best-scores");
-        const parsed = rawScores ? (JSON.parse(rawScores) as Record<string, unknown>) : {};
-        const scores = Object.values(parsed).filter(
-          (score): score is number => typeof score === "number" && Number.isFinite(score),
-        );
-
-        setBestScore(scores.length ? Math.max(0, ...scores.map((score) => Math.floor(score))) : 0);
-      } catch {
-        setBestScore(0);
-      }
-    }, 0);
-
-    return () => window.clearTimeout(timeout);
-  }, []);
-
-  return (
-    <m.div variants={storefrontItemVariants}>
-      <Link
-        className="continue-card"
-        href={`/games/${game.slug}` as Route}
-        aria-label={`Resume ${game.title} from Continue Playing`}
-      >
-        <Image
-          src={image}
-          alt={`${game.title} continue playing artwork`}
-          fill
-          loading="eager"
-          sizes="(max-width: 900px) 100vw, 48vw"
-          className="continue-image"
-        />
-        <span className="continue-overlay" aria-hidden="true" />
-        <span className="continue-footer">
-          <ArcadeAppIcon game={game} small />
-          <span>
-            <strong>{game.title}</strong>
-            <em>{summary}</em>
-          </span>
-          <span className="continue-stats" aria-label={`Best Snake score ${bestScore}`}>
-            <Trophy aria-hidden="true" />
-            Best {bestScore}
-          </span>
-          <span className="store-get-button">Resume Snake</span>
-        </span>
-      </Link>
-    </m.div>
-  );
-}
-
-function getUpcomingStage(game: GameDefinition) {
-  if (game.slug === "dashline" || game.slug === "minesweeper") {
-    return "In progress";
-  }
-
-  if (game.slug === "pong" || game.slug === "tiles") {
-    return "Prototype";
-  }
-
-  return "Planned";
-}
-
-function getUpcomingTiming(game: GameDefinition) {
-  if (game.slug === "dashline") {
-    return "Expected Summer 2026";
-  }
-
-  if (game.slug === "minesweeper" || game.slug === "pong" || game.slug === "tiles") {
-    return "Prototype";
-  }
-
-  return "Designing";
-}
-
-function getUpcomingDescription(game: GameDefinition) {
-  if (game.slug === "dashline") {
-    return "A quick racing challenge built for clean routes, tight turns, and fast restarts.";
-  }
-
-  if (game.slug === "minesweeper") {
-    return "Classic mine-clearing with clean counts and readable boards.";
-  }
-
-  if (game.slug === "pong") {
-    return "Fast paddle rallies with crisp ball movement.";
-  }
-
-  if (game.slug === "tiles") {
-    return "A compact falling-block puzzle built for quick sessions.";
-  }
-
-  if (game.slug === "orbit") {
-    return "Time each tap to stay locked in orbit.";
-  }
-
-  return game.summary;
-}
-
-function StoreGameCard({
-  game,
-  source,
-  shouldReduceMotion = false,
-}: {
-  game: GameDefinition;
-  source: string;
-  shouldReduceMotion?: boolean;
-}) {
-  const isPlayable = game.status === "playable";
-  const action = "Play";
-  const statusLabel = isPlayable ? (game.daily ? "Daily" : "Arcade") : getUpcomingStage(game);
-  const duration = game.duration ?? (game.slug === "snake" ? "1-min rounds" : "Quick session");
-  const summary =
-    game.slug === "snake"
-      ? "Guide the snake, chain apples, and beat your best run."
-      : game.slug === "cipher"
-        ? "Find the hidden word with meaning scores, clues, and letters."
-        : isPlayable
-          ? game.summary
-          : getUpcomingDescription(game);
-  const cardContent = (
-    <>
-      {!shouldReduceMotion ? <Spotlight className="store-components-spotlight" size={190} /> : null}
-      <ArcadeAppIcon game={game} />
-      <span className="store-game-copy">
-        <span className="store-game-title-row">
-          <strong>{game.title}</strong>
-          <span className={`mini-status ${game.status}`}>
-            {isPlayable ? <Gamepad2 aria-hidden="true" /> : <Lock aria-hidden="true" />}
-            {statusLabel}
-          </span>
-        </span>
-        <span>{summary}</span>
-        <span className="store-game-meta">
-          <small>{game.genre}</small>
-          <small>{isPlayable ? duration : getUpcomingTiming(game)}</small>
-        </span>
-      </span>
-      {isPlayable ? <span className="store-get-button">{action}</span> : null}
-    </>
-  );
-
-  if (!isPlayable) {
-    return (
-      <article className={`store-game-card ${game.status} is-disabled`} data-disabled="true">
-        {cardContent}
-      </article>
-    );
-  }
-
-  return (
-    <Link
-      className={`store-game-card ${game.status}`}
-      href={`/games/${game.slug}` as Route}
-      aria-label={`${action} ${game.title} from ${source}`}
-    >
-      {cardContent}
-    </Link>
-  );
-}
-
-function ComingSoonSection({
-  games: plannedGames,
-  searching,
-  shouldReduceMotion,
-}: {
-  games: GameDefinition[];
-  searching: boolean;
-  shouldReduceMotion: boolean;
-}) {
-  if (!plannedGames.length) {
-    return null;
-  }
-
-  const featuredGame =
-    plannedGames.find((game) => game.slug === "dashline") ?? plannedGames[0] ?? fallbackGame;
-  const supportingGames = plannedGames
-    .filter((game) => game.slug !== featuredGame.slug)
-    .slice(0, 4);
-  const featuredUsesImage = featuredGame.preview === "dashline";
-
-  return (
-    <m.section
-      className="store-section coming-soon-section"
-      aria-labelledby="coming-soon-title"
-      variants={storefrontSectionVariants}
-    >
-      <div className="store-section-header">
-        <div>
-          <ComponentsText as="h2" id="coming-soon-title" shouldReduceMotion={shouldReduceMotion}>
-            {searching ? "In-progress results" : "Coming Soon"}
-          </ComponentsText>
-          <p>
-            {searching
-              ? "Unreleased matches stay visible but are disabled until they are playable."
-              : "Upcoming games in development. Playable games stay above."}
-          </p>
-        </div>
-      </div>
-      <div className="coming-soon-layout">
-        <article className="coming-soon-card is-disabled" data-disabled="true">
-          <span className="coming-soon-status">Featured upcoming</span>
-          <span
-            className={`coming-soon-media ${featuredUsesImage ? "" : `preview-art accent-${featuredGame.accent} ${featuredGame.preview}`}`}
-          >
-            {featuredUsesImage ? (
-              <Image
-                src="/art/discover-racing.png"
-                alt={`${featuredGame.title} preview artwork`}
-                fill
-                sizes="(max-width: 900px) 100vw, 46vw"
-                className="coming-soon-image"
-              />
-            ) : (
-              <PreviewArt kind={featuredGame.preview} />
-            )}
-          </span>
-          <span className="coming-soon-copy">
-            <small>Expected Summer 2026</small>
-            <strong>{featuredGame.title}</strong>
-            <span>{getUpcomingDescription(featuredGame)}</span>
-            <span className="coming-soon-meta">
-              <span>{featuredGame.genre}</span>
-              <span>{getUpcomingStage(featuredGame)}</span>
-            </span>
-          </span>
-        </article>
-        {supportingGames.length ? (
-          <div className="store-card-grid planned" role="list">
-            {supportingGames.map((game) => (
-              <m.div key={game.slug} role="listitem" variants={storefrontItemVariants}>
-                <StoreGameCard
-                  game={game}
-                  source="Coming Soon"
-                  shouldReduceMotion={shouldReduceMotion}
-                />
-              </m.div>
-            ))}
-          </div>
-        ) : null}
-      </div>
-    </m.section>
-  );
-}
-
-function ArcadeAppIcon({ game, small = false }: { game: GameDefinition; small?: boolean }) {
-  return (
-    <span
-      className={`store-app-icon ${small ? "small" : ""} ${game.preview} accent-${game.accent}`}
-      aria-hidden="true"
-    >
-      <PreviewArt kind={game.preview} />
-    </span>
-  );
-}
-
-function CollectionView({
-  activeGenre,
-  searchQuery,
-  view,
-}: {
-  activeGenre?: ReturnType<typeof getGenreBySlug>;
-  searchQuery: string;
-  view: Exclude<GameHubView, "games">;
-}) {
-  const shouldReduceMotion = Boolean(useReducedMotion());
-  const meta = getCollectionMeta(view, activeGenre);
-  const shelfGames = getCollectionGames(view, activeGenre);
-  const hasSearch = Boolean(searchQuery.trim());
-  const visibleGames = filterGamesBySearch(
-    hasSearch ? allGames : shelfGames,
-    searchQuery,
-    activeGenre?.slug,
-  );
-  const previewArt = getCollectionArt(view, activeGenre, visibleGames[0] ?? shelfGames[0]);
-  const showDailyCta = view !== "genre" || activeGenre?.slug === "word";
-
-  return (
-    <m.div className="collection-page" variants={pageCascadeVariants}>
-      <m.header className="collection-hero" variants={pageItemVariants}>
-        <div className="collection-copy">
-          <ComponentsText as="h1" shouldReduceMotion={shouldReduceMotion}>
-            {meta.title}
-          </ComponentsText>
-          <p>{meta.description}</p>
-          <div className="collection-actions">
-            <MaybeMagnetic enabled={!shouldReduceMotion}>
-              <Link className="collection-primary-action" href={meta.href as Route}>
-                {meta.action}
-                <ArrowUpRight aria-hidden="true" />
-              </Link>
-            </MaybeMagnetic>
-            <span>{visibleGames.length} games shown</span>
-          </div>
-        </div>
-        <div className={`collection-art accent-${previewArt.accent}`} aria-hidden="true">
-          {!shouldReduceMotion ? (
-            <Spotlight className="collection-components-spotlight" size={260} />
-          ) : null}
-          <PreviewArt kind={previewArt.preview} />
-          <span>{meta.artLabel}</span>
-        </div>
-      </m.header>
-
-      {showDailyCta ? (
-        <m.div variants={pageItemVariants}>
-          <DailyCipherwordCTA variant={view === "discover" ? "banner" : "card"} />
-        </m.div>
-      ) : null}
-
-      <m.section
-        className="template-panel-grid"
-        aria-label={`${meta.title} highlights`}
-        variants={pageItemVariants}
-      >
-        {meta.panels.map((panel) => (
-          <article key={panel.title} className="template-panel">
-            <p>{panel.label}</p>
-            <ComponentsText as="h2" shouldReduceMotion={shouldReduceMotion}>
-              {panel.title}
-            </ComponentsText>
-            <span>{panel.body}</span>
-          </article>
-        ))}
-      </m.section>
-
-      <m.section
-        className="game-shelf template-shelf"
-        aria-labelledby="template-shelf-title"
-        variants={pageItemVariants}
-      >
-        <div className="shelf-heading">
-          <div>
-            <p>{meta.shelfLabel}</p>
-            <ComponentsText
-              as="h2"
-              id="template-shelf-title"
-              shouldReduceMotion={shouldReduceMotion}
-            >
-              {searchQuery ? "Search results" : meta.shelfTitle}
-            </ComponentsText>
-          </div>
-          <span>{visibleGames.length} shown</span>
-        </div>
-
-        {visibleGames.length ? (
-          <div className="template-game-grid" role="list">
-            {visibleGames.map((game) => (
-              <CollectionGameCard
-                key={game.slug}
-                game={game}
-                shouldReduceMotion={shouldReduceMotion}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyGenreState genre={meta.title} />
-        )}
-      </m.section>
-
-      {view === "discover" ? (
-        <m.div variants={pageItemVariants}>
-          <DiscoverParallaxContent />
-        </m.div>
-      ) : null}
-    </m.div>
-  );
-}
-
-function GenrePills({
-  activeGenre,
-  playableOnly,
-  resultCount,
-  shouldReduceMotion,
-  onGenreChange,
-}: {
-  activeGenre?: GenreSlug;
-  playableOnly: boolean;
-  resultCount: number;
-  shouldReduceMotion: boolean;
-  onGenreChange: (genre: GenreSlug | undefined) => void;
-}) {
-  const allCount = games.length;
-  const playableCount = games.filter((game) => game.status === "playable").length;
-  const genresForFilters = gameGenres.filter((genre) =>
-    games.some(
-      (game) => game.genre === genre.label && (!playableOnly || game.status === "playable"),
-    ),
-  );
-  const activeFilterId = activeGenre ?? "all";
-  const handleAnimatedGenreChange = (value: string | null) => {
-    if (!value || value === "all") {
-      onGenreChange(undefined);
-      return;
-    }
-
-    onGenreChange(value as GenreSlug);
-  };
-
-  return (
-    <nav className="genre-pills" aria-label="Game genres">
-      <span className="genre-filter-label">Filter by category</span>
-      <AnimatedBackground
-        defaultValue={activeFilterId}
-        onValueChange={handleAnimatedGenreChange}
-        className="genre-pill-background"
-        transition={
-          shouldReduceMotion
-            ? { duration: 0 }
-            : { type: "spring", stiffness: 420, damping: 34, mass: 0.45 }
-        }
-      >
-        <button
-          data-id="all"
-          className={`genre-pill ${!activeGenre ? "active" : ""}`}
-          type="button"
-          aria-pressed={!activeGenre}
-        >
-          <Grid2X2 aria-hidden="true" />
-          <span>All</span>
-          <small>{allCount}</small>
-        </button>
-        {genresForFilters.map((genre) => {
-          const Icon = iconMap[genre.icon];
-          const genreCount = games.filter(
-            (game) => game.genre === genre.label && (!playableOnly || game.status === "playable"),
-          ).length;
-
-          return (
-            <button
-              key={genre.slug}
-              data-id={genre.slug}
-              className={`genre-pill ${activeGenre === genre.slug ? "active" : ""}`}
-              type="button"
-              aria-pressed={activeGenre === genre.slug}
-            >
-              <Icon aria-hidden="true" />
-              <span>{genre.label}</span>
-              <small>{genreCount}</small>
-            </button>
-          );
-        })}
-      </AnimatedBackground>
-      <span className="genre-pill static" aria-label={`${playableCount} playable games`}>
-        <Gamepad2 aria-hidden="true" />
-        <span>Playable</span>
-        <small>{playableCount}</small>
-      </span>
-      <span className="genre-result-count" aria-live="polite">
-        {resultCount} {resultCount === 1 ? "result" : "results"}
-      </span>
-    </nav>
-  );
-}
-
-function GameTile({
-  game,
-  selected,
-  onSelect,
-}: {
-  game: GameDefinition;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <m.div
-      className={`shelf-card ${selected ? "selected" : ""}`}
-      role="listitem"
-      variants={pageItemVariants}
-    >
-      <button type="button" onClick={onSelect} aria-pressed={selected}>
-        <span className={`game-preview ${game.preview} accent-${game.accent}`} aria-hidden="true">
-          <PreviewArt kind={game.preview} />
-        </span>
-        <span className="shelf-card-copy">
-          <span>
-            <strong>{game.title}</strong>
-            <small>{game.genre}</small>
-          </span>
-          <span className={`mini-status ${game.status}`}>
-            {game.status === "playable" ? (
-              <Gamepad2 aria-hidden="true" />
-            ) : (
-              <Lock aria-hidden="true" />
-            )}
-            {game.status === "playable" ? "Playable" : "Soon"}
-          </span>
-        </span>
-      </button>
-    </m.div>
-  );
-}
-
-function CollectionGameCard({
-  game,
-  shouldReduceMotion,
-}: {
-  game: GameDefinition;
-  shouldReduceMotion: boolean;
-}) {
-  const isPlayable = game.status === "playable";
-  const cardContent = (
-    <>
-      {!shouldReduceMotion ? (
-        <Spotlight className="template-components-spotlight" size={210} />
-      ) : null}
-      <span className={`game-preview ${game.preview} accent-${game.accent}`} aria-hidden="true">
-        <PreviewArt kind={game.preview} />
-      </span>
-      <span className="template-game-copy">
-        <strong>{game.title}</strong>
-        <small>{game.summary}</small>
-        <span className={`mini-status ${game.status}`}>
-          {isPlayable ? <Gamepad2 aria-hidden="true" /> : <Lock aria-hidden="true" />}
-          {isPlayable ? "Playable" : "Soon"}
-        </span>
-      </span>
-    </>
-  );
-
-  if (!isPlayable) {
-    return (
-      <article
-        className="template-game-card coming-soon is-disabled"
-        role="listitem"
-        data-disabled="true"
-      >
-        {cardContent}
-      </article>
-    );
-  }
-
-  return (
-    <Link className="template-game-card" href={`/games/${game.slug}` as Route} role="listitem">
-      {cardContent}
-    </Link>
-  );
-}
-
-function GamePlayView({
-  selectedGame,
-  sidebarOpen,
-  shouldReduceMotion,
-  onPlaySnake,
-}: {
-  selectedGame: GameDefinition;
-  sidebarOpen: boolean;
-  shouldReduceMotion: boolean;
-  onPlaySnake: () => void;
-}) {
-  const GameComponent = gameComponents[selectedGame.slug as keyof typeof gameComponents];
-
-  return (
-    <m.div className="play-page" variants={pageCascadeVariants}>
-      <AnimatePresence mode="wait">
-        <m.div
-          key={selectedGame.slug}
-          className="play-game-surface"
-          variants={gamePanelVariants}
-          initial={shouldReduceMotion ? false : "hidden"}
-          animate="visible"
-          exit={shouldReduceMotion ? undefined : "exit"}
-        >
-          {GameComponent ? (
-            <GameComponent menuOpen={sidebarOpen} />
-          ) : (
-            <section
-              className="launcher-panel play-unavailable"
-              aria-labelledby="play-unavailable-title"
-            >
-              <m.div className="launcher-header">
-                <div>
-                  <p>Preview</p>
-                  <h2 id="play-unavailable-title">{selectedGame.title}</h2>
-                  <span>{selectedGame.summary}</span>
-                </div>
-                <span className={`status-badge ${selectedGame.status}`}>
-                  <Lock aria-hidden="true" />
-                  Coming soon
-                </span>
-              </m.div>
-              <UnavailableGame game={selectedGame} onPlaySnake={onPlaySnake} />
-            </section>
-          )}
-        </m.div>
-      </AnimatePresence>
-    </m.div>
-  );
-}
-
-function GameLauncher({
-  selectedGame,
-  shouldReduceMotion,
-  onPlaySnake,
-}: {
-  selectedGame: GameDefinition;
-  shouldReduceMotion: boolean;
-  onPlaySnake: () => void;
-}) {
-  const GameComponent = gameComponents[selectedGame.slug as keyof typeof gameComponents];
-
-  return (
-    <m.section
-      id="launcher"
-      className="launcher-panel"
-      aria-labelledby="launcher-title"
-      variants={pageItemVariants}
-    >
-      <m.div className="launcher-header">
-        <div>
-          <p>{selectedGame.status === "playable" ? "Playing" : "Preview"}</p>
-          <h2 id="launcher-title">{selectedGame.title}</h2>
-          <span>{selectedGame.summary}</span>
-        </div>
-        <span className={`status-badge ${selectedGame.status}`}>
-          {selectedGame.status === "playable" ? (
-            <Sparkles aria-hidden="true" />
-          ) : (
-            <Lock aria-hidden="true" />
-          )}
-          {selectedGame.status === "playable" ? "Playable" : "Coming soon"}
-        </span>
-      </m.div>
-
-      <AnimatePresence mode="wait">
-        <m.div
-          key={selectedGame.slug}
-          className="launcher-motion-surface"
-          variants={gamePanelVariants}
-          initial={shouldReduceMotion ? false : "hidden"}
-          animate="visible"
-          exit={shouldReduceMotion ? undefined : "exit"}
-        >
-          {GameComponent ? (
-            <GameComponent />
-          ) : (
-            <UnavailableGame game={selectedGame} onPlaySnake={onPlaySnake} />
-          )}
-        </m.div>
-      </AnimatePresence>
-    </m.section>
-  );
-}
-
-function EmptyGenreState({ genre }: { genre: string }) {
-  return (
-    <div className="empty-genre-state">
-      <Sparkles aria-hidden="true" />
-      <h3>{genre} shelf is ready.</h3>
-      <p>This genre does not have a playable slot yet, but the page and navigation are built.</p>
-    </div>
-  );
-}
-
-function UnavailableGame({ game, onPlaySnake }: { game: GameDefinition; onPlaySnake: () => void }) {
-  const shouldReduceMotion = Boolean(useReducedMotion());
-
-  return (
-    <div className="unavailable-state">
-      <div className={`unavailable-art ${game.preview} accent-${game.accent}`} aria-hidden="true">
-        {!shouldReduceMotion ? (
-          <Spotlight className="unavailable-components-spotlight" size={280} />
-        ) : null}
-        <PreviewArt kind={game.preview} />
-      </div>
-      <div>
-        <p>Reserved slot</p>
-        <ComponentsText as="h3" shouldReduceMotion={shouldReduceMotion}>
-          {`${game.title} is not playable yet.`}
-        </ComponentsText>
-        <span>{game.description}</span>
-        <button className="secondary-action" type="button" onClick={onPlaySnake}>
-          Play Snake
-          <ArrowUpRight aria-hidden="true" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function PreviewArt({ kind }: { kind: GameDefinition["preview"] }) {
-  if (kind === "cipherword") {
-    return (
-      <span className="cipherword-preview-art">
-        <i className="cipherword-preview-tile correct">C</i>
-        <i className="cipherword-preview-tile present">I</i>
-        <i className="cipherword-preview-tile absent">P</i>
-        <i className="cipherword-preview-tile correct">H</i>
-        <i className="cipherword-preview-meter" />
-      </span>
-    );
-  }
-
-  if (kind === "snake") {
-    return (
-      <>
-        <span className="snake-preview-route">
-          <i className="snake-route tail" />
-          <i className="snake-route turn" />
-          <i className="snake-route neck" />
-          <i className="snake-head-dot" />
-        </span>
-        <i className="food-dot" />
-      </>
-    );
-  }
-
-  if (kind === "minesweeper") {
-    return (
-      <span className="mine-scene">
-        <i className="mine-radar" />
-        <span className="mine-grid">
-          {Array.from({ length: 16 }, (_, index) => (
-            <i
-              key={index}
-              className={
-                index === 1 || index === 6 || index === 8 || index === 13
-                  ? "revealed"
-                  : index === 5
-                    ? "flagged"
-                    : index === 10
-                      ? "mine"
-                      : ""
-              }
-            >
-              {index === 1 ? "1" : index === 6 ? "2" : index === 8 ? "1" : index === 13 ? "3" : ""}
-            </i>
-          ))}
-        </span>
-        <i className="mine-flag" />
-        <i className="mine-spark a" />
-        <i className="mine-spark b" />
-      </span>
-    );
-  }
-
-  if (kind === "pong") {
-    return (
-      <span className="pong-scene">
-        <i className="pong-score left" />
-        <i className="pong-score right" />
-        <i className="pong-center-line" />
-        <i className="paddle left" />
-        <i className="paddle right" />
-        <i className="ball-trail" />
-        <i className="ball" />
-      </span>
-    );
-  }
-
-  if (kind === "tiles") {
-    return (
-      <span className="tiles-scene">
-        <i className="tile-ghost" />
-        <span className="tile-board">
-          {Array.from({ length: 20 }, (_, index) => (
-            <i
-              key={index}
-              className={
-                [12, 13, 14, 17].includes(index)
-                  ? "piece-a"
-                  : [10, 15, 16, 18].includes(index)
-                    ? "piece-b"
-                    : [3, 4, 8].includes(index)
-                      ? "piece-c"
-                      : ""
-              }
-            />
-          ))}
-        </span>
-        <i className="tile-drop" />
-      </span>
-    );
-  }
-
-  if (kind === "orbit") {
-    return (
-      <span className="orbit-scene">
-        <i className="orbit-star a" />
-        <i className="orbit-star b" />
-        <i className="orbit-star c" />
-        <i className="orbit-ring outer" />
-        <i className="orbit-ring inner" />
-        <i className="orbit-core" />
-        <i className="orbit-moon" />
-        <i className="orbit-trail" />
-      </span>
-    );
-  }
-
-  if (kind === "sky-courier") {
-    return (
-      <span className="sky-scene">
-        <i className="sky-sun" />
-        <i className="sky-cloud a" />
-        <i className="sky-cloud b" />
-        <i className="sky-route" />
-        <i className="sky-plane" />
-        <i className="sky-parcel" />
-      </span>
-    );
-  }
-
-  if (kind === "word") {
-    return (
-      <span className="word-scene">
-        <span className="word-rack">
-          {["W", "O", "R", "D"].map((letter, index) => (
-            <i key={letter} className={index === 2 ? "active" : ""}>
-              {letter}
-            </i>
-          ))}
-        </span>
-        <i className="word-cursor" />
-        <i className="word-signal" />
-      </span>
-    );
-  }
-
-  if (kind === "stack") {
-    return (
-      <span className="stack-scene">
-        <i className="stack-shadow" />
-        <span className="stack-blocks">
-          {Array.from({ length: 7 }, (_, index) => (
-            <i key={index} />
-          ))}
-        </span>
-        <i className="stack-player left" />
-        <i className="stack-player right" />
-      </span>
-    );
-  }
-
-  if (kind === "garden") {
-    return (
-      <span className="garden-scene">
-        <i className="garden-sun" />
-        <i className="garden-bed" />
-        <i className="garden-row a" />
-        <i className="garden-row b" />
-        <i className="garden-stem" />
-        <i className="garden-leaf left" />
-        <i className="garden-leaf right" />
-        <i className="garden-drop" />
-      </span>
-    );
-  }
-
-  if (kind === "route") {
-    return (
-      <span className="route-scene">
-        <span className="route-board">
-          {Array.from({ length: 12 }, (_, index) => (
-            <i key={index} className={[2, 7, 9].includes(index) ? "blocked" : ""} />
-          ))}
-        </span>
-        <i className="route-line a" />
-        <i className="route-line b" />
-        <i className="route-line c" />
-        <i className="route-node start" />
-        <i className="route-node mid" />
-        <i className="route-node end" />
-      </span>
-    );
-  }
-
-  if (kind === "dashline") {
-    return (
-      <>
-        <i className="road-line main" />
-        <i className="road-line side" />
-        <i className="race-car" />
-      </>
-    );
-  }
-
-  return (
-    <span className="number-scene">
-      <span className="number-board">
-        {["2", "4", "8", "16"].map((value) => (
-          <i key={value}>{value}</i>
-        ))}
-      </span>
-      <i className="number-glow" />
-    </span>
-  );
-}
-
-function getCollectionMeta(
-  view: Exclude<GameHubView, "games">,
-  activeGenre?: ReturnType<typeof getGenreBySlug>,
-) {
-  if (view === "favorites") {
-    return {
-      title: "Favorites",
-      description:
-        "A saved-games shelf for daily returns, starter picks, and the games most ready to revisit.",
-      href: "/games/cipher",
-      action: "Play Cipher",
-      artLabel: "Favorite picks",
-      shelfLabel: "Saved shelf",
-      shelfTitle: "Favorite-ready games",
-      panels: [
-        {
-          label: "Start",
-          title: "Cipher is ready daily.",
-          body: "The daily word puzzle stays one click away while the playable shelf grows.",
-        },
-        {
-          label: "Next",
-          title: "Polished placeholders stay visible.",
-          body: "Upcoming games keep their finished preview states so the page feels intentional now.",
-        },
-        {
-          label: "Return",
-          title: "Built for fast revisits.",
-          body: "The route lives under Games and matches the same hub rhythm as the launcher.",
-        },
-      ],
-    };
-  }
-
-  if (view === "genre" && activeGenre) {
-    const copy = genrePageCopy[activeGenre.slug];
-
-    return {
-      title: activeGenre.label,
-      description:
-        copy?.description ??
-        `${activeGenre.label} games on Dylan Games, with routes ready for future playable builds.`,
-      href: `/genres/${activeGenre.slug}`,
-      action: `Browse ${activeGenre.label}`,
-      artLabel: `${activeGenre.label} shelf`,
-      shelfLabel: "Genre shelf",
-      shelfTitle: `${activeGenre.label} games`,
-      panels: [
-        {
-          label: "Focus",
-          title: copy?.focus ?? `${activeGenre.label} route`,
-          body:
-            copy?.rhythm ??
-            "This page uses the shared discovery template so the genre route is complete.",
-        },
-        {
-          label: "Library",
-          title: "Registry-backed layout.",
-          body: "Game cards come from the central registry, keeping metadata and routes aligned.",
-        },
-        {
-          label: "Ready",
-          title: "Playable states can drop in later.",
-          body: "Empty shelves still communicate structure without inventing unavailable games.",
-        },
-      ],
-    };
-  }
-
-  return {
-    title: "Discover",
-    description:
-      "A focused look at the games, genres, and release-ready structure behind Dylan Games.",
-    href: "/games/cipher",
-    action: "Play Cipher",
-    artLabel: "Discover shelf",
-    shelfLabel: "Library",
-    shelfTitle: "Games to explore",
-    panels: [
-      {
-        label: "Hub",
-        title: "Small games, clean routes.",
-        body: "The site keeps game metadata, genre pages, and launch states connected.",
-      },
-      {
-        label: "Genres",
-        title: "Every sidebar page has a surface.",
-        body: "Discovery pages share one template so empty shelves still feel built.",
-      },
-      {
-        label: "Soft launch",
-        title: "No noisy public push.",
-        body: "The hub stays quiet while playable games and finished previews grow over time.",
-      },
-    ],
-  };
-}
-
-function getCollectionGames(
-  view: Exclude<GameHubView, "games">,
-  activeGenre?: ReturnType<typeof getGenreBySlug>,
-): GameDefinition[] {
-  if (view === "favorites") {
-    return favoriteGameSlugs.reduce<GameDefinition[]>((collection, slug) => {
-      const game = getGameBySlug(slug);
-
-      if (game) {
-        collection.push(game);
-      }
-
-      return collection;
-    }, []);
-  }
-
-  if (view === "genre" && activeGenre) {
-    return allGames.filter((game) => game.genre === activeGenre.label);
-  }
-
-  return allGames;
-}
-
-function getCollectionArt(
-  view: Exclude<GameHubView, "games">,
-  activeGenre: ReturnType<typeof getGenreBySlug> | undefined,
-  preferredGame: GameDefinition | undefined,
-) {
-  if (preferredGame) {
-    return {
-      accent: preferredGame.accent,
-      preview: preferredGame.preview,
-    };
-  }
-
-  if (view === "genre" && activeGenre) {
-    return genrePreviewArt[activeGenre.slug] ?? { accent: "violet", preview: "tiles" };
-  }
-
-  return {
-    accent: fallbackGame.accent,
-    preview: fallbackGame.preview,
-  };
-}
-
-function filterStorefrontGames(
-  storefrontGames: GameDefinition[],
-  searchQuery: string,
-  activeGenre?: GenreSlug,
-) {
-  return filterGamesBySearch(storefrontGames, searchQuery, activeGenre);
 }

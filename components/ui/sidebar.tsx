@@ -204,7 +204,7 @@ const Sidebar = React.forwardRef<
               {typeof props["aria-label"] === "string" ? props["aria-label"] : "Navigation"}
             </SheetTitle>
             <SheetDescription className="sr-only">
-              Browse games, favorites, discover pages, and genre shelves.
+              Browse games, achievements, account controls, and available game routes.
             </SheetDescription>
             <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>

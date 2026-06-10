@@ -10,14 +10,13 @@ describe("game registry", () => {
   });
 
   it("keeps playable games registered in launch order", () => {
-    expect(playableGames).toHaveLength(2);
+    expect(playableGames).toHaveLength(1);
     expect(playableGames[0]?.slug).toBe("snake");
-    expect(playableGames[1]?.slug).toBe("cipher");
     expect(getGameBySlug("snake")?.status).toBe("playable");
-    expect(getGameBySlug("cipher")?.status).toBe("playable");
   });
 
-  it("keeps placeholder games visibly unavailable", () => {
-    expect(games.filter((game) => game.status === "coming-soon").length).toBeGreaterThan(0);
+  it("keeps deleted games out of the active registry", () => {
+    expect(getGameBySlug("cipher")).toBeUndefined();
+    expect(games).toHaveLength(1);
   });
 });

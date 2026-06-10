@@ -2,6 +2,7 @@
 
 Report security issues privately to Dylan W. Lim.
 
-This app is static-first and does not require secrets or a backend in its
-current form. If future games add accounts, leaderboards, saves, or payments,
-the backend boundary must be threat-modeled before implementation.
+Snake play requires DWL Accounts. Keep `DWL_APP_SECRET` server-only, use the
+existing `app/auth/*` and `app/api/dwl/*` bridge for account/session/state
+work, and threat-model any future leaderboard, payment, or public profile
+surface before implementation.

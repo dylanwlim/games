@@ -4,10 +4,10 @@ import { GameHub } from "@/features/games/components/game-hub";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Favorites",
-  description: `Favorite games and quick returns on ${siteConfig.name}.`,
+  title: "Achievements",
+  description: `XP and achievements across ${siteConfig.name}.`,
   alternates: {
-    canonical: "/games/favorites",
+    canonical: "/achievements",
   },
   robots: {
     index: false,
@@ -15,6 +15,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function FavoritesPage() {
-  return <GameHub key="favorites" view="favorites" />;
+export default function AchievementsPage() {
+  return <GameHub key="achievements" view="achievements" />;
 }

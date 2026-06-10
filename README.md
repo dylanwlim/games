@@ -24,6 +24,10 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+Snake play is gated by DWL Accounts. Use `.env.example` for the required
+Accounts routing variables and server-only `DWL_APP_SECRET` when testing signed
+in play locally.
+
 ## Validation
 
 ```bash
