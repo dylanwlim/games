@@ -10,13 +10,14 @@ describe("game registry", () => {
   });
 
   it("keeps playable games registered in launch order", () => {
-    expect(playableGames).toHaveLength(1);
-    expect(playableGames[0]?.slug).toBe("snake");
+    expect(playableGames).toHaveLength(2);
+    expect(playableGames.map((game) => game.slug)).toEqual(["meadow", "snake"]);
+    expect(getGameBySlug("meadow")?.status).toBe("playable");
     expect(getGameBySlug("snake")?.status).toBe("playable");
   });
 
   it("keeps deleted games out of the active registry", () => {
     expect(getGameBySlug("cipher")).toBeUndefined();
-    expect(games).toHaveLength(1);
+    expect(games).toHaveLength(2);
   });
 });

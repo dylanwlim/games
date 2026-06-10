@@ -1,8 +1,9 @@
 import type { SnakeMode } from "@/features/games/snake/snake-types";
+import type { MeadowRunResult } from "@/features/games/meadow/meadow-engine";
 
 export const progressionStorageKey = "games:progression-v1";
 
-export type ProgressionGameId = "snake";
+export type ProgressionGameId = "snake" | "meadow";
 
 export type AchievementDefinition = {
   description: string;
@@ -25,9 +26,20 @@ export type SnakeProgression = {
   xp: number;
 };
 
+export type MeadowProgression = {
+  bestScore: number;
+  cashBanked: number;
+  claimedSpawns: number;
+  completedRuns: number;
+  maxTier: number;
+  objectivesCompleted: number;
+  xp: number;
+};
+
 export type GameProgression = {
   achievements: Record<string, AchievementState>;
   games: {
+    meadow: MeadowProgression;
     snake: SnakeProgression;
   };
   level: number;
@@ -79,6 +91,34 @@ export const achievementDefinitions = [
     xp: 100,
   },
   {
+    id: "meadow-first-shift",
+    gameId: "meadow",
+    title: "First Shift",
+    description: "Bank one Meadow run.",
+    xp: 30,
+  },
+  {
+    id: "meadow-rare-feed",
+    gameId: "meadow",
+    title: "Rare Feed Runner",
+    description: "Claim a scarce Meadow spawn.",
+    xp: 55,
+  },
+  {
+    id: "meadow-tier-3",
+    gameId: "meadow",
+    title: "Crowded World",
+    description: "Raise Meadow to Tier 3 pressure.",
+    xp: 90,
+  },
+  {
+    id: "meadow-score-250",
+    gameId: "meadow",
+    title: "Stable Outpost",
+    description: "Bank 250 influence in Meadow.",
+    xp: 100,
+  },
+  {
     id: "global-level-3",
     gameId: "global",
     title: "Arcade Regular",
@@ -91,6 +131,15 @@ export function createInitialProgression(): GameProgression {
   return {
     achievements: {},
     games: {
+      meadow: {
+        bestScore: 0,
+        cashBanked: 0,
+        claimedSpawns: 0,
+        completedRuns: 0,
+        maxTier: 1,
+        objectivesCompleted: 0,
+        xp: 0,
+      },
       snake: {
         bestScore: 0,
         completedRuns: 0,
@@ -165,12 +214,73 @@ export function recordSnakeRun(
   };
 }
 
+export function recordMeadowRun(
+  progression: GameProgression,
+  run: MeadowRunResult,
+  now = new Date(),
+): ProgressionUpdate {
+  const current = normalizeProgression(progression);
+  const runXp = computeMeadowRunXp(run);
+  const meadow: MeadowProgression = {
+    bestScore: Math.max(current.games.meadow.bestScore, Math.max(0, Math.floor(run.score))),
+    cashBanked: current.games.meadow.cashBanked + Math.max(0, Math.floor(run.cash)),
+    claimedSpawns:
+      current.games.meadow.claimedSpawns + Math.max(0, Math.floor(run.claimedSpawns)),
+    completedRuns: current.games.meadow.completedRuns + 1,
+    maxTier: Math.max(current.games.meadow.maxTier, Math.max(1, Math.floor(run.maxTier))),
+    objectivesCompleted: Math.max(
+      current.games.meadow.objectivesCompleted,
+      Math.max(0, Math.floor(run.objectivesCompleted)),
+    ),
+    xp: current.games.meadow.xp + runXp,
+  };
+  const withoutAchievements: GameProgression = {
+    ...current,
+    games: {
+      ...current.games,
+      meadow,
+    },
+    totalXp: current.totalXp + runXp,
+    updatedAt: now.toISOString(),
+  };
+  const withRunLevel = {
+    ...withoutAchievements,
+    level: getLevelForXp(withoutAchievements.totalXp),
+  };
+  const { achievements, achievementXp, unlockedAchievements } = unlockEligibleAchievements(
+    withRunLevel,
+    now,
+  );
+  const totalXp = withRunLevel.totalXp + achievementXp;
+  const nextProgression = {
+    ...withRunLevel,
+    achievements,
+    level: getLevelForXp(totalXp),
+    totalXp,
+  };
+
+  return {
+    nextProgression,
+    runXp,
+    unlockedAchievements,
+  };
+}
+
 export function computeSnakeRunXp(run: SnakeRunResult) {
   const scoreXp = Math.floor(Math.max(0, run.score) / 2);
   const foodXp = Math.max(0, Math.floor(run.foodsEaten)) * 8;
   const completionXp = run.elapsedMs > 0 || run.score > 0 || run.foodsEaten > 0 ? 12 : 5;
 
   return Math.min(300, completionXp + scoreXp + foodXp);
+}
+
+export function computeMeadowRunXp(run: MeadowRunResult) {
+  const scoreXp = Math.floor(Math.max(0, run.score) / 5);
+  const spawnXp = Math.max(0, Math.floor(run.claimedSpawns)) * 18;
+  const objectiveXp = Math.max(0, Math.floor(run.objectivesCompleted)) * 12;
+  const tierXp = Math.max(0, Math.floor(run.maxTier) - 1) * 16;
+
+  return Math.min(360, 18 + scoreXp + spawnXp + objectiveXp + tierXp);
 }
 
 export function getLevelForXp(totalXp: number) {
@@ -213,6 +323,10 @@ function normalizeProgression(value: unknown): GameProgression {
   const initial = createInitialProgression();
   const achievements =
     input.achievements && typeof input.achievements === "object" ? input.achievements : {};
+  const meadowInput =
+    input.games?.meadow && typeof input.games.meadow === "object"
+      ? (input.games.meadow as Partial<MeadowProgression>)
+      : {};
   const snakeInput =
     input.games?.snake && typeof input.games.snake === "object"
       ? (input.games.snake as Partial<SnakeProgression>)
@@ -244,6 +358,15 @@ function normalizeProgression(value: unknown): GameProgression {
       }),
     ),
     games: {
+      meadow: {
+        bestScore: normalizeNumber(meadowInput.bestScore),
+        cashBanked: normalizeNumber(meadowInput.cashBanked),
+        claimedSpawns: normalizeNumber(meadowInput.claimedSpawns),
+        completedRuns: normalizeNumber(meadowInput.completedRuns),
+        maxTier: Math.max(1, normalizeNumber(meadowInput.maxTier) || 1),
+        objectivesCompleted: normalizeNumber(meadowInput.objectivesCompleted),
+        xp: normalizeNumber(meadowInput.xp),
+      },
       snake: {
         bestScore: normalizeNumber(snakeInput.bestScore),
         completedRuns: normalizeNumber(snakeInput.completedRuns),
@@ -285,7 +408,7 @@ function unlockEligibleAchievements(progression: GameProgression, now: Date) {
 }
 
 function isAchievementEligible(id: string, progression: GameProgression) {
-  const { snake } = progression.games;
+  const { meadow, snake } = progression.games;
 
   if (id === "snake-first-run") {
     return snake.completedRuns >= 1;
@@ -301,6 +424,22 @@ function isAchievementEligible(id: string, progression: GameProgression) {
 
   if (id === "snake-mode-sampler") {
     return snake.modesTried.length >= 3;
+  }
+
+  if (id === "meadow-first-shift") {
+    return meadow.completedRuns >= 1;
+  }
+
+  if (id === "meadow-rare-feed") {
+    return meadow.claimedSpawns >= 1;
+  }
+
+  if (id === "meadow-tier-3") {
+    return meadow.maxTier >= 3;
+  }
+
+  if (id === "meadow-score-250") {
+    return meadow.bestScore >= 250;
   }
 
   if (id === "global-level-3") {

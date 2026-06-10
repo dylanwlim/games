@@ -7701,6 +7701,14 @@ img {
   gap: 18px;
 }
 
+.accent-green {
+  --game-accent: var(--green);
+}
+
+.accent-amber {
+  --game-accent: #f2a93b;
+}
+
 .games-showcase {
   min-width: 0;
 }
@@ -7724,7 +7732,7 @@ img {
   border: 1px solid var(--line);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 78% 18%, rgba(103, 201, 95, 0.24), transparent 34%),
+    radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--game-accent, var(--green)), transparent 74%), transparent 34%),
     linear-gradient(135deg, var(--surface) 0%, var(--surface-muted) 100%);
   padding: clamp(24px, 4vw, 52px);
   box-shadow: var(--shadow);
@@ -7742,10 +7750,10 @@ img {
 .showcase-kicker,
 .account-gate-copy > span {
   width: fit-content;
-  border: 1px solid color-mix(in srgb, var(--green), transparent 58%);
+  border: 1px solid color-mix(in srgb, var(--game-accent, var(--green)), transparent 58%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--green), transparent 88%);
-  color: color-mix(in srgb, var(--green), var(--text) 36%);
+  background: color-mix(in srgb, var(--game-accent, var(--green)), transparent 88%);
+  color: color-mix(in srgb, var(--game-accent, var(--green)), var(--text) 36%);
   padding: 6px 10px;
   font-size: 0.76rem;
   font-weight: 700;
@@ -7801,12 +7809,12 @@ img {
   position: relative;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--green), transparent 62%);
+  border: 1px solid color-mix(in srgb, var(--game-accent, var(--green)), transparent 62%);
   border-radius: 16px;
   background:
     linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    radial-gradient(circle at 32% 24%, rgba(179, 250, 147, 0.2), transparent 38%), #111a27;
+    radial-gradient(circle at 32% 24%, color-mix(in srgb, var(--game-accent, var(--green)), transparent 76%), transparent 38%), #111a27;
   background-size:
     24px 24px,
     24px 24px,
@@ -7875,6 +7883,88 @@ img {
   right: 18%;
   width: 8%;
   height: 10%;
+}
+
+.meadow-preview-map {
+  position: absolute;
+  inset: 13%;
+  display: block;
+  border-radius: 22px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 28% 26%, rgba(255, 210, 120, 0.24), transparent 22%),
+    linear-gradient(135deg, #1f422d, #14241e 58%, #101a18);
+  background-size:
+    22px 22px,
+    22px 22px,
+    auto,
+    auto;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.meadow-preview-map i {
+  position: absolute;
+  display: block;
+}
+
+.meadow-preview-field {
+  inset: 14% 12% 16% 14%;
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, rgba(242, 169, 59, 0.16) 1px, transparent 1px),
+    linear-gradient(rgba(242, 169, 59, 0.12) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.meadow-preview-route {
+  top: 31%;
+  left: 34%;
+  width: 42%;
+  height: 28%;
+  border-top: 4px solid rgba(255, 226, 164, 0.72);
+  border-right: 4px solid rgba(255, 226, 164, 0.72);
+  border-radius: 0 18px 0 0;
+}
+
+.meadow-preview-outpost {
+  top: 42%;
+  left: 31%;
+  width: 18%;
+  aspect-ratio: 1;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #ffe1a3, #d9822b);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+}
+
+.meadow-preview-runner {
+  top: 28%;
+  left: 70%;
+  width: 9%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: #f9fafb;
+  box-shadow: 0 0 0 5px rgba(249, 250, 251, 0.18);
+}
+
+.meadow-preview-spawn {
+  width: 11%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+}
+
+.meadow-preview-spawn.rare {
+  top: 19%;
+  left: 18%;
+  background: #86f26c;
+  box-shadow: 0 0 24px rgba(134, 242, 108, 0.45);
+}
+
+.meadow-preview-spawn.scrap {
+  right: 15%;
+  bottom: 20%;
+  background: #8fb5d8;
+  box-shadow: 0 0 24px rgba(143, 181, 216, 0.35);
 }
 
 .games-showcase-navigation {
@@ -7966,7 +8056,7 @@ img {
 
 .available-game-card:hover,
 .available-game-card:focus-visible {
-  border-color: color-mix(in srgb, var(--green), var(--line) 48%);
+  border-color: color-mix(in srgb, var(--game-accent, var(--green)), var(--line) 48%);
   box-shadow: 0 18px 46px rgba(20, 28, 42, 0.12);
   transform: translateY(-2px);
 }
@@ -8179,7 +8269,648 @@ img {
   font-size: 0.96rem;
 }
 
+.meadow-game {
+  --meadow-gold: #f2a93b;
+  --meadow-green: #86d969;
+  --meadow-soil: #5f4226;
+  --meadow-board: #102019;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  min-height: 0;
+  gap: 12px;
+  color: var(--text);
+}
+
+.meadow-toolbar {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-left: 48px;
+}
+
+.meadow-title-block {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.meadow-title-block h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.65rem, 2.8vw, 2.7rem);
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 0.98;
+}
+
+.meadow-title-block span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.meadow-header-stats {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.meadow-header-stats > span,
+.meadow-status-chip {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--text);
+  padding: 0 12px;
+  font-size: 0.84rem;
+  font-weight: 680;
+}
+
+.meadow-status-chip.status-playing {
+  border-color: color-mix(in srgb, var(--meadow-green), var(--line) 36%);
+  background: color-mix(in srgb, var(--meadow-green), transparent 86%);
+}
+
+.meadow-game-shell {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 390px);
+  gap: 12px;
+}
+
+.meadow-board-shell {
+  position: relative;
+  isolation: isolate;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--meadow-gold), var(--line) 58%);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(134, 217, 105, 0.2), transparent 28%),
+    linear-gradient(145deg, #132a20, #0e1717 68%);
+  box-shadow: var(--shadow);
+}
+
+.meadow-board-sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 78% 14%, rgba(242, 169, 59, 0.22), transparent 20%),
+    radial-gradient(circle at 20% 78%, rgba(134, 217, 105, 0.16), transparent 24%);
+  pointer-events: none;
+}
+
+.meadow-region-board {
+  position: absolute;
+  inset: 14px;
+  z-index: 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    radial-gradient(circle at 22% 24%, rgba(134, 217, 105, 0.2), transparent 20%),
+    radial-gradient(circle at 78% 62%, rgba(143, 181, 216, 0.14), transparent 22%),
+    linear-gradient(135deg, #1b3a29, var(--meadow-board));
+  background-size:
+    34px 34px,
+    34px 34px,
+    auto,
+    auto,
+    auto;
+}
+
+.meadow-board-label {
+  position: absolute;
+  z-index: 3;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(6, 12, 10, 0.58);
+  color: rgba(255, 255, 255, 0.78);
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 720;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+.meadow-board-label.top-left {
+  top: 12px;
+  left: 12px;
+}
+
+.meadow-board-label.bottom-right {
+  right: 12px;
+  bottom: 12px;
+}
+
+.meadow-outpost-marker,
+.meadow-runner-marker,
+.meadow-rival-marker,
+.meadow-spawn-marker {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, -50%);
+}
+
+.meadow-outpost-marker {
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: clamp(66px, 10vw, 104px);
+  aspect-ratio: 1;
+  place-items: center;
+}
+
+.meadow-outpost-marker i,
+.meadow-outpost-marker b,
+.meadow-outpost-marker em {
+  position: absolute;
+  display: block;
+}
+
+.meadow-outpost-marker i {
+  inset: 14%;
+  border: 2px solid rgba(255, 226, 164, 0.44);
+  border-radius: 18px;
+  background: rgba(17, 24, 39, 0.38);
+  transform: rotate(45deg);
+}
+
+.meadow-outpost-marker b {
+  width: 46%;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #ffe0a0, #c87323);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.meadow-outpost-marker em {
+  width: 76%;
+  aspect-ratio: 1;
+  border: 1px dashed rgba(255, 226, 164, 0.36);
+  border-radius: 999px;
+}
+
+.meadow-runner-marker {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #1f2937;
+  box-shadow: 0 0 0 8px rgba(248, 250, 252, 0.14), 0 12px 28px rgba(0, 0, 0, 0.28);
+  transition:
+    left 120ms linear,
+    top 120ms linear,
+    transform 160ms ease;
+}
+
+.meadow-runner-marker.status-moving {
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+.meadow-runner-marker svg,
+.meadow-rival-marker svg {
+  width: 19px;
+  height: 19px;
+}
+
+.meadow-rival-marker {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(248, 113, 113, 0.16);
+  color: #fecaca;
+}
+
+.meadow-rival-marker.danger {
+  background: rgba(239, 68, 68, 0.28);
+  box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.1);
+}
+
+.meadow-spawn-marker button {
+  display: grid;
+  min-width: 84px;
+  gap: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 13px;
+  background: rgba(7, 13, 11, 0.72);
+  color: #ffffff;
+  padding: 8px 10px;
+  text-align: left;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.meadow-spawn-marker button:hover,
+.meadow-spawn-marker button:focus-visible {
+  border-color: rgba(255, 226, 164, 0.62);
+  transform: translateY(-1px);
+}
+
+.meadow-spawn-marker span {
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+
+.meadow-spawn-marker small {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.7rem;
+  font-weight: 680;
+}
+
+.meadow-spawn-marker.in-range button {
+  border-color: rgba(134, 217, 105, 0.72);
+  box-shadow: 0 0 0 7px rgba(134, 217, 105, 0.12), 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.meadow-spawn-marker.respawning {
+  opacity: 0.58;
+}
+
+.meadow-state-overlay {
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: min(420px, calc(100% - 36px));
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: rgba(8, 12, 16, 0.76);
+  color: #ffffff;
+  padding: 20px;
+  box-shadow: 0 22px 80px rgba(0, 0, 0, 0.34);
+  text-align: left;
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(16px);
+}
+
+.meadow-state-overlay > span {
+  color: rgba(255, 226, 164, 0.86);
+  font-size: 0.76rem;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.meadow-state-overlay strong {
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1;
+}
+
+.meadow-state-overlay p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.48;
+}
+
+.meadow-side-panel {
+  display: grid;
+  min-height: 0;
+  align-content: start;
+  gap: 10px;
+  overflow-y: auto;
+  padding-right: 3px;
+  scrollbar-width: thin;
+}
+
+.meadow-run-summary,
+.meadow-objective-panel,
+.meadow-action-panel,
+.meadow-objectives-list,
+.meadow-metric,
+.meadow-activity-log span {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.meadow-run-summary {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.meadow-run-summary > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.meadow-run-summary span,
+.meadow-objective-panel span,
+.meadow-panel-heading span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 740;
+  text-transform: uppercase;
+}
+
+.meadow-run-summary strong {
+  color: var(--text);
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1;
+}
+
+.meadow-run-summary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.meadow-run-summary-meta span {
+  border-radius: 999px;
+  background: var(--surface-muted);
+  padding: 5px 8px;
+  text-transform: none;
+}
+
+.meadow-objective-panel {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+}
+
+.meadow-objective-panel strong {
+  color: var(--text);
+  font-size: 1.04rem;
+}
+
+.meadow-objective-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.42;
+}
+
+.meadow-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.meadow-metric {
+  display: grid;
+  gap: 8px;
+  min-height: 72px;
+  padding: 12px;
+}
+
+.meadow-metric span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 720;
+}
+
+.meadow-metric svg {
+  width: 15px;
+  height: 15px;
+}
+
+.meadow-metric strong {
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.meadow-action-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.meadow-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.meadow-panel-heading small {
+  color: var(--subtle);
+  font-size: 0.74rem;
+  font-weight: 650;
+}
+
+.meadow-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.meadow-action-button {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-muted);
+  color: var(--text);
+  padding: 0 10px;
+  font-size: 0.82rem;
+  font-weight: 680;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.meadow-action-button:hover,
+.meadow-action-button:focus-visible {
+  border-color: color-mix(in srgb, var(--meadow-gold), var(--line) 36%);
+  background: var(--surface);
+  transform: translateY(-1px);
+}
+
+.meadow-game kbd {
+  min-width: 20px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--muted);
+  padding: 2px 5px;
+  font-size: 0.68rem;
+  font-weight: 780;
+  text-align: center;
+}
+
+.meadow-objectives-list {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+}
+
+.meadow-objective-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 66px;
+  border-bottom: 1px solid var(--line);
+  padding: 11px 12px;
+}
+
+.meadow-objective-row:last-child {
+  border-bottom: 0;
+}
+
+.meadow-objective-row > span {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--surface-muted);
+  color: var(--muted);
+}
+
+.meadow-objective-row.state-complete > span {
+  background: color-mix(in srgb, var(--meadow-green), transparent 82%);
+  color: color-mix(in srgb, var(--meadow-green), var(--text) 20%);
+}
+
+.meadow-objective-row svg {
+  width: 16px;
+  height: 16px;
+}
+
+.meadow-objective-row strong,
+.meadow-objective-row small {
+  display: block;
+}
+
+.meadow-objective-row strong {
+  color: var(--text);
+  font-size: 0.86rem;
+  line-height: 1.25;
+}
+
+.meadow-objective-row small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.meadow-progression-panel {
+  border-color: color-mix(in srgb, var(--meadow-gold), var(--line) 62%);
+}
+
+.meadow-run-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.meadow-run-actions .primary-action,
+.meadow-run-actions .secondary-action {
+  width: 100%;
+}
+
+.meadow-run-actions .bank-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.54;
+  transform: none;
+}
+
+.meadow-activity-log {
+  display: grid;
+  min-height: 42px;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 1fr);
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
+.meadow-activity-log span {
+  display: block;
+  padding: 9px 11px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.meadow-activity-log small {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--subtle);
+  font-size: 0.68rem;
+  font-weight: 720;
+}
+
+.meadow-activity-log .tone-success {
+  border-color: color-mix(in srgb, var(--meadow-green), var(--line) 42%);
+}
+
+.meadow-activity-log .tone-warning {
+  border-color: color-mix(in srgb, #f87171, var(--line) 38%);
+}
+
 @media (max-width: 900px) {
+  .arcade-main.play-main:has(.meadow-game) {
+    overflow-y: auto;
+  }
+
+  .arcade-main.play-main:has(.meadow-game) .page-motion-shell,
+  .arcade-main.play-main:has(.meadow-game) .play-page,
+  .arcade-main.play-main:has(.meadow-game) .play-game-surface {
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+  }
+
+  .meadow-game {
+    min-height: 960px;
+    grid-template-rows: auto auto auto;
+  }
+
+  .meadow-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-left: 48px;
+  }
+
+  .meadow-game-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .meadow-board-shell {
+    min-height: min(72svh, 560px);
+  }
+
+  .meadow-side-panel {
+    overflow: visible;
+    padding-right: 0;
+  }
+
   .games-showcase-slide,
   .account-gate,
   .achievements-hero {
@@ -8204,6 +8935,42 @@ img {
 }
 
 @media (max-width: 520px) {
+  .meadow-game {
+    gap: 10px;
+    min-height: 1120px;
+  }
+
+  .meadow-toolbar {
+    padding-left: 44px;
+  }
+
+  .meadow-header-stats {
+    justify-content: flex-start;
+  }
+
+  .meadow-board-shell {
+    min-height: 430px;
+    border-radius: 14px;
+  }
+
+  .meadow-region-board {
+    inset: 10px;
+  }
+
+  .meadow-spawn-marker button {
+    min-width: 74px;
+    padding: 7px 8px;
+  }
+
+  .meadow-action-grid,
+  .meadow-metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meadow-activity-log {
+    grid-auto-columns: minmax(260px, 1fr);
+  }
+
   .games-showcase-slide,
   .account-gate,
   .achievements-hero {

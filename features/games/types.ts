@@ -1,10 +1,10 @@
 export type GameStatus = "playable";
 
-export type GameGenre = "Action";
+export type GameGenre = "Action" | "Strategy";
 
-export type GameAccent = "green";
+export type GameAccent = "green" | "amber";
 
-export type GamePreviewKind = "snake";
+export type GamePreviewKind = "meadow" | "snake";
 
 export type GameDefinition = {
   accent: GameAccent;

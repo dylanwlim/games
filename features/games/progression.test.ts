@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   computeSnakeRunXp,
+  computeMeadowRunXp,
   createInitialProgression,
   getLevelForXp,
   parseProgression,
   progressionStorageKey,
+  recordMeadowRun,
   recordSnakeRun,
 } from "./progression";
 
@@ -35,6 +37,30 @@ describe("game progression", () => {
     ]);
   });
 
+  it("awards Meadow XP and achievements into the shared account total", () => {
+    const run = {
+      cash: 180,
+      claimedSpawns: 1,
+      elapsedMs: 90_000,
+      maxTier: 3,
+      objectivesCompleted: 4,
+      score: 280,
+    };
+    const result = recordMeadowRun(createInitialProgression(), run);
+
+    expect(result.runXp).toBe(computeMeadowRunXp(run));
+    expect(result.nextProgression.games.meadow.bestScore).toBe(280);
+    expect(result.nextProgression.games.meadow.completedRuns).toBe(1);
+    expect(result.nextProgression.games.meadow.claimedSpawns).toBe(1);
+    expect(result.nextProgression.totalXp).toBeGreaterThan(result.runXp);
+    expect(result.unlockedAchievements.map((achievement) => achievement.id)).toEqual([
+      "meadow-first-shift",
+      "meadow-rare-feed",
+      "meadow-tier-3",
+      "meadow-score-250",
+    ]);
+  });
+
   it("does not award the same achievement twice", () => {
     const first = recordSnakeRun(createInitialProgression(), {
       elapsedMs: 10_000,
@@ -61,6 +87,15 @@ describe("game progression", () => {
       JSON.stringify({
         totalXp: 260,
         games: {
+          meadow: {
+            bestScore: 240.8,
+            cashBanked: 120,
+            claimedSpawns: 1,
+            completedRuns: 1,
+            maxTier: 2,
+            objectivesCompleted: 4,
+            xp: 90,
+          },
           snake: {
             bestScore: 50.8,
             completedRuns: 2,
@@ -73,6 +108,8 @@ describe("game progression", () => {
     );
 
     expect(parsed.level).toBe(getLevelForXp(260));
+    expect(parsed.games.meadow.bestScore).toBe(240);
+    expect(parsed.games.meadow.maxTier).toBe(2);
     expect(parsed.games.snake.bestScore).toBe(50);
     expect(parsed.games.snake.modesTried).toEqual(["classic", "zen"]);
   });

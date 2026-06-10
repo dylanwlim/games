@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import { achievementDefinitions } from "@/features/games/progression";
 import { games, getGameBySlug, playableGames } from "@/features/games/game-registry";
+import { MeadowGame } from "@/features/games/meadow/meadow-game";
 import { SnakeGame } from "@/features/games/snake/snake-game";
 import type { GameDefinition } from "@/features/games/types";
 import { useGameProgression } from "@/features/games/use-game-progression";
@@ -705,8 +706,11 @@ function AchievementsView({ shouldReduceMotion }: { shouldReduceMotion: boolean 
         </div>
       </m.section>
       <m.div className="achievements-play-link" variants={pageItemVariants}>
-        <Link className="primary-play-button" href="/games/snake">
+        <Link className="primary-play-button" href="/games/meadow">
           <Gamepad2 aria-hidden="true" />
+          Play Meadow
+        </Link>
+        <Link className="feature-secondary-button" href="/games/snake">
           Play Snake
         </Link>
       </m.div>
@@ -749,7 +753,11 @@ function GamePlayView({
           {loading ? (
             <AccountGate loading />
           ) : user ? (
-            <SnakeGame menuOpen={sidebarOpen} />
+            selectedGame.slug === "meadow" ? (
+              <MeadowGame menuOpen={sidebarOpen} />
+            ) : (
+              <SnakeGame menuOpen={sidebarOpen} />
+            )
           ) : (
             <AccountGate authReturnUrl={authReturnUrl} game={selectedGame} />
           )}
@@ -771,7 +779,7 @@ function AccountGate({
   return (
     <section className="account-gate" aria-labelledby="account-gate-title">
       <div className="account-gate-art" aria-hidden="true">
-        <PreviewArt kind="snake" />
+        <PreviewArt kind={game?.preview ?? "snake"} />
       </div>
       <div className="account-gate-copy">
         <span>{loading ? "Checking account" : "DWL Accounts required"}</span>
@@ -802,8 +810,17 @@ function AccountGate({
 }
 
 function PreviewArt({ kind }: { kind: GameDefinition["preview"] }) {
-  if (kind !== "snake") {
-    return null;
+  if (kind === "meadow") {
+    return (
+      <span className="meadow-preview-map">
+        <i className="meadow-preview-field" />
+        <i className="meadow-preview-route" />
+        <i className="meadow-preview-outpost" />
+        <i className="meadow-preview-runner" />
+        <i className="meadow-preview-spawn rare" />
+        <i className="meadow-preview-spawn scrap" />
+      </span>
+    );
   }
 
   return (
